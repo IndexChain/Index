@@ -1904,16 +1904,14 @@ bool AcceptToMemoryPool(
 }
 
 /** Return transaction in txOut, and if it was found inside a block, its hash is placed in hashBlock */
-bool
-GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::Params &consensusParams, uint256 &hashBlock,
-               bool fAllowSlow) {
-    CBlockIndex *pindexSlow = NULL;
+bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus::Params& consensusParams, uint256 &hashBlock, bool fAllowSlow) {
+    CBlockIndex *pindexSlow = nullptr;
 
     LOCK(cs_main);
 
     std::shared_ptr<const CTransaction> ptx = mempool.get(hash);
     if (ptx) {
-        txOut = *ptx;
+        txOut = ptx;
         return true;
     }
 
@@ -1932,7 +1930,7 @@ GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::Params
                 return error("%s: Deserialize or I/O error - %s", __func__, e.what());
             }
             hashBlock = header.GetHash();
-            if (txOut.GetHash() != hash)
+            if (txOut->GetHash() != hash)
                 return error("%s: txid mismatch", __func__);
             return true;
         }
@@ -2062,9 +2060,9 @@ bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos, int nHeight, con
    
 
     // Check the header
-    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){
+    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams, block->IsProofOfStake())){
         //Maybe cache is not valid
-        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){
+        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams, block->IsProofOfStake())){
             return error("ReadBlockFromDisk: CheckProofOfWork: Errors in block header at %s", pos.ToString());
         }
     }
@@ -4363,9 +4361,9 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 //btzc: code from vertcoin, add
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
-    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
+    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams, block->IsProofOfStake())) {
         //Maybe cache is not valid
-        if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
+        if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams, block->IsProofOfStake)) {
             return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
         }
     }
@@ -4581,8 +4579,9 @@ GenerateCoinbaseCommitment(CBlock &block, const CBlockIndex *pindexPrev, const C
             memcpy(&out.scriptPubKey[6], witnessroot.begin(), 32);
             commitment = std::vector < unsigned
             char > (out.scriptPubKey.begin(), out.scriptPubKey.end());
-            const_cast<std::vector <CTxOut> *>(&block.vtx[0].vout)->push_back(out);
-            block.vtx[0].UpdateHash();
+            CMutableTransaction tx(*block.vtx[0]);
+            tx.vout.push_back(out);
+            block.vtx[0] = MakeTransactionRef(std::move(tx));
         }
     }
     UpdateUncommittedBlockStructures(block, pindexPrev, consensusParams);
@@ -4599,7 +4598,7 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
 		return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
 	// Check proof of work
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+    if (block.nBits != GetNextWorkRequired(pindexPrev, consensusParams, block.IsProofOfStake()))
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
 
     // Check timestamp against prev
