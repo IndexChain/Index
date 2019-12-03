@@ -69,7 +69,7 @@ ZerocoinTestingSetupBase::~ZerocoinTestingSetupBase() {
         const CChainParams& chainparams = Params();
         CBlockTemplate *pblocktemplate = BlockAssembler(chainparams).CreateNewBlock(
             scriptPubKey, tx_ids);
-        CBlock& block = pblocktemplate->block;
+        CBlock block = pblocktemplate->block;
 
         // IncrementExtraNonce creates a valid coinbase and merkleRoot
         unsigned int extraNonce = 0;
@@ -79,7 +79,7 @@ ZerocoinTestingSetupBase::~ZerocoinTestingSetupBase() {
             ++block.nNonce;
         }
 
-        //delete pblocktemplate;
+        delete pblocktemplate;
         return block;
     }
 
@@ -108,10 +108,9 @@ ZerocoinTestingSetupBase::~ZerocoinTestingSetupBase() {
 
  ZerocoinTestingSetup200::ZerocoinTestingSetup200()
     {
-        CPubKey newKey;
-        BOOST_CHECK(pwalletMain->GetKeyFromPool(newKey));
+        BOOST_CHECK(pwalletMain->GetKeyFromPool(pubkey));
 
-        string strAddress = CBitcoinAddress(newKey.GetID()).ToString();
+        string strAddress = CBitcoinAddress(pubkey.GetID()).ToString();
         pwalletMain->SetAddressBook(CBitcoinAddress(strAddress).Get(), "",
                                ( "receive"));
 
@@ -121,7 +120,7 @@ ZerocoinTestingSetupBase::~ZerocoinTestingSetupBase() {
         // Since sigma V3 implementation also over consensus.nMintV3SigmaStartBlock = 180;
 
         printf("Balance before %ld\n", pwalletMain->GetBalance());
-        scriptPubKey = CScript() <<  ToByteVector(newKey/*coinbaseKey.GetPubKey()*/) << OP_CHECKSIG;
+        scriptPubKey = CScript() << OP_DUP << OP_HASH160 << ToByteVector(pubkey.GetID()) << OP_EQUALVERIFY << OP_CHECKSIG;
         for (int i = 0; i < 200; i++)
         {
             CBlock b = CreateAndProcessBlock({}, scriptPubKey);

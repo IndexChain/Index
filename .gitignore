@@ -2,6 +2,9 @@
 .project
 .cproject
 .vscode
+.kdev4
+ZCoin.kdev4
+src.kdev4
 
 *.tar.gz
 
@@ -50,6 +53,7 @@ src/qt/forms/ui_*.h
 src/qt/test/moc*.cpp
 
 src/tor.timestamp*
+src/tor/src/or
 
 .deps
 .dirstamp
@@ -132,3 +136,8 @@ zcoin.creator
 zcoin.creator.user
 zcoin.files
 zcoin.includes
+.idea/
+.vs/
+.idea/
+
+src/testbip47

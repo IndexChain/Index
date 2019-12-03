@@ -10,11 +10,12 @@
 #include "amount.h"
 #include "primitives/transaction.h"
 #include "primitives/zerocoin.h"
-#include "hdmint/hdmint.h"
-#include "hdmint/mintpool.h"
 #include "wallet/db.h"
+#include "streams.h"
 #include "key.h"
 
+#include "../hdmint/hdmint.h"
+#include "../hdmint/mintpool.h"
 #include "../secp256k1/include/GroupElement.h"
 #include "../secp256k1/include/Scalar.h"
 
@@ -29,6 +30,8 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include "bip47/Bip47PaymentChannel.h"
 
 static const bool DEFAULT_FLUSHWALLET = true;
 
@@ -72,7 +75,7 @@ public:
     static const int VERSION_BASIC = 1;
     static const int VERSION_WITH_BIP44 = 10;
     static const int CURRENT_VERSION = VERSION_WITH_BIP44;
-    static const int N_CHANGES = 3; // standard = 0/1, mint = 2
+    static const int N_CHANGES = 4; // standard = 0/1, mint = 2, exodus = 3
     int nVersion;
 
     CHDChain() { SetNull(); }
@@ -87,6 +90,7 @@ public:
         READWRITE(masterKeyID);
         if(this->nVersion >= VERSION_WITH_BIP44){
             READWRITE(nExternalChainCounters);
+            nExternalChainCounters.resize(N_CHANGES);
         }
     }
 
@@ -100,6 +104,51 @@ public:
         }
     }
 };
+
+/**
+ * CBip47HDChain
+ */
+
+/* simple HD chain data model */
+class CBip47HDChain
+{
+public:
+    uint32_t nExternalChainCounter; // VERSION_BASIC
+    vector<uint32_t> nExternalChainCounters; // VERSION_WITH_BIP44: vector index corresponds to account value
+    CKeyID masterKeyID; //!< master key hash160
+
+    static const int VERSION_BASIC = 1;
+    static const int VERSION_WITH_BIP47 = 10;
+    static const int CURRENT_VERSION = VERSION_WITH_BIP47;
+    static const int N_CHANGES = 3; // standard = 0/1, mint = 2
+    int nVersion;
+
+    CBip47HDChain() { SetNull(); }
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion)
+    {
+
+        READWRITE(this->nVersion);
+        nVersion = this->nVersion;
+        READWRITE(nExternalChainCounter);
+        READWRITE(masterKeyID);
+        if(this->nVersion >= VERSION_WITH_BIP47){
+            READWRITE(nExternalChainCounters);
+        }
+    }
+
+    void SetNull()
+    {
+        nVersion = CBip47HDChain::CURRENT_VERSION;
+        masterKeyID.SetNull();
+        nExternalChainCounter = 0;
+        for(int index=0;index<N_CHANGES;index++){
+            nExternalChainCounters.push_back(0);
+        }
+    }
+};
+
 
 class CKeyMetadata
 {
@@ -124,7 +173,7 @@ public:
         nCreateTime = nCreateTime_;
     }
 
-    bool ParseComponents(){
+    bool ParseComponents() {
         std::vector<std::string> nComponents;
         if(hdKeypath=="m")
             return false;
@@ -222,13 +271,13 @@ public:
     void ListAccountCreditDebit(const std::string& strAccount, std::list<CAccountingEntry>& acentries);
 
     bool WriteZerocoinEntry(const CZerocoinEntry& zerocoin);
-    bool WriteZerocoinEntry(const CSigmaEntry& zerocoin);
+    bool WriteSigmaEntry(const CSigmaEntry& zerocoin);
     bool ReadZerocoinEntry(const Bignum& pub, CZerocoinEntry& entry);
-    bool ReadZerocoinEntry(const secp_primitives::GroupElement& pub, CSigmaEntry& entry);
+    bool ReadSigmaEntry(const secp_primitives::GroupElement& pub, CSigmaEntry& entry);
     bool HasZerocoinEntry(const Bignum& pub);
-    bool HasZerocoinEntry(const secp_primitives::GroupElement& pub);
+    bool HasSigmaEntry(const secp_primitives::GroupElement& pub);
     bool EraseZerocoinEntry(const CZerocoinEntry& zerocoin);
-    bool EraseZerocoinEntry(const CSigmaEntry& zerocoin);
+    bool EraseSigmaEntry(const CSigmaEntry& sigma);
     void ListPubCoin(std::list<CZerocoinEntry>& listPubCoin);
     void ListSigmaPubCoin(std::list<CSigmaEntry>& listPubCoin);
     void ListCoinSpendSerial(std::list<CZerocoinSpendEntry>& listCoinSpendSerial);
@@ -255,15 +304,15 @@ public:
     static bool Recover(CDBEnv& dbenv, const std::string& filename, bool fOnlyKeys);
     static bool Recover(CDBEnv& dbenv, const std::string& filename);
 
-    bool ReadZerocoinCount(int32_t& nCount);
-    bool WriteZerocoinCount(const int32_t& nCount);
+    bool ReadMintCount(int32_t& nCount);
+    bool WriteMintCount(const int32_t& nCount);
 
-    bool ReadZerocoinSeedCount(int32_t& nCount);
-    bool WriteZerocoinSeedCount(const int32_t& nCount);
+    bool ReadMintSeedCount(int32_t& nCount);
+    bool WriteMintSeedCount(const int32_t& nCount);
 
     bool ArchiveMintOrphan(const CZerocoinEntry& zerocoin);
     bool ArchiveDeterministicOrphan(const CHDMint& dMint);
-    bool UnarchiveZerocoinMint(const uint256& hashPubcoin, CSigmaEntry& zerocoin);
+    bool UnarchiveSigmaMint(const uint256& hashPubcoin, CSigmaEntry& zerocoin);
     bool UnarchiveHDMint(const uint256& hashPubcoin, CHDMint& dMint);
 
     bool WriteHDMint(const CHDMint& dMint);
@@ -283,6 +332,139 @@ public:
 
     //! write the hdchain model (external chain child index counter)
     bool WriteHDChain(const CHDChain& chain);
+
+    //! write the bip47hdchain model (external chain child index counter)
+    bool WriteCBip47HDChain(const CBip47HDChain& bip47chain);
+    
+    // @bip47 channel data write
+    bool WriteBip47PaymentChannel(const Bip47PaymentChannel& pchannel, const string& channelId);
+    
+    void ListBip47PaymentChannel(std::map <string, Bip47PaymentChannel> &mPchannels);
+    
+    bool WritePaymentChannelData();
+    
+    /// Write destination data key,value tuple to database
+    bool WritePcodeNotificationData(const std::string &rpcodestr, const std::string &key, const std::string &value);
+    bool WriteBip47SeedMaster(const vector<unsigned char> &seedmaster);
+    bool ReadBip47SeedMaster(vector<unsigned char> &seedmaster);
+    /// Erase destination data tuple from wallet database
+    bool ErasePcodeNotificationData(const std::string &rpcodestr, const std::string &key);
+    bool loadPCodeNotificationTransactions(std::vector<std::string>& vPCodeNotificationTransactions);
+    
+#ifdef ENABLE_EXODUS
+
+    template<class MintPool>
+    bool ReadExodusMintPool(MintPool &mintPool)
+    {
+        return Read(std::string("exodus_mint_pool"), mintPool);
+    }
+
+    template<class MintPool>
+    bool WriteExodusMintPool(MintPool const &mintPool)
+    {
+        return Write(std::string("exodus_mint_pool"), mintPool, true);
+    }
+
+    bool HasExodusMintPool()
+    {
+        return Exists(std::string("exodus_mint_pool"));
+    }
+
+    template<class Key, class MintID>
+    bool ReadExodusMintID(const Key& k, MintID &id)
+    {
+        return Read(std::make_pair(std::string("exodus_mint_id"), k), id);
+    }
+
+    template<class Key, class MintID>
+    bool WriteExodusMintID(const Key& k, const MintID &id)
+    {
+        return Write(std::make_pair(std::string("exodus_mint_id"), k), id);
+    }
+
+    template<class Key>
+    bool HasExodusMintID(const Key& k)
+    {
+        return Exists(std::make_pair(std::string("exodus_mint_id"), k));
+    }
+
+    template<class Key>
+    bool EraseExodusMintID(const Key& k)
+    {
+        return Erase(std::make_pair(std::string("exodus_mint_id"), k));
+    }
+
+    template<class K, class V>
+    bool ReadExodusMint(const K& k, V& v)
+    {
+        return Read(std::make_pair(std::string("exodus_mint"), k), v);
+    }
+
+    template<class K>
+    bool HasExodusMint(const K& k)
+    {
+        return Exists(std::make_pair(std::string("exodus_mint"), k));
+    }
+
+    template<class K, class V>
+    bool WriteExodusMint(const K &k, const V &v)
+    {
+        return Write(std::make_pair(std::string("exodus_mint"), k), v, true);
+    }
+
+    template<class K>
+    bool EraseExodusMint(const K& k)
+    {
+        return Erase(std::make_pair(std::string("exodus_mint"), k));
+    }
+
+    template<typename K, typename V, typename InsertF>
+    void ListExodusMints(InsertF insertF)
+    {
+        auto cursor = GetCursor();
+        if (!cursor) {
+            throw runtime_error(std::string(__func__)+" : cannot create DB cursor");
+        }
+
+        unsigned int flags = DB_SET_RANGE;
+        while (true) {
+
+            // Read next record
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            if (flags == DB_SET_RANGE) {
+                ssKey << std::make_pair(string("exodus_mint"), K());
+            }
+
+            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+            int ret = ReadAtCursor(cursor, ssKey, ssValue, flags);
+
+            flags = DB_NEXT;
+            if (ret == DB_NOTFOUND) {
+                break;
+            } else if (ret != 0) {
+                cursor->close();
+                throw runtime_error(std::string(__func__)+" : error scanning DB");
+            }
+
+            // Unserialize
+            std::string type;
+            ssKey >> type;
+            if (type != "exodus_mint") {
+                break;
+            }
+
+            K key;
+            ssKey >> key;
+
+            V value;
+            ssValue >> value;
+
+            insertF(key, value);
+        }
+
+        cursor->close();
+    }
+#endif
 
 private:
     CWalletDB(const CWalletDB&);
