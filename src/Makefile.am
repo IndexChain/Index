@@ -368,6 +368,8 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/x16Rv2/sph_types.h \
   crypto/x16Rv2/sph_blake.h \
   crypto/x16Rv2/sph_bmw.h \
+  crypto/x16Rv2/sph_hamsi.h \
+  crypto/x16Rv2/sph_fugue.h \
   crypto/x16Rv2/sph_jh.h \
   crypto/x16Rv2/sph_keccak.h \
   crypto/x16Rv2/sph_skein.h \
@@ -379,6 +381,7 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/x16Rv2/sph_sha2.h \
   crypto/x16Rv2/sph_haval.h \
   crypto/x16Rv2/sph_tiger.h \
+  crypto/x16Rv2/sph_whirlpool.h \
   crypto/x16Rv2/lyra2.h \
   crypto/x16Rv2/sponge.h \
   crypto/x16Rv2/gost_streebog.h \
