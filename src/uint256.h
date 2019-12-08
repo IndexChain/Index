@@ -145,6 +145,13 @@ public:
     {
         return ReadLE64(data);
     }
+    int GetNibble(int index) const 
+    {
+        index = 63 - index;
+        if (index % 2 == 1)
+            return(data[index / 2] >> 4);
+        return(data[index / 2] & 0x0F); 
+    }
 };
 
 /* uint256 from const char *.
