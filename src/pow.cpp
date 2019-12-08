@@ -66,17 +66,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHead
         return bnNew.GetCompact();
     }
 
-    int nFirstMTPBlock = MTPState::GetMTPState()->GetFirstMTPBlockNumber(params, pindexLast);
-    bool fMTP = nFirstMTPBlock > 0;
+    bool fMTP = false;
 
-    if (pblock->IsMTP() && !fMTP) {
-        // first MTP block ever
-        return params.nInitialMTPDifficulty;
-    }
-
-    const uint32_t BlocksTargetSpacing = 
-        (params.nMTPFiveMinutesStartBlock == 0 && fMTP) || (params.nMTPFiveMinutesStartBlock > 0 && pindexLast->nHeight >= params.nMTPFiveMinutesStartBlock) ?
-            params.nPowTargetSpacingMTP : params.nPowTargetSpacing;
+    const uint32_t BlocksTargetSpacing = params.nPowTargetSpacing;
     unsigned int TimeDaySeconds = 60 * 60 * 24;
     int64_t PastSecondsMin = TimeDaySeconds * 0.25; // 21600
     int64_t PastSecondsMax = TimeDaySeconds * 7;// 604800
@@ -84,13 +76,6 @@ unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHead
     uint32_t PastBlocksMax = PastSecondsMax / BlocksTargetSpacing; // 1008 blocks
     uint32_t StartingPoWBlock = 0;
 
-    if (nFirstMTPBlock > 1) {
-        // There are both legacy and MTP blocks in the chain. Limit PoW calculation scope to MTP blocks only
-        uint32_t numberOfMTPBlocks = pindexLast->nHeight - nFirstMTPBlock + 1;
-        PastBlocksMin = std::min(PastBlocksMin, numberOfMTPBlocks);
-        PastBlocksMax = std::min(PastBlocksMax, numberOfMTPBlocks);
-        StartingPoWBlock = nFirstMTPBlock;
-    }
 
     if ((pindexLast->nHeight + 1 - StartingPoWBlock) % params.DifficultyAdjustmentInterval(fMTP) != 0) // Retarget every nInterval blocks
     {

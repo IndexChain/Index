@@ -26,7 +26,7 @@ public:
     static MTPState *GetMTPState() { return sharedMTPState; }
 
     // Methods to query MTP state
-    bool IsMTP() const { return nFirstMTPBlock > 0; }
+    bool IsMTP() const { return false; }
     int GetFirstMTPBlockNumber() const { return nFirstMTPBlock; }
 
     // Get first MTP block number given the last block is blockIndex (which can be
