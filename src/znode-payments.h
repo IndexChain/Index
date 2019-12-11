@@ -101,7 +101,7 @@ public:
     bool GetBestPayee(CScript& payeeRet);
     bool HasPayeeWithVotes(CScript payeeIn, int nVotesReq);
 
-    bool IsTransactionValid(const CTransaction& txNew, bool fMTP);
+    bool IsTransactionValid(const CTransaction& txNew, bool fMTP, int nHeight);
 
     std::string GetRequiredPaymentsString();
 };

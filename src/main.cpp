@@ -2101,26 +2101,37 @@ bool ReadBlockHeaderFromDisk(CBlock &block, const CDiskBlockPos &pos) {
 }
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, int nTime) {
+    bool fPremineBlock = nHeight == 1;
+    int nYearBlocksinmin = 525600
+    bool phaseyear1 = nHeight >= 1 && nHeight <= nYearBlocksinmin;
+    bool phaseyear2 = nHeight >= nYearBlocksinmin && nHeight <= (nYearBlocksinmin * 2)
+    bool phaseyear3 = nHeight >= (nYearBlocksinmin * 2) && nHeight <= (nYearBlocksinmin * 3)
+    bool phaseyear4 = nHeight >= (nYearBlocksinmin * 3) && nHeight <= (nYearBlocksinmin * 4)
+    bool phaseyear5 = nHeight >= (nYearBlocksinmin * 4) && nHeight <= (nYearBlocksinmin * 5)
+    bool phaseyear6 = nHeight >= (nYearBlocksinmin * 4) && nHeight <= (nYearBlocksinmin * 5)
+    bool phaseyear7 = nHeight >= (nYearBlocksinmin * 4) && nHeight <= (nYearBlocksinmin * 5)
+
     // Genesis block is 0 coin
     if (nHeight == 0)
         return 0;
-
-    // Subsidy is cut in half after nSubsidyHalvingFirst block, then every nSubsidyHalvingInterval blocks.
-    // After block nSubsidyHalvingStopBlock there will be no subsidy at all
-    if (nHeight >= consensusParams.nSubsidyHalvingStopBlock)
-        return 0;
-    int halvings = nHeight < consensusParams.nSubsidyHalvingFirst ? 0 : (nHeight - consensusParams.nSubsidyHalvingFirst) / consensusParams.nSubsidyHalvingInterval + 1;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return 0;
-
-    CAmount nSubsidy = 50 * COIN;
-    nSubsidy >>= halvings;
-
-    if (nHeight > 0 && nTime >= (int)consensusParams.nMTPSwitchTime)
-        nSubsidy /= consensusParams.nMTPRewardReduction;
-
-    return nSubsidy;
+    else if (fPremineBlock)
+        return 300000000 * COIN;
+    else if (phaseyear1)
+        return 3 * COIN;
+    else if (phaseyear2)
+        return 2.5 * COIN;
+    else if (phaseyear3)
+        return 2 * COIN;
+    else if (phaseyear4)
+        return 1.5 * COIN;
+    else if (phaseyear5)
+        return 1 * COIN;
+    else if (phaseyear6)
+        return 0.75 * COIN;
+    else if (phaseyear7)
+        return 0.5 * COIN;
+    else
+        return 0.5 * COIN;
 }
 
 bool IsInitialBlockDownload() {
@@ -3687,7 +3698,7 @@ int GetInputAge(const CTxIn &txin) {
     }
 }
 
-CAmount GetZnodePayment(const Consensus::Params &params, bool fMTP) {
+CAmount GetZnodePayment(const Consensus::Params &params, bool fMTP,int nHeight) {
 //    CAmount ret = blockValue * 30/100 ; // start at 30%
 //    int nMNPIBlock = Params().GetConsensus().nZnodePaymentsStartBlock;
 ////    int nMNPIBlock = Params().GetConsensus().nZnodePaymentsIncreaseBlock;
@@ -3703,10 +3714,12 @@ CAmount GetZnodePayment(const Consensus::Params &params, bool fMTP) {
 //    if (nHeight > nMNPIBlock + (nMNPIPeriod * 6)) ret += blockValue / 40; // 261680 - 45.0% - 2015-05-01
 //    if (nHeight > nMNPIBlock + (nMNPIPeriod * 7)) ret += blockValue / 40; // 278960 - 47.5% - 2015-06-01
 //    if (nHeight > nMNPIBlock + (nMNPIPeriod * 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03
-    CAmount coin = fMTP ? COIN/params.nMTPRewardReduction : COIN;
-    CAmount ret = 15 * coin; //15 or 7.5 XZC
+if(nHeight > 100)
+{
+    return GetBlockSubsidy(nHeight,params) * 0.2 * COIN;
+}
 
-    return ret;
+    return 0;
 }
 
 bool DisconnectBlocks(int blocks) {

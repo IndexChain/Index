@@ -530,7 +530,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         // get some info back to pass to getblocktemplate
         if (nHeight >= chainparams.GetConsensus().nZnodePaymentsStartBlock) {
             const Consensus::Params &params = chainparams.GetConsensus();
-            CAmount znodePayment = GetZnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime);
+            CAmount znodePayment = GetZnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime,nHeight);
             coinbaseTx.vout[0].nValue -= znodePayment;
             FillBlockPayments(coinbaseTx, nHeight, znodePayment, pblock->txoutZnode, pblock->voutSuperblock);
         }
