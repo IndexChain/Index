@@ -37,52 +37,74 @@ double GetDifficultyHelper(unsigned int nBits) {
     return dDiff;
 }
 
-// Zcoin GetNextWorkRequired
-unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params) {
-    if (!pindexLast || pindexLast->nHeight < params.nDifficultyAdjustStartBlock)
-        return params.nFixedDifficulty;
+unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params) {
+    /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    int64_t nPastBlocks = 24;
 
-    if (params.IsTestnet()) {
-        // If the new block's timestamp is more than nTargetSpacing*6
-        // then allow mining of a min-difficulty block
-        if (pblock->nTime > pindexLast->nTime + params.nPowTargetTimespan * 1) {
-            return params.nFixedDifficulty;
+    // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
+    if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
+        return bnPowLimit.GetCompact();
+    }
+
+    if (params.fPowAllowMinDifficultyBlocks) {
+        // recent block is more than 2 hours old
+        if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + 2 * 60 * 60) {
+            return bnPowLimit.GetCompact();
+        }
+        // recent block is more than 10 minutes old
+        if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 4) {
+            arith_uint256 bnNew = arith_uint256().SetCompact(pindexLast->nBits) * 10;
+            if (bnNew > bnPowLimit) {
+                bnNew = bnPowLimit;
+            }
+            return bnNew.GetCompact();
         }
     }
 
-    // 9/29/2016 - Reset to Lyra2(2,block_height,256) due to ASIC KnC Miner Scrypt
-    // 36 block look back, reset to mininmum diff
-    if (params.IsMain() && pindexLast->nHeight + 1 >= HF_LYRA2VAR_HEIGHT && pindexLast->nHeight + 1 <= HF_LYRA2VAR_HEIGHT + 36 - 1) {
-        return params.nFixedDifficulty;
-    }
-    // 02/11/2017 - Increase diff to match with new hashrates of Lyra2Z algo
-    if (params.IsMain() && pindexLast->nHeight + 1 == HF_LYRA2Z_HEIGHT) {
-        CBigNum bnNew;
-        bnNew.SetCompact(pindexLast->nBits);
-        bnNew /= 20000; // increase the diff by 20000x since the new hashrate is approx. 20000 times higher
-        LogPrintf("Lyra2Z HF - Before: %08x %.8f\n", pindexLast->nBits, GetDifficultyHelper(pindexLast->nBits));
-        LogPrintf("Lyra2Z HF - After: %08x %.8f\n", bnNew.GetCompact(), GetDifficultyHelper(bnNew.GetCompact()));
-        if (bnNew > bnProofOfWorkLimit) { bnNew = bnProofOfWorkLimit; } // safe threshold
-        return bnNew.GetCompact();
-    }
+    const CBlockIndex *pindex = pindexLast;
+    arith_uint256 bnPastTargetAvg;
 
-    bool fMTP = false;
+    for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
+        arith_uint256 bnTarget = arith_uint256().SetCompact(pindex->nBits);
+        if (nCountBlocks == 1) {
+            bnPastTargetAvg = bnTarget;
+        } else {
+            // NOTE: that's not an average really...
+            bnPastTargetAvg = (bnPastTargetAvg * nCountBlocks + bnTarget) / (nCountBlocks + 1);
+        }
 
-    const uint32_t BlocksTargetSpacing = params.nPowTargetSpacing;
-    unsigned int TimeDaySeconds = 60 * 60 * 24;
-    int64_t PastSecondsMin = TimeDaySeconds * 0.25; // 21600
-    int64_t PastSecondsMax = TimeDaySeconds * 7;// 604800 
-    uint32_t PastBlocksMin = PastSecondsMin / BlocksTargetSpacing; // 36 blocks
-    uint32_t PastBlocksMax = PastSecondsMax / BlocksTargetSpacing; // 1008 blocks
-    uint32_t StartingPoWBlock = 0;
-
-
-    if ((pindexLast->nHeight + 1 - StartingPoWBlock) % params.DifficultyAdjustmentInterval(fMTP) != 0) // Retarget every nInterval blocks
-    {
-        return pindexLast->nBits;
+        if(nCountBlocks != nPastBlocks) {
+            assert(pindex->pprev); // should never fail
+            pindex = pindex->pprev;
+        }
     }
 
-    return BorisRidiculouslyNamedDifficultyFunction(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
+    arith_uint256 bnNew(bnPastTargetAvg);
+
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - pindex->GetBlockTime();
+    // NOTE: is this accurate? nActualTimespan counts it for (nPastBlocks - 1) blocks only...
+    int64_t nTargetTimespan = nPastBlocks * params.nPowTargetSpacing;
+
+    if (nActualTimespan < nTargetTimespan/3)
+        nActualTimespan = nTargetTimespan/3;
+    if (nActualTimespan > nTargetTimespan*3)
+        nActualTimespan = nTargetTimespan*3;
+
+    // Retarget
+    bnNew *= nActualTimespan;
+    bnNew /= nTargetTimespan;
+
+    if (bnNew > bnPowLimit) {
+        bnNew = bnPowLimit;
+    }
+
+    return bnNew.GetCompact();
+}
+// Zcoin GetNextWorkRequired
+unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params) {
+    
+        return DarkGravityWave(pindexLast, pblock, params);
 }
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex *pindexLast, int64_t nFirstBlockTime, const Consensus::Params &params) {
