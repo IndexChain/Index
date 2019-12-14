@@ -278,18 +278,16 @@ public:
 
 //    uint256 getuint256() const
 //    {
-//        uint64_t x = 0;
-//        uint256 n = x;
 //        unsigned int nSize = BN_bn2mpi(bn, NULL);
 //        if (nSize < 4)
-//            return n;
+//            return 0;
 //        std::vector<unsigned char> vch(nSize);
 //        BN_bn2mpi(bn, &vch[0]);
 //        if (vch.size() > 4)
 //            vch[4] &= 0x7f;
 //        for (unsigned int i = 0, j = vch.size()-1; i < sizeof(n) && j >= 4; i++, j--)
 //            ((unsigned char*)&n)[i] = vch[j];
-//        return n;
+//        return 0;
 //    }
 
     void setvch(const std::vector<unsigned char>& vch)

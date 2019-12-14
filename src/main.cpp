@@ -2059,10 +2059,7 @@ bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos, int nHeight, con
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
 
-    // Zcoin - MTP
-    if (!CheckMerkleTreeProof(block, consensusParams)){
-    	return error("ReadBlockFromDisk: CheckMerkleTreeProof: Errors in block header at %s", pos.ToString());
-    }
+   
 
     // Check the header
     if (!CheckProofOfWork(block.GetPoWHash(nHeight), block.nBits, consensusParams)){
@@ -2102,7 +2099,7 @@ bool ReadBlockHeaderFromDisk(CBlock &block, const CDiskBlockPos &pos) {
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, int nTime) {
     bool fPremineBlock = nHeight == 1;
-    int nYearBlocksinmin = 525600
+    int nYearBlocksinmin = 525600;
     bool phaseyear1 = nHeight > 1 && nHeight < nYearBlocksinmin;
     bool phaseyear2 = nHeight > nYearBlocksinmin && nHeight < (nYearBlocksinmin * 2);
     bool phaseyear3 = nHeight > (nYearBlocksinmin * 2) && nHeight < (nYearBlocksinmin * 3);
@@ -2113,7 +2110,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, i
 
     // Genesis block is 0 coin
     if (nHeight == 0)
-        return 0;
+        return 0 * COIN;
     else if (fPremineBlock)
         return 300000000 * COIN;
     else if (phaseyear1)

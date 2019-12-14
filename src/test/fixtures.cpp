@@ -201,16 +201,11 @@ MtpMalformedTestingSetup::MtpMalformedTestingSetup()
         while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
             ++block.nNonce;
         }
-        if(mtp) {
-            while (!CheckMerkleTreeProof(block, chainparams.GetConsensus())){
-                block.mtpHashValue = mtp::hash(block, Params().GetConsensus().powLimit);
-            }
-        }
-        else {
-            while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
+
+        while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
                 ++block.nNonce;
-            }
         }
+        
 
         //delete pblocktemplate;
         return block;

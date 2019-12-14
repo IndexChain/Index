@@ -422,7 +422,7 @@ void CZnode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanBack)
                 continue;
             }
             bool fMTP = BlockReading->nHeight > 0 && BlockReading->nTime >= params.nMTPSwitchTime;
-            CAmount nZnodePayment = GetZnodePayment(params, fMTP);
+            CAmount nZnodePayment = GetZnodePayment(params, fMTP,BlockReading->nHeight);
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
             if (mnpayee == txout.scriptPubKey && nZnodePayment == txout.nValue) {

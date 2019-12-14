@@ -541,110 +541,28 @@ bool CheckMintZcoinTransaction(const CTxOut &txout,
 }
 
 bool CheckZerocoinFoundersInputs(const CTransaction &tx, CValidationState &state, const Consensus::Params &params, int nHeight, bool fMTP) {
-    // Check for founders inputs
     if ((nHeight > params.nCheckBugFixedAtBlock) && (nHeight < params.nSubsidyHalvingFirst)) {
         // Reduce everything by a factor of two when MTP is in place
-        int reductionFactor = fMTP ? params.nMTPRewardReduction : 1;
 
-        bool found_1 = false;
-        bool found_2 = false;
-        bool found_3 = false;
-        bool found_4 = false;
-        bool found_5 = false;
         int total_payment_tx = 0; // no more than 1 output for payment
-        CScript FOUNDER_1_SCRIPT;
-        CScript FOUNDER_2_SCRIPT;
-        CScript FOUNDER_3_SCRIPT;
-        CScript FOUNDER_4_SCRIPT;
-        CScript FOUNDER_5_SCRIPT;
         if (nHeight < params.nZnodePaymentsStartBlock) {
             if (params.IsMain() && GetAdjustedTime() > nStartRewardTime) {
-                FOUNDER_1_SCRIPT = GetScriptForDestination(CBitcoinAddress("aCAgTPgtYcA4EysU4UKC86EQd5cTtHtCcr").Get());
-                if (nHeight < 14000) {
-                    FOUNDER_2_SCRIPT = GetScriptForDestination(
-                            CBitcoinAddress("aLrg41sXbXZc5MyEj7dts8upZKSAtJmRDR").Get());
-                } else {
-                    FOUNDER_2_SCRIPT = GetScriptForDestination(
-                            CBitcoinAddress("aHu897ivzmeFuLNB6956X6gyGeVNHUBRgD").Get());
-                }
-                FOUNDER_3_SCRIPT = GetScriptForDestination(CBitcoinAddress("aQ18FBVFtnueucZKeVg4srhmzbpAeb1KoN").Get());
-                FOUNDER_4_SCRIPT = GetScriptForDestination(CBitcoinAddress("a1HwTdCmQV3NspP2QqCGpehoFpi8NY4Zg3").Get());
-                FOUNDER_5_SCRIPT = GetScriptForDestination(CBitcoinAddress("a1kCCGddf5pMXSipLVD9hBG2MGGVNaJ15U").Get());
             } else if (params.IsMain() && GetAdjustedTime() <= nStartRewardTime) {
                 return state.DoS(100, false, REJECT_TRANSACTION_TOO_EARLY,
                                  "CTransaction::CheckTransaction() : transaction is too early");
             } else {
-                FOUNDER_1_SCRIPT = GetScriptForDestination(CBitcoinAddress("TDk19wPKYq91i18qmY6U9FeTdTxwPeSveo").Get());
-                FOUNDER_2_SCRIPT = GetScriptForDestination(CBitcoinAddress("TWZZcDGkNixTAMtRBqzZkkMHbq1G6vUTk5").Get());
-                FOUNDER_3_SCRIPT = GetScriptForDestination(CBitcoinAddress("TRZTFdNCKCKbLMQV8cZDkQN9Vwuuq4gDzT").Get());
-                FOUNDER_4_SCRIPT = GetScriptForDestination(CBitcoinAddress("TG2ruj59E5b1u9G3F7HQVs6pCcVDBxrQve").Get());
-                FOUNDER_5_SCRIPT = GetScriptForDestination(CBitcoinAddress("TCsTzQZKVn4fao8jDmB9zQBk9YQNEZ3XfS").Get());
-            }
-
-            BOOST_FOREACH(const CTxOut &output, tx.vout) {
-                if (output.scriptPubKey == FOUNDER_1_SCRIPT && output.nValue == (int64_t)(2 * COIN)/reductionFactor) {
-                    found_1 = true;
-                }
-                if (output.scriptPubKey == FOUNDER_2_SCRIPT && output.nValue == (int64_t)(2 * COIN)/reductionFactor) {
-                    found_2 = true;
-                }
-                if (output.scriptPubKey == FOUNDER_3_SCRIPT && output.nValue == (int64_t)(2 * COIN)/reductionFactor) {
-                    found_3 = true;
-                }
-                if (output.scriptPubKey == FOUNDER_4_SCRIPT && output.nValue == (int64_t)(2 * COIN)/reductionFactor) {
-                    found_4 = true;
-                }
-                if (output.scriptPubKey == FOUNDER_5_SCRIPT && output.nValue == (int64_t)(2 * COIN)/reductionFactor) {
-                    found_5 = true;
-                }
             }
         } else {
 
             if (params.IsMain() && GetAdjustedTime() > nStartRewardTime) {
-                FOUNDER_1_SCRIPT = GetScriptForDestination(CBitcoinAddress("aCAgTPgtYcA4EysU4UKC86EQd5cTtHtCcr").Get());
-                if (nHeight < 14000) {
-                    FOUNDER_2_SCRIPT = GetScriptForDestination(
-                            CBitcoinAddress("aLrg41sXbXZc5MyEj7dts8upZKSAtJmRDR").Get());
-                } else {
-                    FOUNDER_2_SCRIPT = GetScriptForDestination(
-                            CBitcoinAddress("aHu897ivzmeFuLNB6956X6gyGeVNHUBRgD").Get());
-                }
-                FOUNDER_3_SCRIPT = GetScriptForDestination(CBitcoinAddress("aQ18FBVFtnueucZKeVg4srhmzbpAeb1KoN").Get());
-                FOUNDER_4_SCRIPT = GetScriptForDestination(CBitcoinAddress("a1HwTdCmQV3NspP2QqCGpehoFpi8NY4Zg3").Get());
-                FOUNDER_5_SCRIPT = GetScriptForDestination(CBitcoinAddress("a1kCCGddf5pMXSipLVD9hBG2MGGVNaJ15U").Get());
             } else if (params.IsMain() && GetAdjustedTime() <= nStartRewardTime) {
                 return state.DoS(100, false, REJECT_TRANSACTION_TOO_EARLY,
                                  "CTransaction::CheckTransaction() : transaction is too early");
             } else {
-                FOUNDER_1_SCRIPT = GetScriptForDestination(CBitcoinAddress("TDk19wPKYq91i18qmY6U9FeTdTxwPeSveo").Get());
-                FOUNDER_2_SCRIPT = GetScriptForDestination(CBitcoinAddress("TWZZcDGkNixTAMtRBqzZkkMHbq1G6vUTk5").Get());
-                FOUNDER_3_SCRIPT = GetScriptForDestination(CBitcoinAddress("TRZTFdNCKCKbLMQV8cZDkQN9Vwuuq4gDzT").Get());
-                FOUNDER_4_SCRIPT = GetScriptForDestination(CBitcoinAddress("TG2ruj59E5b1u9G3F7HQVs6pCcVDBxrQve").Get());
-                FOUNDER_5_SCRIPT = GetScriptForDestination(CBitcoinAddress("TCsTzQZKVn4fao8jDmB9zQBk9YQNEZ3XfS").Get());
             }
 
             CAmount znodePayment = GetZnodePayment(params, fMTP,nHeight);
             BOOST_FOREACH(const CTxOut &output, tx.vout) {
-                if (output.scriptPubKey == FOUNDER_1_SCRIPT && output.nValue == (int64_t)(1 * COIN)/reductionFactor) {
-                    found_1 = true;
-                    continue;
-                }
-                if (output.scriptPubKey == FOUNDER_2_SCRIPT && output.nValue == (int64_t)(1 * COIN)/reductionFactor) {
-                    found_2 = true;
-                    continue;
-                }
-                if (output.scriptPubKey == FOUNDER_3_SCRIPT && output.nValue == (int64_t)(1 * COIN)/reductionFactor) {
-                    found_3 = true;
-                    continue;
-                }
-                if (output.scriptPubKey == FOUNDER_4_SCRIPT && output.nValue == (int64_t)(3 * COIN)/reductionFactor) {
-                    found_4 = true;
-                    continue;
-                }
-                if (output.scriptPubKey == FOUNDER_5_SCRIPT && output.nValue == (int64_t)(1 * COIN)/reductionFactor) {
-                    found_5 = true;
-                    continue;
-                }
                 if (znodePayment == output.nValue) {
                     total_payment_tx = total_payment_tx + 1;
                 }
@@ -666,11 +584,6 @@ bool CheckZerocoinFoundersInputs(const CTransaction &tx, CValidationState &state
                 return state.DoS(100, false, REJECT_INVALID_ZNODE_PAYMENT,
                                  "CTransaction::CheckTransaction() : invalid znode payment");
             }
-        }
-
-        if (!(found_1 && found_2 && found_3 && found_4 && found_5)) {
-            return state.DoS(100, false, REJECT_FOUNDER_REWARD_MISSING,
-                             "CTransaction::CheckTransaction() : founders reward missing");
         }
     }
 

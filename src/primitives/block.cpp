@@ -54,15 +54,15 @@ uint256 CBlockHeader::GetHash() const {
 bool CBlockHeader::IsMTP() const {
     // In case if nTime == ZC_GENESIS_BLOCK_TIME we're being called from CChainParams() constructor and
     // it is not possible to get Params()
-    return nTime > ZC_GENESIS_BLOCK_TIME && nTime >= Params().GetConsensus().nMTPSwitchTime;
+    return false;
 }
 
 uint256 CBlockHeader::GetPoWHash(int nHeight, bool forceCalc) const {
 
-    bool fTestNet = (Params().NetworkIDString() == CBaseChainParams::TESTNET);
     try {
         //Changed hash algo to X16Rv2
-        return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+           return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+
     } catch (std::exception &e) {
         LogPrintf("excepetion: %s", e.what());
     }

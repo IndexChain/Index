@@ -62,7 +62,31 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward,
                               extraNonce);
 }
-
+// void MineGenesis(CBlock genesis) {
+// if(genesis.GetHash() != uint256S("0x"))
+//         {
+//             printf("Looking for genesis block...\n");
+//             uint256 hashTarget = CBigNum().SetCompact(genesis.nBits).getuint256();
+//             while(genesis.GetHash() > hashTarget)
+//             {
+//                 ++genesis.nNonce;
+//                 if (genesis.nNonce == 0)
+//                 {
+//                     printf("NONCE WRAPPED, incrementing time");
+//                     std::cout << std::string("NONCE WRAPPED, incrementing time:\n");
+//                     ++genesis.nTime;
+//                 }
+//                 if (genesis.nNonce % 10000 == 0)
+//                 {
+//                     printf("Mainnet: nonce %08u: hash = %s \n", genesis.nNonce, genesis.GetHash().ToString().c_str());
+//                 }
+//             }
+//             printf("merkle root: %s\n", genesis.hashMerkleRoot.ToString().c_str());
+//             printf("block.nTime = %u \n", genesis.nTime);
+//             printf("block.nNonce = %u \n", genesis.nNonce);
+//             printf("block.GetHash = %s\n", genesis.GetHash().ToString().c_str());
+//         }
+// }
 /**
  * Main network
  */
@@ -91,10 +115,10 @@ public:
         consensus.nMinNFactor = 10;
         consensus.nMaxNFactor = 30;
         //nVertcoinStartTime
-        consensus.nChainStartTime = 1389306217;
+        consensus.nChainStartTime = 1576332572;
         consensus.BIP34Height = 227931;
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
-        consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
         consensus.nPowTargetTimespan = 60 * 60; // 60 minutes between retargets
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
@@ -188,17 +212,16 @@ public:
          * extraNonce
          */
         std::vector<unsigned char> extraNonce(4);
-        extraNonce[0] = 0x8c;
-        extraNonce[1] = 0x3d;
+	    extraNonce[0] = 0x82;
+        extraNonce[1] = 0x3f;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 142392, 0x1e0ffff0, 2, 0 * COIN, extraNonce);
-        const std::string s = genesis.GetHash().ToString();
-        std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
-        std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
-        consensus.hashGenesisBlock = genesis.GetHash();
-        // assert(consensus.hashGenesisBlock == uint256S("0x4381deb85b1b2c9843c222944b616d997516dcbd6a964e1eaf0def0830695233"));
-        // assert(genesis.hashMerkleRoot == uint256S("0x365d2aa75d061370c9aefdabac3985716b1e3b4bb7c4af4ed54f25e5aaa42783"));
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 24573139, 0x1e00ffff, 2, 0 * COIN, extraNonce);
+        // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
+        // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
+        consensus.hashGenesisBlock = genesis.GetHash();    
+        assert(consensus.hashGenesisBlock == uint256S("0x00000018e72901cbd7453dcfc74d5c84161f9eb6f976d6c9871a403642e176cb"));
+        assert(genesis.hashMerkleRoot     == uint256S("7cdb95c379851068bf35b01b8935a4c4a226e571952cbead7e519f093a5f35d8"));
         // vSeeds.push_back(CDNSSeedData("amsterdam.zcoin.io", "amsterdam.zcoin.io", false));
         // Note that of those with the service bits flag, most only support a subset of possible options
         base58Prefixes[PUBKEY_ADDRESS] = std::vector < unsigned char > (1, 82);
@@ -209,7 +232,7 @@ public:
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
-        fMiningRequiresPeers = true;
+        fMiningRequiresPeers = false;
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
@@ -281,7 +304,7 @@ public:
         consensus.nChainStartTime = 1389306217;
         consensus.BIP34Height = 21111;
         consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
-        consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 60 * 60; // 60 minutes between retargets
         consensus.nPowTargetSpacing = 5 * 60; // 5 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -308,7 +331,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nTimeout = 1539172800 + consensus.nMinerConfirmationWindow*2 * 5*60;
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000708f98bf623f02e");
+        consensus.nMinimumChainWork = uint256S("0x0");
 
         consensus.nSpendV15StartBlock = 5000;
         consensus.nCheckBugFixedAtBlock = 1;
@@ -366,31 +389,59 @@ public:
         extraNonce[1] = 0x00;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 3564781, 0x1e0ffff0, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 10381382, 0x1e00ffff, 2, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
-        //std::cout << "zcoin testnet genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
-        //std::cout << "zcoin testnet hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
-        //btzc: update testnet zcoin hashGenesisBlock and hashMerkleRoot
+        // std::cout << "zcoin testnet genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
+        // std::cout << "zcoin testnet hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
+        // //btzc: update testnet zcoin hashGenesisBlock and hashMerkleRoot
+        /*
+        uint32_t nGenesisTime = ZC_GENESIS_BLOCK_TIME;
+        arith_uint256 test;
+        bool fNegative;
+        bool fOverflow;
+        test.SetCompact(0x1e00ffff, &fNegative, &fOverflow);
+        std::cout << "Test threshold: " << test.GetHex() << "\n\n";
+        int genesisNonce = 0;
+        uint256 TempHashHolding = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
+        uint256 BestBlockHash = uint256S("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        for (int i=0;i<40000000;i++) {
+            genesis = CreateGenesisBlock(nGenesisTime, i, 0x1e00ffff, 2, 0 * COIN,extraNonce);
+            //genesis.hashPrevBlock = TempHashHolding;
+            consensus.hashGenesisBlock = genesis.GetHash();
+            arith_uint256 BestBlockHashArith = UintToArith256(BestBlockHash);
+            if (UintToArith256(consensus.hashGenesisBlock) < BestBlockHashArith) {
+                BestBlockHash = consensus.hashGenesisBlock;
+                std::cout << BestBlockHash.GetHex() << " Nonce: " << i << "\n";
+                std::cout << "   PrevBlockHash: " << genesis.hashPrevBlock.GetHex() << "\n";
+        	std::cout << "hashGenesisBlock to 0x" << BestBlockHash.GetHex() << std::endl;
+        	std::cout << "Genesis Nonce to " << genesisNonce << std::endl;
+        	std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
+            }
+            TempHashHolding = consensus.hashGenesisBlock;
+            if (BestBlockHashArith < test) {
+                genesisNonce = i - 1;
+                break;
+            }
+            //std::cout << consensus.hashGenesisBlock.GetHex() << "\n";
+        }
+        std::cout << "\n";
+        std::cout << "\n";
+        std::cout << "\n";
+        std::cout << "hashGenesisBlock to 0x" << BestBlockHash.GetHex() << std::endl;
+        std::cout << "Genesis Nonce to " << genesisNonce << std::endl;
+        std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
+        std::cout << "\n";
+        return;
+        */
         assert(consensus.hashGenesisBlock ==
-                uint256S("0x1e3487fdb1a7d46dac3e8f3e58339c6eff54abf6aef353485f3ed64250a35e89"));
+                uint256S("0x000000f5f276fb5d7ed88e6dce16c9768533e2c9cb81ea9435de53db0306a3db"));
         assert(genesis.hashMerkleRoot ==
-                uint256S("0x25b361d60bc7a66b311e72389bf5d9add911c735102bcb6425f63aceeff5b7b8"));
+                uint256S("3f105b7ee0068c963cab5e889bcec419d82646b9060905f559eb8c4c1975f4c6"));
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         // zcoin test seeds
         // vSeeds.push_back(CDNSSeedData("beta1.zcoin.io", "beta1.zcoin.io", false));
-        // vSeeds.push_back(CDNSSeedData("beta2.zcoin.io", "beta2.zcoin.io", false));
-        // vSeeds.push_back(CDNSSeedData("45.76.182.254", "45.76.182.254", false));
-        // vSeeds.push_back(CDNSSeedData("MTP1", "mtp1.zcoin.io", false));
-        // vSeeds.push_back(CDNSSeedData("MTP2", "mtp2.zcoin.io", false));
-        vSeeds.push_back(CDNSSeedData("SIGMA1", "sigma1.zcoin.io", false));
-        vSeeds.push_back(CDNSSeedData("SIGMA2", "sigma2.zcoin.io", false));
-
-//        vSeeds.push_back(CDNSSeedData("testnetbitcoin.jonasschnelli.ch", "testnet-seed.bitcoin.jonasschnelli.ch", true));
-//        vSeeds.push_back(CDNSSeedData("petertodd.org", "seed.tbtc.petertodd.org", true));
-//        vSeeds.push_back(CDNSSeedData("bluematt.me", "testnet-seed.bluematt.me"));
-//        vSeeds.push_back(CDNSSeedData("bitcoin.schildbach.de", "testnet-seed.bitcoin.schildbach.de"));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector < unsigned char > (1, 65);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector < unsigned char > (1, 178);
