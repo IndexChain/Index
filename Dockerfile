@@ -68,11 +68,11 @@ RUN apt-get remove -y \
 # Start Zcoin Daemon
 USER zcoind
 
-RUN mkdir /home/zcoind/.zcoin
-VOLUME [ "/home/zcoind/.zcoin" ]
+RUN mkdir /home/zcoind/.index
+VOLUME [ "/home/zcoind/.index" ]
 
 # Main network ports
-EXPOSE 8168
+EXPOSE 7082
 EXPOSE 8888
 
 # Test network ports

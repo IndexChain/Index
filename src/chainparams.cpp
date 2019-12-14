@@ -173,9 +173,9 @@ public:
         //btzc: update zcoin pchMessage
         pchMessageStart[0] = 0xe3;
         pchMessageStart[1] = 0xd9;
-        pchMessageStart[2] = 0xfe;
-        pchMessageStart[3] = 0xf1;
-        nDefaultPort = 8168;
+        pchMessageStart[2] = 0xf3;
+        pchMessageStart[3] = 0x4a;
+        nDefaultPort = 7082;
         nPruneAfterHeight = 100000;
         /**
          * btzc: zcoin init genesis block
@@ -197,7 +197,13 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();    
         assert(consensus.hashGenesisBlock == uint256S("0x000006ca60c7df6d2ebbcd0865497d1bd43816d61bb4eac5399a0c59e6dd20a5"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
-        // vSeeds.push_back(CDNSSeedData("amsterdam.zcoin.io", "amsterdam.zcoin.io", false));
+        //Initial seeders for use
+        vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));
+        vSeeds.push_back(CDNSSeedData("198.13.41.221", "198.13.41.221", false));
+        vSeeds.push_back(CDNSSeedData("202.182.101.157", "202.182.101.157", false));
+        vSeeds.push_back(CDNSSeedData("207.148.96.237", "207.148.96.237", false));
+        vSeeds.push_back(CDNSSeedData("202.182.107.84", "202.182.107.84", false));
+
         // Note that of those with the service bits flag, most only support a subset of possible options
         base58Prefixes[PUBKEY_ADDRESS] = std::vector < unsigned char > (1, 82);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector < unsigned char > (1, 7);

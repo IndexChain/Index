@@ -110,7 +110,7 @@ setting the BITCOIND and FLAGS environment variables in the file
 4e) Mac OS X
 
 Copy org.bitcoin.bitcoind.plist into ~/Library/LaunchAgents. Load the launch agent by
-running `launchctl load ~/Library/LaunchAgents/org.zcoin.zcoind.plist`.
+running `launchctl load ~/Library/LaunchAgents/org.index.zcoind.plist`.
 
 This Launch Agent will cause bitcoind to start whenever the user logs in.
 

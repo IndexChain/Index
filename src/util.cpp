@@ -475,13 +475,13 @@ void PrintExceptionContinue(const std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\zcoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\zcoin
-    // Mac: ~/Library/Application Support/zcoin
-    // Unix: ~/.zcoin
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\IndexCore
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\IndexCore
+    // Mac: ~/Library/Application Support/IndexCore
+    // Unix: ~/.IndexCore
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "zcoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "IndexCore";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -491,10 +491,10 @@ boost::filesystem::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/zcoin";
+    return pathRet / "Library/Application Support/IndexCore";
 #else
     // Unix
-    return pathRet / ".zcoin";
+    return pathRet / ".IndexCore";
 #endif
 #endif
 }
