@@ -71,7 +71,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHead
     const uint32_t BlocksTargetSpacing = params.nPowTargetSpacing;
     unsigned int TimeDaySeconds = 60 * 60 * 24;
     int64_t PastSecondsMin = TimeDaySeconds * 0.25; // 21600
-    int64_t PastSecondsMax = TimeDaySeconds * 7;// 604800
+    int64_t PastSecondsMax = TimeDaySeconds * 7;// 604800 
     uint32_t PastBlocksMin = PastSecondsMin / BlocksTargetSpacing; // 36 blocks
     uint32_t PastBlocksMax = PastSecondsMax / BlocksTargetSpacing; // 1008 blocks
     uint32_t StartingPoWBlock = 0;
@@ -112,14 +112,14 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex *pindexLast, int64_t nF
 // Zcoin - MTP
 bool CheckMerkleTreeProof(const CBlockHeader &block, const Consensus::Params &params) {
     if (!block.IsMTP())
-	    return true;
+        return true;
 
     if (!block.mtpHashData)
         return false;
 
     uint256 calculatedMtpHashValue;
     bool isVerified = mtp::verify(block.nNonce, block, Params().GetConsensus().powLimit, &calculatedMtpHashValue) &&
-        block.mtpHashValue == calculatedMtpHashValue;
+                      block.mtpHashValue == calculatedMtpHashValue;
 
     if(!isVerified)
         return false;
@@ -131,19 +131,27 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params 
     bool fNegative;
     bool fOverflow;
     arith_uint256 bnTarget;
-return true;
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
+    std::cout << "Test thresholdxx: " << bnTarget.GetHex() << "\n\n";
     // Check range
-    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit))
+    if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit)){
+        LogPrintf("Range check failed\n");
         return false;
-    // Check proof of work matches claimed amount
-    if (UintToArith256(hash) > bnTarget)
-        return false;
+    }
+    LogPrintf("hash=%s\n",hash.ToString());
+    if(hash == params.hashGenesisBlock || hash == uint256S("6d7a781e43ba657cd5adf790d198f58fe5321f0346aa8eb00c7a99ca3c990d05")){
+        LogPrintf("Bypassed check for genesis\n");
+        return true;
+    }
+        // Check proof of work matches claimed amount
+        if (UintToArith256(hash) > bnTarget){
+           return error("CheckProofOfWork() : hash doesn't match nBits\n");
+        }
     return true;
 }
 
 unsigned int BorisRidiculouslyNamedDifficultyFunction(const CBlockIndex *pindexLast, uint32_t TargetBlocksSpacingSeconds,
-                                         uint32_t PastBlocksMin, uint32_t PastBlocksMax) {
+                                                      uint32_t PastBlocksMin, uint32_t PastBlocksMax) {
 
     const CBlockIndex *BlockLastSolved = pindexLast;
     const CBlockIndex *BlockReading = pindexLast;

@@ -2062,9 +2062,9 @@ bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos, int nHeight, con
    
 
     // Check the header
-    if (!CheckProofOfWork(block.GetPoWHash(nHeight), block.nBits, consensusParams)){
+    if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)){
         //Maybe cache is not valid
-        if (!CheckProofOfWork(block.GetPoWHash(nHeight, true), block.nBits, consensusParams)){
+        if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)){
             return error("ReadBlockFromDisk: CheckProofOfWork: Errors in block header at %s", pos.ToString());
         }
     }
@@ -4363,9 +4363,9 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 //btzc: code from vertcoin, add
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
-    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(nHeight), block.nBits, consensusParams)) {
+    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
         //Maybe cache is not valid
-        if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(nHeight, true), block.nBits, consensusParams)) {
+        if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
             return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
         }
     }
