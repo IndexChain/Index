@@ -342,7 +342,7 @@ public:
 
     uint256 GetBlockPoWHash(bool forceCalc = false) const
     {
-        return GetBlockHeader().GetPoWHash(nHeight, forceCalc);
+        return GetBlockHeader().GetPoWHash();
     }
 
     int64_t GetBlockTime() const

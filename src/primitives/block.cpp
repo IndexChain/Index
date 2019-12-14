@@ -48,7 +48,7 @@ unsigned char GetNfactor(int64_t nTimestamp) {
 }
 
 uint256 CBlockHeader::GetHash() const {
-    return SerializeHash(*this);
+       return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
 }
 
 bool CBlockHeader::IsMTP() const {

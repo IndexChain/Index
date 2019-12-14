@@ -38,7 +38,7 @@ public:
     bool Check(uint256 hashAuxBlock, int nChainID, bool fTestNet);
 
     uint256 GetParentBlockHash(int height) {
-        return parentBlockHeader.GetPoWHash(height);
+        return parentBlockHeader.GetPoWHash();
     }
 };
 
