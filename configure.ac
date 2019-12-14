@@ -95,9 +95,9 @@ AC_ARG_VAR(PYTHONPATH, Augments the default search path for python module files)
 enable_wallet=yes
 
 AC_ARG_ENABLE([exodus],
-  [AS_HELP_STRING([--enable-exodus],[enable exodus (disabled by default)])],
+  [AS_HELP_STRING([--enable-exodus],[enable exodus (enabled by default)])],
   [enable_exodus=$enableval],
-  [enable_exodus=no])
+  [enable_exodus=yes])
 
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
