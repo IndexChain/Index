@@ -132,16 +132,9 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params 
     bool fOverflow;
     arith_uint256 bnTarget;
     bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
-    std::cout << "Test thresholdxx: " << bnTarget.GetHex() << "\n\n";
     // Check range
     if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit)){
-        LogPrintf("Range check failed\n");
         return false;
-    }
-    LogPrintf("hash=%s\n",hash.ToString());
-    if(hash == params.hashGenesisBlock || hash == uint256S("6d7a781e43ba657cd5adf790d198f58fe5321f0346aa8eb00c7a99ca3c990d05")){
-        LogPrintf("Bypassed check for genesis\n");
-        return true;
     }
         // Check proof of work matches claimed amount
         if (UintToArith256(hash) > bnTarget){

@@ -207,7 +207,7 @@ public:
 //        powHash = hash;
     }
 
-    uint256 GetPoWHash(int nHeight, bool forceCalc = false) const;
+    uint256 GetPoWHash() const;
 
     uint256 GetHash() const;
 

@@ -84,7 +84,7 @@ struct MtpTransTestingSetup : public TestingSetup {
         unsigned int extraNonce = 0;
         IncrementExtraNonce(&block, chainActive.Tip(), extraNonce);
 
-        while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
+        while (!CheckProofOfWork(block.GetPoWHash(), block.nBits, chainparams.GetConsensus())){
             ++block.nNonce;
         }
         if(mtp) {
@@ -93,7 +93,7 @@ struct MtpTransTestingSetup : public TestingSetup {
             }
         }
         else {
-            while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
+            while (!CheckProofOfWork(block.GetPoWHash(), block.nBits, chainparams.GetConsensus())){
                 ++block.nNonce;
             }
         }

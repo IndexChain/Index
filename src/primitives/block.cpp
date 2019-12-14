@@ -57,7 +57,7 @@ bool CBlockHeader::IsMTP() const {
     return false;
 }
 
-uint256 CBlockHeader::GetPoWHash(int nHeight, bool forceCalc) const {
+uint256 CBlockHeader::GetPoWHash() const {
 
     try {
         //Changed hash algo to X16Rv2

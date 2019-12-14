@@ -1184,7 +1184,7 @@ void static ZcoinMiner(const CChainParams &chainparams) {
                 uint256 thash;
                    ///change to x116rv3
                 while (true) {
-                    thash = pblock->GetHash();
+                    thash = pblock->GetPoWHash();
 
                     //LogPrintf("*****\nhash   : %s  \ntarget : %s\n", UintToArith256(thash).ToString(), hashTarget.ToString());
 

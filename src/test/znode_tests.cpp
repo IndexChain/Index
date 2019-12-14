@@ -90,7 +90,7 @@ struct ZnodeTestingSetup : public TestingSetup {
         unsigned int extraNonce = 0;
         IncrementExtraNonce(&block, chainActive.Tip(), extraNonce);
 
-        while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
+        while (!CheckProofOfWork(block.GetPoWHash(), block.nBits, chainparams.GetConsensus())){
             ++block.nNonce;
         }
         if(mtp) {
@@ -99,7 +99,7 @@ struct ZnodeTestingSetup : public TestingSetup {
             }
         }
         else {
-            while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())){
+            while (!CheckProofOfWork(block.GetPoWHash(), block.nBits, chainparams.GetConsensus())){
                 ++block.nNonce;
             }
         }
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
     bool mutated;
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
 
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
 
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
     BOOST_CHECK(true == CheckBlock(b, state, chainparams.GetConsensus()));
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
     tx.vout[1].scriptPubKey = tx.vout[0].scriptPubKey;
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
     BOOST_CHECK(false == CheckBlock(b, state, chainparams.GetConsensus()));
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
     znodeSync.Reset();
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
     BOOST_CHECK(true == CheckTransaction(tx, state, tx.GetHash(), false, after_block));
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
     tx.vout[1].scriptPubKey = payee1.GetPayee();
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
     BOOST_CHECK(true == CheckBlock(b, state, chainparams.GetConsensus()));
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
     tx.vout[1].scriptPubKey = tx.vout[2].scriptPubKey;
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
     BOOST_CHECK(false == CheckBlock(b, state, chainparams.GetConsensus()));
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(Test_EnforceZnodePayment)
 
     b.fChecked = false;
     b.hashMerkleRoot = BlockMerkleRoot(b, &mutated);
-    while (!CheckProofOfWork(b.GetHash(), b.nBits, chainparams.GetConsensus())){
+    while (!CheckProofOfWork(b.GetPoWHash(), b.nBits, chainparams.GetConsensus())){
         ++b.nNonce;
     }
     BOOST_CHECK(true == CheckTransaction(tx, state, tx.GetHash(), false, before_block));
