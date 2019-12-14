@@ -184,6 +184,9 @@ struct Params {
     /** block number to disable zerocoin on consensus level */
     int nDisableZerocoinStartBlock;
 	
+     // Params for Zawy's LWMA difficulty adjustment algorithm.
+
+    int nZawyLwmaAveragingWindow;
     int64_t DifficultyAdjustmentInterval(bool fMTP = false) const { return nPowTargetTimespan / (fMTP ? nPowTargetSpacingMTP : nPowTargetSpacing); }
     uint256 nMinimumChainWork;
 

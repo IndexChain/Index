@@ -18,8 +18,8 @@
 #include "crypto/MerkleTreeProof/mtp.h"
 #include "mtpstate.h"
 #include "fixed.h"
-#define USE_LWMA false;
-#define USE_DGW3 true;
+ bool USE_LWMA = false;
+ bool USE_DGW3 =true;
 static CBigNum bnProofOfWorkLimit(~arith_uint256(0) >> 8);
 
 double GetDifficultyHelper(unsigned int nBits) {
@@ -170,7 +170,7 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
 unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params) {
     // Special rule for regtest: we never retarget.
     if (params.fPowNoRetargeting) {
-        return pindexPrev->nBits;
+        return pindexLast->nBits;
     }
     if(USE_DGW3)
        return DarkGravityWave(pindexLast, pblock, params);
