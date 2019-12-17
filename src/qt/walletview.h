@@ -111,8 +111,8 @@ private:
     BlankSigmaDialog *blankSigmaView;
     QWidget *sigmaPage;
     Zc2SigmaPage *zc2SigmaPage;
-    TransactionView *zcoinTransactionList;
-    QWidget *zcoinTransactionsView;
+    TransactionView *indexTransactionList;
+    QWidget *indexTransactionsView;
     ZnodeList *znodeListPage;
 
     QProgressDialog *progressDialog;

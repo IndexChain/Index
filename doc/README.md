@@ -1,28 +1,28 @@
-Zcoin Core 0.13.6.x
+Index Core 0.13.6.x
 =====================
 
 Setup
 ---------------------
-[Zcoin Core] (https://zcoin.io/get-zcoin/) is the original Zcoin client and it builds the backbone of the network. However, it downloads and stores the entire history of Zcoin transactions (which is currently several hundreds MBs); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
+[Index Core] (https://index.io/get-index/) is the original Index client and it builds the backbone of the network. However, it downloads and stores the entire history of Index transactions (which is currently several hundreds MBs); depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
 
 Running
 ---------------------
-The following are some helpful notes on how to run Zcoin on your native platform.
+The following are some helpful notes on how to run Index on your native platform.
 
 ### Unix
 
 Unpack the files into a directory and run:
 
-- `bin/zcoin-qt` (GUI) or
-- `bin/zcoind` (headless)
+- `bin/index-qt` (GUI) or
+- `bin/indexd` (headless)
 
 ### Windows
 
-Unpack the files into a directory, and then run zcoin-qt.exe.
+Unpack the files into a directory, and then run index-qt.exe.
 
 ### OS X
 
-Drag Zcoin-Core to your applications folder, and then run Zcoin-Core.
+Drag Index-Core to your applications folder, and then run Index-Core.
 
 ### Need Help?
 
@@ -33,7 +33,7 @@ for help and more information.
 
 Building
 ---------------------
-The following are developer notes on how to build Zcoin on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build Index on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
 - [OS X Build Notes](build-osx.md)
 - [Unix Build Notes](build-unix.md)
@@ -43,7 +43,7 @@ The following are developer notes on how to build Zcoin on your native platform.
 
 Development
 ---------------------
-The Zcoin repo's [root README](/README.md) contains relevant information on the development process and automated testing.
+The Index repo's [root README](/README.md) contains relevant information on the development process and automated testing.
 
 - [Developer Notes](developer-notes.md)
 - [Multiwallet Qt Development](multiwallet-qt.md)

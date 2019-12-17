@@ -239,7 +239,7 @@ public:
     int PROPERTY_CREATION_FEE_BLOCK;
 
     /**
-     * Amount of XZC to pay when create a new property on main ecosystem.
+     * Amount of IDX to pay when create a new property on main ecosystem.
      **/
     CAmount PROPERTY_CREATION_FEE;
 

@@ -11,11 +11,11 @@ from pprint import pprint
 
 
 #1. Generate some blocks
-#2. Mint zcoins
-#3. 2 Spend zcoins in different time
-#4. Send zcoins
+#2. Mint indexs
+#3. 2 Spend indexs in different time
+#4. Send indexs
 #5. Gerate blocks
-#6. Remint some zcoins
+#6. Remint some indexs
 #7. Mint sigma coins
 #8. 2 Spend in different time
 #9. Send
@@ -48,25 +48,25 @@ class TransactionsVerAfterRestartTest(BitcoinTestFramework):
         self.nodes[0].generate(101)
         self.sync_all()
 
-        zcoin_denoms = [1, 10, 25, 50, 100]
+        index_denoms = [1, 10, 25, 50, 100]
 
-        #2. Mint zcoins
-        for denom in zcoin_denoms:
+        #2. Mint indexs
+        for denom in index_denoms:
             self.nodes[0].mintzerocoin(denom)
             self.nodes[0].mintzerocoin(denom)
 
-        #3. 2 Spend zcoins
+        #3. 2 Spend indexs
         self.nodes[0].generate(10)
         self.nodes[0].spendzerocoin(1)
         self.nodes[0].spendzerocoin(10)
 
-        #4. Send zcoins
+        #4. Send indexs
         self.nodes[0].sendtoaddress('TNZMs3dtwRddC5BuZ9zQUdvksPUjmJPRfL', 25)
 
         #5. Gerate blocks
         self.nodes[0].generate(290)
 
-        #6. Remint some zcoins
+        #6. Remint some indexs
         self.nodes[0].remintzerocointosigma(50)
 
         self.nodes[0].generate(10)

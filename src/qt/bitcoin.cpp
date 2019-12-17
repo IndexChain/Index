@@ -95,7 +95,7 @@ static void InitMessage(const std::string &message)
  */
 static std::string Translate(const char* psz)
 {
-    return QCoreApplication::translate("zcoin-core", psz).toStdString();
+    return QCoreApplication::translate("index-core", psz).toStdString();
 }
 
 static QString GetLangTerritory()
@@ -485,7 +485,7 @@ void BitcoinApplication::initializeResult(int retval)
         }
         
         // Now that initialization/startup is done, process any command-line
-        // zcoin: URIs or payment requests:
+        // index: URIs or payment requests:
         connect(paymentServer, SIGNAL(receivedPaymentRequest(SendCoinsRecipient)),
                          window, SLOT(handlePaymentRequest(SendCoinsRecipient)));
         connect(window, SIGNAL(receivedURI(QString)),
@@ -507,7 +507,7 @@ void BitcoinApplication::shutdownResult(int retval)
 
 void BitcoinApplication::handleRunawayException(const QString &message)
 {
-    QMessageBox::critical(0, "Runaway exception", BitcoinGUI::tr("A fatal error occurred. Zcoin can no longer continue safely and will quit.") + QString("\n\n") + message);
+    QMessageBox::critical(0, "Runaway exception", BitcoinGUI::tr("A fatal error occurred. Index can no longer continue safely and will quit.") + QString("\n\n") + message);
     ::exit(EXIT_FAILURE);
 }
 
@@ -586,7 +586,7 @@ int main(int argc, char *argv[])
     if (!Intro::pickDataDirectory())
         return EXIT_SUCCESS;
 
-    /// 6. Determine availability of data directory and parse zcoin.conf
+    /// 6. Determine availability of data directory and parse index.conf
     /// - Do not call GetDataDir(true) before this step finishes
     if (!boost::filesystem::is_directory(GetDataDir(false)))
     {
@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
     /// 7a. parse znode.conf
     std::string strErr;
     if(!znodeConfig.read(strErr)) {
-        QMessageBox::critical(0, QObject::tr("Zcoin Core"),
+        QMessageBox::critical(0, QObject::tr("Index Core"),
                               QObject::tr("Error reading znode configuration file: %1").arg(strErr.c_str()));
         return EXIT_FAILURE;
     }
@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
         exit(EXIT_SUCCESS);
 
     // Start up the payment server early, too, so impatient users that click on
-    // zcoin: links repeatedly have their payment requests routed to this process:
+    // index: links repeatedly have their payment requests routed to this process:
     app.createPaymentServer();
 #endif
     /// 9. Main GUI initialization

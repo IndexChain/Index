@@ -26,7 +26,7 @@ CCriticalSection cs_mapZnodePaymentVotes;
 *   Determine if coinbase outgoing created money is the correct value
 *
 *   Why is this needed?
-*   - In Zcoin some blocks are superblocks, which output much higher amounts of coins
+*   - In Index some blocks are superblocks, which output much higher amounts of coins
 *   - Otherblocks are 10% lower in outgoing value, so in total, no extra coins are created
 *   - When non-superblocks are detected, the normal schedule should be maintained
 */
@@ -272,7 +272,7 @@ void CZnodePayments::ProcessMessage(CNode *pfrom, std::string &strCommand, CData
     // Ignore any payments messages until znode list is synced
     if (!znodeSync.IsZnodeListSynced()) return;
 
-    if (fLiteMode) return; // disable all Zcoin specific functionality
+    if (fLiteMode) return; // disable all Index specific functionality
 
     bool fTestNet = (Params().NetworkIDString() == CBaseChainParams::TESTNET);
 
@@ -552,7 +552,7 @@ bool CZnodeBlockPayees::IsTransactionValid(const CTransaction &txNew, bool fMTP,
 
     if (!hasValidPayee) return true;
 
-    LogPrintf("CZnodeBlockPayees::IsTransactionValid -- ERROR: Missing required payment, possible payees: '%s', amount: %f XZC\n", strPayeesPossible, (float) nZnodePayment / COIN);
+    LogPrintf("CZnodeBlockPayees::IsTransactionValid -- ERROR: Missing required payment, possible payees: '%s', amount: %f IDX\n", strPayeesPossible, (float) nZnodePayment / COIN);
     return false;
 }
 

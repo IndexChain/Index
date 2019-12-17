@@ -50,7 +50,7 @@ class ExodusSendMintTest(ExodusTestFramework):
         assert_equal("100", self.nodes[0].exodus_getbalance(addr, nonSigmaProperty)['balance'])
 
         # sigma
-        # mint without xzc and token
+        # mint without idx and token
         addr = self.nodes[0].getnewaddress()
         assert_raises_message(
             JSONRPCException,
@@ -58,7 +58,7 @@ class ExodusSendMintTest(ExodusTestFramework):
             self.nodes[0].exodus_sendmint, addr, sigmaProperty, {"0": 1}
         )
 
-        # mint without xzc then fail
+        # mint without idx then fail
         addr = self.nodes[0].getnewaddress()
         self.nodes[0].exodus_send(self.addrs[0], addr, sigmaProperty, "100")
         self.nodes[0].generate(10)

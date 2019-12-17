@@ -830,7 +830,7 @@ DBErrors CWalletDB::LoadWallet(CWallet *pwallet) {
                 else {
                     // Leave other errors alone, if we try to fix them we might make things worse.
                     LogPrintf("ReadKeyValue() failed, strType=%s\n", strType);
-                    // Zcoin - MTP
+                    // Index - MTP
                     // Need Peter to take a look
                     //fNoncriticalErrors = true; // ... but do warn the user there is something wrong.
                     if (strType == "tx")

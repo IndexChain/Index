@@ -551,7 +551,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         pblock->nBits          = GetNextWorkRequired(pindexPrev, pblock, chainparams.GetConsensus());
         pblock->nNonce         = 0;
 
-        // Zcoin - MTP
+        // Index - MTP
         if (pblock->IsMTP())
             pblock->mtpHashData = make_shared<CMTPHashData>();
 
@@ -946,7 +946,7 @@ void BlockAssembler::addPriorityTxs()
         CTransaction tx = mi->GetTx();
         mempool.ApplyDeltas(tx.GetHash(), dPriority, dummy);
         vecPriority.push_back(TxCoinAgePriority(dPriority, mi));
-        //add Zcoin validation
+        //add Index validation
         if (tx.IsCoinBase() || !CheckFinalTx(tx))
             continue;
         if (tx.IsZerocoinSpend() || tx.IsSigmaSpend() || tx.IsZerocoinRemint()) {
@@ -1098,7 +1098,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 
 void static ZcoinMiner(const CChainParams &chainparams) {
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("zcoin-miner");
+    RenameThread("index-miner");
 
     unsigned int nExtraNonce = 0;
 

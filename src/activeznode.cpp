@@ -226,7 +226,7 @@ void CActiveZnode::ManageStateInitial() {
     }
 
     if (pwalletMain->GetBalance() < ZNODE_COIN_REQUIRED * COIN) {
-        LogPrintf("CActiveZnode::ManageStateInitial -- %s: Wallet balance is < 1000 XZC\n", GetStateString());
+        LogPrintf("CActiveZnode::ManageStateInitial -- %s: Wallet balance is < 1000 IDX\n", GetStateString());
         return;
     }
 

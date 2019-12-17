@@ -2267,7 +2267,7 @@ void ThreadDandelionShuffle() {
                 GetTimeMicros(), consensus.nDandelionShuffleInterval);
             // Sleep for 1 second until the next shuffle time.
             // Sleeping for DANDELION_SHUFFLE_INTERVAL seconds at once
-            // results to not being able to close zcoin.
+            // results to not being able to close index.
             int time_to_sleep = (nNextDandelionShuffle - GetTimeMicros()) / 1000;
             while (time_to_sleep > 0) {
                 if (!CNode::interruptNet.sleep_for(

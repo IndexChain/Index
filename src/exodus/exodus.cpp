@@ -154,7 +154,7 @@ std::string exodus::strMPProperty(uint32_t propertyId)
         str = strprintf("Test token: %d : 0x%08X", 0x7FFFFFFF & propertyId, propertyId);
     } else {
         switch (propertyId) {
-            case EXODUS_PROPERTY_XZC: str = "XZC";
+            case EXODUS_PROPERTY_IDX: str = "IDX";
                 break;
             case EXODUS_PROPERTY_EXODUS: str = "EXODUS";
                 break;
@@ -306,7 +306,7 @@ bool exodus::isTestEcosystemProperty(uint32_t propertyId)
 
 bool exodus::isMainEcosystemProperty(uint32_t propertyId)
 {
-    if ((EXODUS_PROPERTY_XZC != propertyId) && !isTestEcosystemProperty(propertyId)) return true;
+    if ((EXODUS_PROPERTY_IDX != propertyId) && !isTestEcosystemProperty(propertyId)) return true;
 
     return false;
 }
@@ -1284,7 +1284,7 @@ int input_mp_offers_string(const std::string& s)
     uint256 txid = uint256S(vstr[i++]);
 
     // TODO: should this be here? There are usually no sanity checks..
-    if (EXODUS_PROPERTY_XZC != prop_desired) return -1;
+    if (EXODUS_PROPERTY_IDX != prop_desired) return -1;
 
     const std::string combo = STR_SELLOFFER_ADDR_PROP_COMBO(sellerAddr, prop);
     CMPOffer newOffer(offerBlock, amountOriginal, prop, btcDesired, minFee, blocktimelimit, txid);

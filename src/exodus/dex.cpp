@@ -311,7 +311,7 @@ int DEx_acceptCreate(const std::string& addressBuyer, const std::string& address
         assert(update_tally_map(addressSeller, propertyId, -amountReserved, SELLOFFER_RESERVE));
         assert(update_tally_map(addressSeller, propertyId, amountReserved, ACCEPT_RESERVE));
 
-        CMPAccept acceptOffer(amountReserved, block, offer.getBlockTimeLimit(), offer.getProperty(), offer.getOfferAmountOriginal(), offer.getXZCDesiredOriginal(), offer.getHash());
+        CMPAccept acceptOffer(amountReserved, block, offer.getBlockTimeLimit(), offer.getProperty(), offer.getOfferAmountOriginal(), offer.getIDXDesiredOriginal(), offer.getHash());
         my_accepts.insert(std::make_pair(keyAcceptOrder, acceptOffer));
 
         rc = 0;
@@ -396,12 +396,12 @@ static int64_t calculateDExPurchase(const int64_t amountOffered, const int64_t a
 {
     uint64_t acceptOfferAmount = static_cast<uint64_t>(amountOffered);
     uint64_t acceptBTCDesired = static_cast<uint64_t>(amountDesired);
-    uint64_t XZC_paid = static_cast<uint64_t>(amountPaid);
+    uint64_t IDX_paid = static_cast<uint64_t>(amountPaid);
 
-    const double XZC_desired_original = acceptBTCDesired;
+    const double IDX_desired_original = acceptBTCDesired;
     const double offer_amount_original = acceptOfferAmount;
 
-    double perc_X = (double) XZC_paid / XZC_desired_original;
+    double perc_X = (double) IDX_paid / IDX_desired_original;
     double Purchased = offer_amount_original * perc_X;
 
     uint64_t units_purchased = rounduint64(Purchased);
@@ -460,7 +460,7 @@ int DEx_payment(const uint256& txid, unsigned int vout, const std::string& addre
 
     // -------------------------------------------------------------------------
 
-    const int64_t amountDesired = p_accept->getXZCDesiredOriginal();
+    const int64_t amountDesired = p_accept->getIDXDesiredOriginal();
     const int64_t amountOffered = p_accept->getOfferAmountOriginal();
 
     // divide by 0 protection

@@ -28,7 +28,7 @@ jobs:
           name: CONFIGURE
           command: ./configure
       - run:
-          name: BUILD Zcoin
+          name: BUILD Index
           command: make -j2
       - run:
           name: RUN Unit test
@@ -64,7 +64,7 @@ jobs:
               ./autogen.sh;
               ./configure --prefix=`pwd`/depends/x86_64-w64-mingw32
         - run:
-            name: BUILD Zcoin Windows
+            name: BUILD Index Windows
             command: make -j2
 workflows:
   version: 2

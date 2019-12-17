@@ -77,20 +77,20 @@ class SigmaMeetSpendTest(BitcoinTestFramework):
         activate_sigma_spend(denoms4, spend_size4, spend4, remint4, self)
 
 
-def activate_sigma_spend(denoms, spendsize, exp_spends, exp_remints, zcoind):
+def activate_sigma_spend(denoms, spendsize, exp_spends, exp_remints, indexd):
     for denom in denoms:
         count, size = denom
         for i in range(count):
-            zcoind.nodes[0].mint(size)
-            zcoind.nodes[0].generate(6)
+            indexd.nodes[0].mint(size)
+            indexd.nodes[0].generate(6)
 
-    myaddr = zcoind.nodes[0].listreceivedbyaddress(0, True)[0]['address']
+    myaddr = indexd.nodes[0].listreceivedbyaddress(0, True)[0]['address']
     args = {myaddr: spendsize}
-    txid = zcoind.nodes[0].spendmany("", args)
-    zcoind.nodes[0].generate(2)
+    txid = indexd.nodes[0].spendmany("", args)
+    indexd.nodes[0].generate(2)
 
     # Should be checked spends
-    spends = zcoind.nodes[0].listsigmaspends(0)
+    spends = indexd.nodes[0].listsigmaspends(0)
     cur_spend = [sp for sp in spends if sp['txid'] == txid]
     assert len(cur_spend) == 1, 'Txid not found in list of spends'
     cur_remints = [denom['denomination'] for denom in cur_spend[0]['remints']]

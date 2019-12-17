@@ -63,7 +63,7 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
     sigmaView(0),
     blankSigmaView(0),
     zc2SigmaPage(0),
-    zcoinTransactionsView(0),
+    indexTransactionsView(0),
     platformStyle(platformStyle)
 {
     overviewPage = new OverviewPage(platformStyle);
@@ -116,13 +116,13 @@ WalletView::~WalletView()
 
 void WalletView::setupTransactionPage()
 {
-    // Create Zcoin transactions list
-    zcoinTransactionList = new TransactionView(platformStyle);
+    // Create Index transactions list
+    indexTransactionList = new TransactionView(platformStyle);
 
-    connect(zcoinTransactionList, SIGNAL(doubleClicked(QModelIndex)), zcoinTransactionList, SLOT(showDetails()));
-    connect(zcoinTransactionList, SIGNAL(message(QString, QString, unsigned int)), this, SIGNAL(message(QString, QString, unsigned int)));
+    connect(indexTransactionList, SIGNAL(doubleClicked(QModelIndex)), indexTransactionList, SLOT(showDetails()));
+    connect(indexTransactionList, SIGNAL(message(QString, QString, unsigned int)), this, SIGNAL(message(QString, QString, unsigned int)));
 
-    // Create export panel for Zcoin transactions
+    // Create export panel for Index transactions
     auto exportButton = new QPushButton(tr("&Export"));
 
     exportButton->setToolTip(tr("Export the data in the current tab to a file"));
@@ -131,19 +131,19 @@ void WalletView::setupTransactionPage()
         exportButton->setIcon(platformStyle->SingleColorIcon(":/icons/export"));
     }
 
-    connect(exportButton, SIGNAL(clicked()), zcoinTransactionList, SLOT(exportClicked()));
+    connect(exportButton, SIGNAL(clicked()), indexTransactionList, SLOT(exportClicked()));
 
     auto exportLayout = new QHBoxLayout();
     exportLayout->addStretch();
     exportLayout->addWidget(exportButton);
 
     // Compose transaction list and export panel together
-    auto zcoinLayout = new QVBoxLayout();
-    zcoinLayout->addWidget(zcoinTransactionList);
-    zcoinLayout->addLayout(exportLayout);
+    auto indexLayout = new QVBoxLayout();
+    indexLayout->addWidget(indexTransactionList);
+    indexLayout->addLayout(exportLayout);
 
-    zcoinTransactionsView = new QWidget();
-    zcoinTransactionsView->setLayout(zcoinLayout);
+    indexTransactionsView = new QWidget();
+    indexTransactionsView->setLayout(indexLayout);
 
 #ifdef ENABLE_EXODUS
     // Create tabs for transaction categories
@@ -151,7 +151,7 @@ void WalletView::setupTransactionPage()
         exodusTransactionsView = new TXHistoryDialog();
 
         transactionTabs = new QTabWidget();
-        transactionTabs->addTab(zcoinTransactionsView, tr("Zcoin"));
+        transactionTabs->addTab(indexTransactionsView, tr("Index"));
         transactionTabs->addTab(exodusTransactionsView, tr("Exodus"));
     }
 #endif
@@ -164,7 +164,7 @@ void WalletView::setupTransactionPage()
         pageLayout->addWidget(transactionTabs);
     } else
 #endif
-        pageLayout->addWidget(zcoinTransactionsView);
+        pageLayout->addWidget(indexTransactionsView);
 
     transactionsPage->setLayout(pageLayout);
 }
@@ -181,7 +181,7 @@ void WalletView::setupSendCoinPage()
         sendExodusView = new SendMPDialog(platformStyle);
 
         sendCoinsTabs = new QTabWidget();
-        sendCoinsTabs->addTab(sendZcoinView, tr("Zcoin"));
+        sendCoinsTabs->addTab(sendZcoinView, tr("Index"));
         sendCoinsTabs->addTab(sendExodusView, tr("Exodus"));
     }
 #endif
@@ -288,7 +288,7 @@ void WalletView::setWalletModel(WalletModel *walletModel)
     this->walletModel = walletModel;
 
     // Put transaction list in tabs
-    zcoinTransactionList->setModel(walletModel);
+    indexTransactionList->setModel(walletModel);
     overviewPage->setWalletModel(walletModel);
     receiveCoinsPage->setModel(walletModel);
     zerocoinPage->setModel(walletModel->getAddressTableModel());
@@ -409,7 +409,7 @@ void WalletView::focusExodusTransaction(const uint256& txid)
 void WalletView::focusBitcoinHistoryTab(const QModelIndex &idx)
 {
     gotoBitcoinHistoryTab();
-    zcoinTransactionList->focusTransaction(idx);
+    indexTransactionList->focusTransaction(idx);
 }
 
 void WalletView::gotoZnodePage()

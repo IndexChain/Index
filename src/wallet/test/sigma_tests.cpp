@@ -544,8 +544,8 @@ BOOST_AUTO_TEST_CASE(create_spend_with_coins_more_than_1)
 
     BOOST_CHECK(tx.vin.size() == 2);
 
-    // 2 outputs to recipients 5 + 10 xzc
-    // 10 mints as changes, 1 * 4 + 0.5 * 1 + 0.1 * 4 + 0.05 xzc
+    // 2 outputs to recipients 5 + 10 idx
+    // 10 mints as changes, 1 * 4 + 0.5 * 1 + 0.1 * 4 + 0.05 idx
     BOOST_CHECK(tx.vout.size() == 12);
     BOOST_CHECK(fee > 0);
 

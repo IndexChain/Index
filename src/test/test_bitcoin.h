@@ -90,5 +90,5 @@ struct TestMemPoolEntryHelper
     TestMemPoolEntryHelper &SigOpsCost(unsigned int _sigopsCost) { sigOpCost = _sigopsCost; return *this; }
 };
 
-std::string bitcoin_address_to_zcoin(const std::string address);
+std::string bitcoin_address_to_index(const std::string address);
 #endif

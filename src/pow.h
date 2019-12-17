@@ -26,7 +26,7 @@ unsigned int BorisRidiculouslyNamedDifficultyFunction(const CBlockIndex *pindexL
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params &);
 
-// Zcoin - MTP
+// Index - MTP
 bool CheckMerkleTreeProof(const CBlockHeader &block, const Consensus::Params &params);
 
 #endif // BITCOIN_POW_H

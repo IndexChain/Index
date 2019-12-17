@@ -166,7 +166,7 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
     return next_target.GetCompact();
 }
 
-// Zcoin GetNextWorkRequired
+// Index GetNextWorkRequired
 unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params) {
     // Special rule for regtest: we never retarget.
     if (params.fPowNoRetargeting) {
@@ -203,7 +203,7 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex *pindexLast, int64_t nF
     return bnNew.GetCompact();
 }
 
-// Zcoin - MTP
+// Index - MTP
 bool CheckMerkleTreeProof(const CBlockHeader &block, const Consensus::Params &params) {
     if (!block.IsMTP())
         return true;

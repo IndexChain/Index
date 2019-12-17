@@ -5,13 +5,13 @@
 
 # build output
 **/*.exe
-src/zcoin
-src/zcoind
-src/zcoin-cli
-src/zcoin-tx
-src/test/test_zcoin
-src/test/test_zcoin_fuzzy
-src/qt/test/test_zcoin-qt
+src/index
+src/indexd
+src/index-cli
+src/index-tx
+src/test/test_index
+src/test/test_index_fuzzy
+src/qt/test/test_index-qt
 
 # autoreconf
 **/*.tar.gz
@@ -82,12 +82,12 @@ src/tor.timestamp*
 # Compilation and Qt preprocessor part
 **/*.qm
 **/Makefile
-**/zcoin-qt*
-**/Zcoin-Qt.app
+**/index-qt*
+**/Index-Qt.app
 
 # Unit-tests
 **/Makefile.test
-**/zcoin-qt_test
+**/index-qt_test
 
 # Resources cpp
 **/qrc_*.cpp
@@ -100,7 +100,7 @@ build
 **/*.gcno
 **/*.gcda
 *.info
-test_zcoin.coverage
+test_index.coverage
 total.coverage
 coverage_percent.txt
 
@@ -116,5 +116,5 @@ src/test/buildenv.py
 
 doc/doxygen
 
-libzcoinconsensus.pc
+libindexconsensus.pc
 contrib/devtools/split-debug.sh

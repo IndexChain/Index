@@ -82,7 +82,7 @@ int populateRPCTransactionObject(const CTransaction& tx, const uint256& blockHas
 
     const uint256& txid = tx.GetHash();
 
-    // DEx XZC payment needs special handling since it's not actually an Exodus message - handle and return
+    // DEx IDX payment needs special handling since it's not actually an Exodus message - handle and return
     if (parseRC > 0) {
         if (confirmations <= 0) {
             // only confirmed DEx payments are currently supported
@@ -297,7 +297,7 @@ void populateRPCTypeTradeOffer(CMPTransaction& exodusObj, UniValue& txobj)
     CMPOffer temp_offer(exodusObj);
     uint32_t propertyId = exodusObj.getProperty();
     int64_t amountOffered = exodusObj.getAmount();
-    int64_t amountDesired = temp_offer.getXZCDesiredOriginal();
+    int64_t amountDesired = temp_offer.getIDXDesiredOriginal();
     uint8_t sellSubAction = temp_offer.getSubaction();
 
     {

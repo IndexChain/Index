@@ -130,8 +130,8 @@
         <translation>Reindexando bloques no disco...</translation>
     </message>
     <message>
-        <source>Send coins to a Zcoin address</source>
-        <translation>Enviar moedas a unha dirección Zcoin</translation>
+        <source>Send coins to a Index address</source>
+        <translation>Enviar moedas a unha dirección Index</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -154,8 +154,8 @@
         <translation>&amp;Verificar mensaxe...</translation>
     </message>
     <message>
-        <source>Zcoin</source>
-        <translation>Zcoin</translation>
+        <source>Index</source>
+        <translation>Index</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -182,12 +182,12 @@
         <translation>Encriptar as claves privadas que pertencen ao teu moedeiro</translation>
     </message>
     <message>
-        <source>Sign messages with your Zcoin addresses to prove you own them</source>
-        <translation>Asina mensaxes coas túas direccións Zcoin para probar que te pertencen</translation>
+        <source>Sign messages with your Index addresses to prove you own them</source>
+        <translation>Asina mensaxes coas túas direccións Index para probar que te pertencen</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Zcoin addresses</source>
-        <translation>Verificar mensaxes para asegurar que foron asinados con direccións Zcoin dadas.</translation>
+        <source>Verify messages to ensure they were signed with specified Index addresses</source>
+        <translation>Verificar mensaxes para asegurar que foron asinados con direccións Index dadas.</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -206,8 +206,8 @@
         <translation>Barra de ferramentas</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and zcoin: URIs)</source>
-        <translation>Solicitar pagos (xenera códigos QR e zcoin: URIs)</translation>
+        <source>Request payments (generates QR codes and index: URIs)</source>
+        <translation>Solicitar pagos (xenera códigos QR e index: URIs)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -218,8 +218,8 @@
         <translation>Amosar a listaxe de etiquetas e direccións para recibir empregadas</translation>
     </message>
     <message>
-        <source>Open a zcoin: URI or payment request</source>
-        <translation>Abrir un zcoin: URI ou solicitude de pago</translation>
+        <source>Open a index: URI or payment request</source>
+        <translation>Abrir un index: URI ou solicitude de pago</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -467,8 +467,8 @@
         <translation>Moedeiro</translation>
     </message>
     <message>
-        <source>Automatically open the Zcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Abrir automáticamente o porto do cliente Zcoin no router. Esto so funciona se o teu router soporta UPnP e está habilitado.</translation>
+        <source>Automatically open the Index client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Abrir automáticamente o porto do cliente Index no router. Esto so funciona se o teu router soporta UPnP e está habilitado.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -546,8 +546,8 @@
         <translation>Formulario</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Zcoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>A información amosada por estar desactualizada. O teu moedeiro sincronízase automáticamente coa rede Zcoin despois de que se estableza unha conexión, pero este proceso non está todavía rematado.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Index network after a connection is established, but this process has not completed yet.</source>
+        <translation>A información amosada por estar desactualizada. O teu moedeiro sincronízase automáticamente coa rede Index despois de que se estableza unha conexión, pero este proceso non está todavía rematado.</translation>
     </message>
     <message>
         <source>Your current spendable balance</source>
@@ -929,8 +929,8 @@
         <translation>Copiar a sinatura actual ao portapapeis do sistema</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Zcoin address</source>
-        <translation>Asina a mensaxe para probar que posees esta dirección Zcoin</translation>
+        <source>Sign the message to prove you own this Index address</source>
+        <translation>Asina a mensaxe para probar que posees esta dirección Index</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -949,8 +949,8 @@
         <translation>&amp;Verificar Mensaxe</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Zcoin address</source>
-        <translation>Verificar a mensaxe para asegurar que foi asinada coa dirección Zcoin especificada</translation>
+        <source>Verify the message to ensure it was signed with the specified Index address</source>
+        <translation>Verificar a mensaxe para asegurar que foi asinada coa dirección Index especificada</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -1004,7 +1004,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>zcoin-core</name>
+    <name>index-core</name>
     <message>
         <source>Options:</source>
         <translation>Opcións:</translation>
@@ -1034,8 +1034,8 @@
         <translation>Aceptar conexións de fóra (por defecto: 1 se non -proxy ou -connect)</translation>
     </message>
     <message>
-        <source>Zcoin Core</source>
-        <translation>Core de Zcoin</translation>
+        <source>Index Core</source>
+        <translation>Core de Index</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>

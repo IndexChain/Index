@@ -170,7 +170,7 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
        `  * a large 32-bit integer with any alignment.
          */
-        //btzc: update zcoin pchMessage
+        //btzc: update index pchMessage
         pchMessageStart[0] = 0xe3;
         pchMessageStart[1] = 0xd9;
         pchMessageStart[2] = 0xf3;
@@ -178,7 +178,7 @@ public:
         nDefaultPort = 7082;
         nPruneAfterHeight = 100000;
         /**
-         * btzc: zcoin init genesis block
+         * btzc: index init genesis block
          * nBits = 0x1e0ffff0
          * nTime = 1414776286
          * nNonce = 142392
@@ -374,9 +374,9 @@ public:
         extraNonce[3] = 0x00;
         genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 568343, 504365040, 2, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
-        // std::cout << "zcoin testnet genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
-        // std::cout << "zcoin testnet hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
-        // //btzc: update testnet zcoin hashGenesisBlock and hashMerkleRoot
+        // std::cout << "index testnet genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
+        // std::cout << "index testnet hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
+        // //btzc: update testnet index hashGenesisBlock and hashMerkleRoot
         
         assert(consensus.hashGenesisBlock ==
                 uint256S("0x00000046d4a29c850187070cc5ea6fb3e493bcbbb2afa17ef21aaf70f5361b22"));
@@ -385,8 +385,8 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
-        // zcoin test seeds
-        // vSeeds.push_back(CDNSSeedData("beta1.zcoin.io", "beta1.zcoin.io", false));
+        // index test seeds
+        // vSeeds.push_back(CDNSSeedData("beta1.index.io", "beta1.index.io", false));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector < unsigned char > (1, 65);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector < unsigned char > (1, 178);
@@ -535,10 +535,10 @@ public:
         extraNonce[3] = 0x00;
         genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 414098459, 0x207fffff, 1, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
-        //btzc: update regtest zcoin hashGenesisBlock and hashMerkleRoot
-//        std::cout << "zcoin regtest genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
-//        std::cout << "zcoin regtest hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
-        //btzc: update testnet zcoin hashGenesisBlock and hashMerkleRoot
+        //btzc: update regtest index hashGenesisBlock and hashMerkleRoot
+//        std::cout << "index regtest genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
+//        std::cout << "index regtest hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
+        //btzc: update testnet index hashGenesisBlock and hashMerkleRoot
         //assert(consensus.hashGenesisBlock ==
         //       uint256S("0x0080c7bf30bb2579ed9c93213475bf8fafc1f53807da908cde19cf405b9eb55b"));
         //assert(genesis.hashMerkleRoot ==

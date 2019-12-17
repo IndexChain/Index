@@ -37,7 +37,7 @@ inline int GetZerocoinChainID()
     return 0x0001; // We are the first :)
 }
 
-// Zcoin - MTP
+// Index - MTP
 class CMTPHashData {
 public:
     uint8_t hashRootMTP[16]; // 16 is 128 bit of blake2b
@@ -99,7 +99,7 @@ public:
     uint32_t nBits;
     uint32_t nNonce;
 
-    // Zcoin - MTP
+    // Index - MTP
     int32_t nVersionMTP = 0x1000;
     uint256 mtpHashValue;
 
@@ -134,7 +134,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        // Zcoin - MTP
+        // Index - MTP
         // On read: allocate and read. On write: write only if already allocated
         if (IsMTP()) {
             READWRITE(nVersionMTP);
@@ -179,7 +179,7 @@ public:
         isComputed = -1;
         powHash.SetNull();
 
-        // Zcoin - MTP
+        // Index - MTP
         mtpHashData.reset();
         mtpHashValue.SetNull();
         reserved[0].SetNull();

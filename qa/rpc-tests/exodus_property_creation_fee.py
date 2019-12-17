@@ -53,7 +53,7 @@ class ExodusPropertyCreationFeeTest(ExodusTestFramework):
         # make sure, property creation fee is activated
         self.nodes[0].generate(creation_fee_start_block - self.nodes[0].getblockcount())
 
-        # after the activation, 100 XZC is required for creating main ecosystem property
+        # after the activation, 100 IDX is required for creating main ecosystem property
         self.test_insufficient(ecosystem = 1)
         self.test_insufficient(ecosystem = 1, amount = "10000")
 
@@ -61,7 +61,7 @@ class ExodusPropertyCreationFeeTest(ExodusTestFramework):
         self.test(ecosystem = 2)
         self.test(ecosystem = 2, amount = "10000")
 
-        # creating main ecosystem property with 100 XZC fee, should success
+        # creating main ecosystem property with 100 IDX fee, should success
         self.test(balance = 101, ecosystem = 1)
         self.test(balance = 101, ecosystem = 1, amount = "10000")
 

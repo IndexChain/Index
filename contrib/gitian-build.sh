@@ -20,7 +20,7 @@ osx=true
 SIGNER=
 VERSION=
 commit=false
-url=${url:-https://github.com/zcoinofficial/zcoin}
+url=${url:-https://github.com/indexofficial/index}
 gsigsUrl=https://github.com/bitcoin-core/gitian.sigs
 detachUrl=https://github.com/bitcoin-core/bitcoin-detached-sigs.git
 proc=2
@@ -44,7 +44,7 @@ version		Version number, commit, or branch to build. If building a commit or bra
 
 Options:
 -c|--commit	Indicate that the version argument is for a commit or branch
--u|--url	Specify the URL of the zcoinofficial repository. Default is https://github.com/zcoinofficial/zcoin.git
+-u|--url	Specify the URL of the indexofficial repository. Default is https://github.com/indexofficial/index.git
 -g|--gsigsUrl	Specify the URL of the gitian.sigs repository. Default is https://github.com/bitcoin-core/gitian.sigs
 -d|--detachUrl	Specify the URL of the bitcoin-detached-sigs repository. Default is https://github.com/bitcoin-core/bitcoin-detached-sigs
 -v|--verify 	Verify the Gitian build
@@ -289,7 +289,7 @@ then
 fi
 
 # Set up build
-pushd ./zcoin
+pushd ./index
 git fetch
 git checkout ${COMMIT}
 popd
@@ -298,7 +298,7 @@ popd
 if [[ $build = true ]]
 then
 	# Make output folder
-	mkdir -p ./zcoin-binaries/${VERSION}
+	mkdir -p ./index-binaries/${VERSION}
 
 	# Build Dependencies
 	echo ""
@@ -308,7 +308,7 @@ then
 	mkdir -p inputs
 	wget -N -P inputs $osslPatchUrl
 	wget -N -P inputs $osslTarUrl
-	make -C ../zcoin/depends download SOURCES_PATH=`pwd`/cache/common
+	make -C ../index/depends download SOURCES_PATH=`pwd`/cache/common
 
 	# Linux
 	if [[ $linux = true ]]
@@ -316,9 +316,9 @@ then
 	    echo ""
 	    echo "Compiling ${VERSION} Linux"
 	    echo ""
-	    ./bin/gbuild -j ${proc} -m ${mem} --commit zcoin=${COMMIT} --url zcoin=${url} ../zcoin/contrib/gitian-descriptors/gitian-linux.yml
-	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../zcoin/contrib/gitian-descriptors/gitian-linux.yml
-	    mv build/out/zcoin-*.tar.gz build/out/src/zcoin-*.tar.gz ../zcoin-binaries/${VERSION}
+	    ./bin/gbuild -j ${proc} -m ${mem} --commit index=${COMMIT} --url index=${url} ../index/contrib/gitian-descriptors/gitian-linux.yml
+	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../index/contrib/gitian-descriptors/gitian-linux.yml
+	    mv build/out/index-*.tar.gz build/out/src/index-*.tar.gz ../index-binaries/${VERSION}
 	fi
 	# Windows
 	if [[ $windows = true ]]
@@ -328,7 +328,7 @@ then
            #	echo ""
         #	echo "Starting Utilities build for Windows"
         #	echo ""
-        #	./bin/gbuild -j ${proc} -m ${mem} --allow-sudo ../zcoin/contrib/gitian-descriptors/gitian-win-utils.yml
+        #	./bin/gbuild -j ${proc} -m ${mem} --allow-sudo ../index/contrib/gitian-descriptors/gitian-win-utils.yml
         #	if [ $? -ne 0 ];
         #	then
         #	    echo ""
@@ -345,10 +345,10 @@ then
 	    echo ""
 	    echo "Compiling ${VERSION} Windows"
 	    echo ""
-	    ./bin/gbuild -j ${proc} -m ${mem} --commit zcoin=${COMMIT} --url zcoin=${url} ../zcoin/contrib/gitian-descriptors/gitian-win.yml
-	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../zcoin/contrib/gitian-descriptors/gitian-win.yml
-	    mv build/out/zcoin-*-win-unsigned.tar.gz inputs/zcoin-win-unsigned.tar.gz
-	    mv build/out/zcoin-*.zip build/out/zcoin-*.exe ../zcoin-binaries/${VERSION}
+	    ./bin/gbuild -j ${proc} -m ${mem} --commit index=${COMMIT} --url index=${url} ../index/contrib/gitian-descriptors/gitian-win.yml
+	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs/ ../index/contrib/gitian-descriptors/gitian-win.yml
+	    mv build/out/index-*-win-unsigned.tar.gz inputs/index-win-unsigned.tar.gz
+	    mv build/out/index-*.zip build/out/index-*.exe ../index-binaries/${VERSION}
 	fi
 	# Mac OSX
 	if [[ $osx = true ]]
@@ -356,10 +356,10 @@ then
 	    echo ""
 	    echo "Compiling ${VERSION} Mac OSX"
 	    echo ""
-	    ./bin/gbuild -j ${proc} -m ${mem} --commit zcoin=${COMMIT} --url zcoin=${url} ../zcoin/contrib/gitian-descriptors/gitian-osx.yml
-	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../zcoin/contrib/gitian-descriptors/gitian-osx.yml
-	    mv build/out/zcoin-*-osx-unsigned.tar.gz inputs/zcoin-osx-unsigned.tar.gz
-	    mv build/out/zcoin-*.tar.gz build/out/zcoin-*.dmg ../zcoin-binaries/${VERSION}
+	    ./bin/gbuild -j ${proc} -m ${mem} --commit index=${COMMIT} --url index=${url} ../index/contrib/gitian-descriptors/gitian-osx.yml
+	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../index/contrib/gitian-descriptors/gitian-osx.yml
+	    mv build/out/index-*-osx-unsigned.tar.gz inputs/index-osx-unsigned.tar.gz
+	    mv build/out/index-*.tar.gz build/out/index-*.dmg ../index-binaries/${VERSION}
 	fi
 	popd
 
@@ -386,27 +386,27 @@ then
 	echo ""
 	echo "Verifying v${VERSION} Linux"
 	echo ""
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../zcoin/contrib/gitian-descriptors/gitian-linux.yml
+	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-linux ../index/contrib/gitian-descriptors/gitian-linux.yml
 	# Windows
 	echo ""
 	echo "Verifying v${VERSION} Windows"
 	echo ""
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../zcoin/contrib/gitian-descriptors/gitian-win.yml
+	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-win-unsigned ../index/contrib/gitian-descriptors/gitian-win.yml
 	# Mac OSX
 	echo ""
 	echo "Verifying v${VERSION} Mac OSX"
 	echo ""
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../zcoin/contrib/gitian-descriptors/gitian-osx.yml
+	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-unsigned ../index/contrib/gitian-descriptors/gitian-osx.yml
 	# Signed Windows
 	echo ""
 	echo "Verifying v${VERSION} Signed Windows"
 	echo ""
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../zcoin/contrib/gitian-descriptors/gitian-osx-signer.yml
+	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../index/contrib/gitian-descriptors/gitian-osx-signer.yml
 	# Signed Mac OSX
 	echo ""
 	echo "Verifying v${VERSION} Signed Mac OSX"
 	echo ""
-	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../zcoin/contrib/gitian-descriptors/gitian-osx-signer.yml
+	./bin/gverify -v -d ../gitian.sigs/ -r ${VERSION}-osx-signed ../index/contrib/gitian-descriptors/gitian-osx-signer.yml
 	popd
 fi
 
@@ -421,10 +421,10 @@ then
 	    echo ""
 	    echo "Signing ${VERSION} Windows"
 	    echo ""
-	    ./bin/gbuild -i --commit signature=${COMMIT} --url signature=${detachUrl} ../zcoin/contrib/gitian-descriptors/gitian-win-signer.yml
-	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../zcoin/contrib/gitian-descriptors/gitian-win-signer.yml
-	    mv build/out/zcoin-*win64-setup.exe ../zcoin-binaries/${VERSION}
-	    mv build/out/zcoin-*win32-setup.exe ../zcoin-binaries/${VERSION}
+	    ./bin/gbuild -i --commit signature=${COMMIT} --url signature=${detachUrl} ../index/contrib/gitian-descriptors/gitian-win-signer.yml
+	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-win-signed --destination ../gitian.sigs/ ../index/contrib/gitian-descriptors/gitian-win-signer.yml
+	    mv build/out/index-*win64-setup.exe ../index-binaries/${VERSION}
+	    mv build/out/index-*win32-setup.exe ../index-binaries/${VERSION}
 	fi
 	# Sign Mac OSX
 	if [[ $osx = true ]]
@@ -432,9 +432,9 @@ then
 	    echo ""
 	    echo "Signing ${VERSION} Mac OSX"
 	    echo ""
-	    ./bin/gbuild -i --commit signature=${COMMIT} --url signature=${detachUrl} ../zcoin/contrib/gitian-descriptors/gitian-osx-signer.yml
-	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../zcoin/contrib/gitian-descriptors/gitian-osx-signer.yml
-	    mv build/out/zcoin-osx-signed.dmg ../zcoin-binaries/${VERSION}/zcoin-${VERSION}-osx.dmg
+	    ./bin/gbuild -i --commit signature=${COMMIT} --url signature=${detachUrl} ../index/contrib/gitian-descriptors/gitian-osx-signer.yml
+	    ./bin/gsign -p "${signProg}" --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../index/contrib/gitian-descriptors/gitian-osx-signer.yml
+	    mv build/out/index-osx-signed.dmg ../index-binaries/${VERSION}/index-${VERSION}-osx.dmg
 	fi
 	popd
 

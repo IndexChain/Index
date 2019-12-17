@@ -57,7 +57,7 @@ class WalletTest (BitcoinTestFramework):
         assert_equal(len(self.nodes[1].listunspent()), 1)
         assert_equal(len(self.nodes[2].listunspent()), 0)
 
-        # Send 21 Zcoin from 0 to 2 using sendtoaddress call.
+        # Send 21 Index from 0 to 2 using sendtoaddress call.
         self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 10)
         time.sleep(5)
         self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11)

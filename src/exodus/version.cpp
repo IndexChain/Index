@@ -37,7 +37,7 @@ const std::string ExodusVersion()
     }
 }
 
-//! Returns formatted Zcoin Core version, e.g. "0.10", "0.9.3"
+//! Returns formatted Index Core version, e.g. "0.10", "0.9.3"
 const std::string ZcoinCoreVersion()
 {
     if (CLIENT_VERSION_BUILD) {
