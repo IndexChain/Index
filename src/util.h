@@ -34,6 +34,14 @@ static const bool DEFAULT_LOGTIMEMICROS = false;
 static const bool DEFAULT_LOGIPS        = false;
 static const bool DEFAULT_LOGTIMESTAMPS = true;
 
+const char * const PERSISTENT_FILENAME = "persistent/";
+
+const char * const PAYMENT_REQUEST_FILENAME = "payment_request.json";
+const char * const TX_METADATA_FILENAME = "tx_metadata.json";
+const char * const ZEROCOIN_FILENAME = "zerocoin.json";
+const char * const SETTINGS_FILENAME = "settings.json";
+const char * const TX_TIMESTAMP_FILENAME = "tx_timestamp.json";
+
 /** Signals for translation. */
 class CTranslationInterface
 {
@@ -51,6 +59,7 @@ extern bool fDebug;
 extern bool fPrintToConsole;
 extern bool fPrintToDebugLog;
 extern bool fServer;
+extern bool fApi;
 extern std::string strMiscWarning;
 extern bool fLogTimestamps;
 extern bool fLogTimeMicros;
@@ -137,12 +146,23 @@ boost::filesystem::path GetDefaultDataDir();
 const boost::filesystem::path &GetDataDir(bool fNetSpecific = true);
 const boost::filesystem::path &GetBackupsDir();
 void ClearDatadirCache();
+boost::filesystem::path GetPersistentDataDir(bool fNetSpecific = true);
+boost::filesystem::path GetJsonDataDir(bool fNetSpecific, const char* filename);
 boost::filesystem::path GetConfigFile();
+void CreatePersistentFiles(bool fNetSpecific=true);
+boost::filesystem::path CreateTxMetadataFile(bool fNetSpecific=true);
+boost::filesystem::path CreatePaymentRequestFile(bool fNetSpecific=true);
+boost::filesystem::path CreateZerocoinFile(bool fNetSpecific=true);
+boost::filesystem::path CreateSettingsFile(bool fNetSpecific=true);
+boost::filesystem::path CreateTxTimestampFile(bool fNetSpecific=true);
 boost::filesystem::path GetZnodeConfigFile();
-#ifndef WIN32
 boost::filesystem::path GetPidFile();
 void CreatePidFile(const boost::filesystem::path &path, pid_t pid);
+
+#ifdef ENABLE_CLIENTAPI
+bool CreateZipFile(std::string rootPath, std::vector<std::string> folderPaths, std::vector<std::string> filePaths, std::string destinationPath);
 #endif
+
 void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet, std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet);
 #ifdef WIN32
 boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);

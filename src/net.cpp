@@ -23,6 +23,7 @@
 #include "consensus/validation.h"
 #include "txmempool.h"
 #include "./consensus/validation.h"
+#include "validationinterface.h"
 
 
 #ifdef WIN32
@@ -1308,6 +1309,7 @@ void ThreadSocketHandler() {
         if (vNodes.size() != nPrevNodeCount) {
             nPrevNodeCount = vNodes.size();
             uiInterface.NotifyNumConnectionsChanged(nPrevNodeCount);
+            GetMainSignals().NumConnectionsChanged();
         }
 
         //

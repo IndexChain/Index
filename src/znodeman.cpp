@@ -8,9 +8,12 @@
 //#include "governance.h"
 #include "znode-payments.h"
 #include "znode-sync.h"
+#include "znode.h"
+#include "znodeconfig.h"
 #include "znodeman.h"
 #include "netfulfilledman.h"
 #include "util.h"
+#include "validationinterface.h"
 
 /** Znode manager */
 CZnodeMan mnodeman;
@@ -443,6 +446,21 @@ void CZnodeMan::DsegUpdate(CNode* pnode)
     LogPrint("znode", "CZnodeMan::DsegUpdate -- asked %s for the list\n", pnode->addr.ToString());
 }
 
+CZnode* CZnodeMan::Find(const std::string &txHash, const std::string outputIndex)
+{
+    LOCK(cs);
+
+    BOOST_FOREACH(CZnode& mn, vZnodes)
+    {
+        COutPoint outpoint = mn.vin.prevout;
+
+        if(txHash==outpoint.hash.ToString().substr(0,64) &&
+           outputIndex==to_string(outpoint.n))
+            return &mn;
+    }
+    return NULL;
+}
+
 CZnode* CZnodeMan::Find(const CScript &payee)
 {
     LOCK(cs);
@@ -574,6 +592,58 @@ char* CZnodeMan::GetNotQualifyReason(CZnode& mn, int nBlockHeight, bool fFilterS
         return reasonStr;
     }
     return NULL;
+}
+
+// Same method, different return type, to avoid Znode operator issues.
+// TODO: discuss standardizing the JSON type here, as it's done everywhere else in the code.
+UniValue CZnodeMan::GetNotQualifyReasonToUniValue(CZnode& mn, int nBlockHeight, bool fFilterSigTime, int nMnCount)
+{
+    UniValue ret(UniValue::VOBJ);
+    UniValue data(UniValue::VOBJ);
+    string description;
+
+    if (!mn.IsValidForPayment()) {
+        description = "not valid for payment";
+    }
+
+    //it's in the list (up to 8 entries ahead of current block to allow propagation) -- so let's skip it
+    else if (mnpayments.IsScheduled(mn, nBlockHeight)) {
+        description = "Is scheduled";
+    }
+
+    // //check protocol version
+    else if (mn.nProtocolVersion < mnpayments.GetMinZnodePaymentsProto()) {
+        description = "Invalid nProtocolVersion";
+
+        data.push_back(Pair("nProtocolVersion", mn.nProtocolVersion));
+    }
+
+    //it's too new, wait for a cycle
+    else if (fFilterSigTime && mn.sigTime + (nMnCount * 2.6 * 60) > GetAdjustedTime()) {
+        // LogPrintf("it's too new, wait for a cycle!\n");
+        description = "Too new";
+
+        //TODO unix timestamp
+        data.push_back(Pair("sigTime", mn.sigTime));
+        data.push_back(Pair("qualifiedAfter", mn.sigTime + (nMnCount * 2.6 * 60)));
+    }
+    //make sure it has at least as many confirmations as there are znodes
+    else if (mn.GetCollateralAge() < nMnCount) {
+        description = "collateralAge < znCount";
+
+        data.push_back(Pair("collateralAge", mn.GetCollateralAge()));
+        data.push_back(Pair("znCount", nMnCount));
+    }
+
+    ret.push_back(Pair("result", description.empty()));
+    if(!description.empty()){
+        ret.push_back(Pair("description", description));
+    }
+    if(!data.empty()){
+        ret.push_back(Pair("data", data));
+    }
+
+    return ret;
 }
 
 //
@@ -789,6 +859,7 @@ std::vector<std::pair<int, CZnode> > CZnodeMan::GetZnodeRanks(int nBlockHeight, 
     int nRank = 0;
     BOOST_FOREACH (PAIRTYPE(int64_t, CZnode*)& s, vecZnodeScores) {
         nRank++;
+        s.second->SetRank(nRank);
         vecZnodeRanks.push_back(std::make_pair(nRank, *s.second));
     }
 
@@ -1466,11 +1537,13 @@ void CZnodeMan::UpdateZnodeList(CZnodeBroadcast mnb)
             CZnode mn(mnb);
             if (Add(mn)) {
                 znodeSync.AddedZnodeList();
+                GetMainSignals().UpdatedZnode(mn);
             }
         } else {
             CZnodeBroadcast mnbOld = mapSeenZnodeBroadcast[CZnodeBroadcast(*pmn).GetHash()].second;
             if (pmn->UpdateFromNewBroadcast(mnb)) {
                 znodeSync.AddedZnodeList();
+                GetMainSignals().UpdatedZnode(*pmn);
                 mapSeenZnodeBroadcast.erase(mnbOld.GetHash());
             }
         }
@@ -1497,6 +1570,7 @@ bool CZnodeMan::CheckMnbAndUpdateZnodeList(CNode* pfrom, CZnodeBroadcast mnb, in
                 LogPrint("znode", "CZnodeMan::CheckMnbAndUpdateZnodeList -- znode=%s seen update\n", mnb.vin.prevout.ToStringShort());
                 mapSeenZnodeBroadcast[hash].first = GetTime();
                 znodeSync.AddedZnodeList();
+                GetMainSignals().UpdatedZnode(mnb);
             }
             // did we ask this node for it?
             if (pfrom && IsMnbRecoveryRequested(hash) && GetTime() < mMnbRecoveryRequests[hash].first) {
@@ -1545,7 +1619,9 @@ bool CZnodeMan::CheckMnbAndUpdateZnodeList(CNode* pfrom, CZnodeBroadcast mnb, in
     } // end of LOCK(cs);
 
     if(mnb.CheckOutpoint(nDos)) {
-        Add(mnb);
+        if(Add(mnb)){
+            GetMainSignals().UpdatedZnode(mnb);  
+        }
         znodeSync.AddedZnodeList();
         // if it matches our Znode privkey...
         if(fZNode && mnb.pubKeyZnode == activeZnode.pubKeyZnode) {
@@ -1697,13 +1773,13 @@ void CZnodeMan::SetZnodeLastPing(const CTxIn& vin, const CZnodePing& mnp)
     if(!pMN)  {
         return;
     }
-    pMN->lastPing = mnp;
+    pMN->SetLastPing(mnp);
     mapSeenZnodePing.insert(std::make_pair(mnp.GetHash(), mnp));
 
     CZnodeBroadcast mnb(*pMN);
     uint256 hash = mnb.GetHash();
     if(mapSeenZnodeBroadcast.count(hash)) {
-        mapSeenZnodeBroadcast[hash].second.lastPing = mnp;
+        mapSeenZnodeBroadcast[hash].second.SetLastPing(mnp);
     }
 }
 
@@ -1713,7 +1789,7 @@ void CZnodeMan::UpdatedBlockTip(const CBlockIndex *pindex)
     LogPrint("znode", "CZnodeMan::UpdatedBlockTip -- pCurrentBlockIndex->nHeight=%d\n", pCurrentBlockIndex->nHeight);
 
     CheckSameAddr();
-
+    
     if(fZNode) {
         // normal wallet does not need to update this every block, doing update on rpc call should be enough
         UpdateLastPaid();

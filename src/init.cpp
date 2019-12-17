@@ -41,6 +41,16 @@
 #include "validation.h"
 #include "mtpstate.h"
 
+#ifdef ENABLE_CLIENTAPI
+#include "zmqserver/zmqabstract.h"
+#include "zmqserver/zmqinterface.h"
+#include "client-api/server.h"
+#include "client-api/register.h"
+#include "client-api/settings.h"
+static CZMQPublisherInterface* pzmqPublisherInterface = NULL;
+static CZMQReplierInterface* pzmqReplierInterface = NULL;
+#endif
+
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #endif
@@ -87,20 +97,8 @@
 #include "instantx.h"
 #include "spork.h"
 
-#if ENABLE_ZMQ
-#include "zmq/zmqnotificationinterface.h"
-#endif
 
 bool fFeeEstimatesInitialized = false;
-static const bool DEFAULT_PROXYRANDOMIZE = true;
-static const bool DEFAULT_REST_ENABLE = false;
-static const bool DEFAULT_DISABLE_SAFEMODE = false;
-static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
-
-
-#if ENABLE_ZMQ
-static CZMQNotificationInterface* pzmqNotificationInterface = NULL;
-#endif
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
@@ -211,6 +209,9 @@ void Interrupt(boost::thread_group &threadGroup) {
     InterruptHTTPServer();
     InterruptHTTPRPC();
     InterruptRPC();
+#ifdef ENABLE_CLIENTAPI
+    InterruptAPI();
+#endif
     InterruptREST();
     InterruptTorControl();
     threadGroup.interrupt_all();
@@ -236,6 +237,10 @@ void Shutdown() {
     StopREST();
     StopRPC();
     StopHTTPServer();
+#ifdef ENABLE_CLIENTAPI
+    StopAPI();
+#endif
+
 #ifdef ENABLE_WALLET
     if (pwalletMain)
         pwalletMain->Flush(false);
@@ -293,21 +298,23 @@ void Shutdown() {
     zwalletMain = NULL;
 #endif
 
-#if ENABLE_ZMQ
-    if (pzmqNotificationInterface) {
-        UnregisterValidationInterface(pzmqNotificationInterface);
-        delete pzmqNotificationInterface;
-        pzmqNotificationInterface = NULL;
+#ifdef ENABLE_CLIENTAPI
+    if (pzmqPublisherInterface) {
+        UnregisterValidationInterface(pzmqPublisherInterface);
+        delete pzmqPublisherInterface;
+        pzmqPublisherInterface = NULL;
+    }
+
+    if (pzmqReplierInterface) {
+        pzmqReplierInterface->Shutdown();
     }
 #endif
 
-#ifndef WIN32
     try {
         boost::filesystem::remove(GetPidFile());
     } catch (const boost::filesystem::filesystem_error &e) {
         LogPrintf("%s: Unable to remove pidfile: %s\n", __func__, e.what());
     }
-#endif
     UnregisterAllValidationInterfaces();
 #ifdef ENABLE_WALLET
     delete pwalletMain;
@@ -402,9 +409,7 @@ std::string HelpMessage(HelpMessageMode mode) {
     strUsage += HelpMessageOpt("-par=<n>", strprintf(
             _("Set the number of script verification threads (%u to %d, 0 = auto, <0 = leave that many cores free, default: %d)"),
             -GetNumCores(), MAX_SCRIPTCHECK_THREADS, DEFAULT_SCRIPTCHECK_THREADS));
-#ifndef WIN32
     strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), BITCOIN_PID_FILENAME));
-#endif
     strUsage += HelpMessageOpt("-prune=<n>", strprintf(
             _("Reduce storage requirements by pruning (deleting) old blocks. This mode is incompatible with -txindex and -rescan. "
                       "Warning: Reverting this setting requires re-downloading the entire blockchain. "
@@ -475,6 +480,11 @@ std::string HelpMessage(HelpMessageMode mode) {
     strUsage += HelpMessageOpt("-proxyrandomize", strprintf(
             _("Randomize credentials for every proxy connection. This enables Tor stream isolation (default: %u)"),
             DEFAULT_PROXYRANDOMIZE));
+#ifdef ENABLE_CLIENTAPI
+    strUsage += HelpMessageOpt("-resetapicerts", strprintf(
+            _("Reset ZMQ authentication key files on startup. (default: %u)"),
+            DEFAULT_RESETAPICERTS));
+#endif
     strUsage += HelpMessageOpt("-rpcserialversion", strprintf(
             _("Sets the serialization of raw transaction or block hex returned in non-verbose mode, non-segwit(0) or segwit(1) (default: %d)"),
             DEFAULT_RPC_SERIALIZE_VERSION));
@@ -516,13 +526,11 @@ std::string HelpMessage(HelpMessageMode mode) {
     strUsage += CWallet::GetWalletHelpString(showDebug);
 #endif
 
-#if ENABLE_ZMQ
     strUsage += HelpMessageGroup(_("ZeroMQ notification options:"));
     strUsage += HelpMessageOpt("-zmqpubhashblock=<address>", _("Enable publish hash block in <address>"));
     strUsage += HelpMessageOpt("-zmqpubhashtx=<address>", _("Enable publish hash transaction in <address>"));
     strUsage += HelpMessageOpt("-zmqpubrawblock=<address>", _("Enable publish raw block in <address>"));
     strUsage += HelpMessageOpt("-zmqpubrawtx=<address>", _("Enable publish raw transaction in <address>"));
-#endif
 
     strUsage += HelpMessageGroup(_("Debugging/Testing options:"));
     strUsage += HelpMessageOpt("-uacomment=<cmt>", _("Append comment to the user agent string"));
@@ -1284,6 +1292,11 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     }
 
     RegisterAllCoreRPCCommands(tableRPC);
+
+#ifdef ENABLE_CLIENTAPI
+    RegisterAllCoreAPICommands(tableAPI);
+#endif
+
 #ifdef ENABLE_WALLET
     bool fDisableWallet = GetBoolArg("-disablewallet", false);
     if (!fDisableWallet)
@@ -1410,7 +1423,9 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
                           strDataDir, _(PACKAGE_NAME), e.what()));
     }
 
-#ifndef WIN32
+#ifdef WIN32
+    CreatePidFile(GetPidFile(), GetCurrentProcessId());
+#else
     CreatePidFile(GetPidFile(), getpid());
 #endif
     if (GetBoolArg("-shrinkdebugfile", !fDebug))
@@ -1444,9 +1459,29 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
      */
     if (fServer) {
         uiInterface.InitMessage.connect(SetRPCWarmupStatus);
+#ifdef ENABLE_CLIENTAPI
+        uiInterface.InitMessage.connect(SetAPIWarmupStatus);
+#endif
         if (!AppInitServers(threadGroup))
             return InitError(_("Unable to start HTTP server. See debug log for details."));
     }
+
+#ifdef ENABLE_CLIENTAPI
+    fApi = GetBoolArg("-clientapi", false);
+
+    if(fApi){
+        if (!StartAPI())
+            return false;        
+
+        CreatePaymentRequestFile();
+        CreateTxTimestampFile();
+        CreateTxMetadataFile();
+        CreateZerocoinFile();
+
+        bool resetapicerts = GetBoolArg("-resetapicerts", DEFAULT_RESETAPICERTS);
+        CZMQAbstract::CreateCerts(resetapicerts);
+    }
+#endif
 
     int64_t nStart;
 
@@ -1602,13 +1637,22 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     const std::string &strDest, mapMultiArgs["-seednode"])
     AddOneShot(strDest);
 
-#if ENABLE_ZMQ
-    pzmqNotificationInterface = CZMQNotificationInterface::CreateWithArguments(mapArgs);
+#ifdef ENABLE_CLIENTAPI
+    if(fApi){
+        pzmqPublisherInterface = pzmqPublisherInterface->Create();
+        pzmqReplierInterface = pzmqReplierInterface->Create();
 
-    if (pzmqNotificationInterface) {
-        RegisterValidationInterface(pzmqNotificationInterface);
+        if(!(pzmqPublisherInterface) || !(pzmqReplierInterface))
+            return InitError(_("Unable to start ZMQ API. See debug log for details."));
+
+        // register publisher with validation interface
+        RegisterValidationInterface(pzmqPublisherInterface);
+
+        // ZMQ API
+        RegisterAllCoreAPICommands(tableAPI);
     }
 #endif
+    
     if (mapArgs.count("-maxuploadtarget")) {
         CNode::SetMaxOutboundTarget(GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET) * 1024 * 1024);
     }
@@ -1617,6 +1661,11 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     LogPrintf("Step 7: load block chain ************************************\n");
     fReindex = GetBoolArg("-reindex", false);
     bool fReindexChainState = GetBoolArg("-reindex-chainstate", false);
+
+#ifdef ENABLE_CLIENTAPI
+    if(fApi)
+        pzmqPublisherInterface->StartWorker();
+#endif
 
     // Upgrading to 0.8; hard-link the old blknnnn.dat files into /blocks/
     boost::filesystem::path blocksDir = GetDataDir() / "blocks";
@@ -1798,7 +1847,7 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
                         strLoadError + ".\n\n" + _("Do you want to rebuild the block database now?"),
                         strLoadError + ".\nPlease restart with -reindex or -reindex-chainstate to recover.",
                         "", CClientUIInterface::MSG_ERROR | CClientUIInterface::BTN_ABORT);
-                if (fRet) {
+                if (fRet || fApi) { // Force reindex when using client-api
                     fReindex = true;
                     fRequestShutdown = false;
                 } else {
@@ -2012,23 +2061,25 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
 
     LogPrintf("Using Znode config file %s\n", GetZnodeConfigFile().string());
 
-    if (GetBoolArg("-znconflock", true) && pwalletMain && (znodeConfig.getCount() > 0)) {
-        LOCK(pwalletMain->cs_wallet);
-        LogPrintf("Locking Znodes:\n");
-        uint256 mnTxHash;
-        int outputIndex;
+    // Lock Existing Znodes
+    if (GetBoolArg("-znconflock", true) && (znodeConfig.getCount() > 0)) {
+        LogPrintf(" Locking Existing Znodes..\n");
+        LOCK2(cs_main, pwalletMain->cs_wallet);
         BOOST_FOREACH(CZnodeConfig::CZnodeEntry mne, znodeConfig.getEntries()) {
-            mnTxHash.SetHex(mne.getTxHash());
-            outputIndex = boost::lexical_cast<unsigned int>(mne.getOutputIndex());
+            uint256 mnTxHash(uint256S(mne.getTxHash()));
+            int outputIndex = boost::lexical_cast<unsigned int>(mne.getOutputIndex());
+
             COutPoint outpoint = COutPoint(mnTxHash, outputIndex);
-            // don't lock non-spendable outpoint (i.e. it's already spent or it's not from this wallet at all)
-            if (pwalletMain->IsMine(CTxIn(outpoint)) != ISMINE_SPENDABLE) {
-                LogPrintf("  %s %s - IS NOT SPENDABLE, was not locked\n", mne.getTxHash(), mne.getOutputIndex());
-                continue;
+
+            if(pwalletMain->IsMine(CTxIn(outpoint)) == ISMINE_SPENDABLE &&
+              !pwalletMain->IsSpent(mnTxHash, outputIndex)){
+                pwalletMain->LockCoin(outpoint); //Lock if this transaction is an available znode colleteral payment
+            }else {
+                pwalletMain->UnlockCoin(outpoint); // Unlock any spent/unavailable Znode collateral
             }
-            pwalletMain->LockCoin(outpoint);
-            LogPrintf("  %s %s - locked successfully\n", mne.getTxHash(), mne.getOutputIndex());
         }
+        if(fApi)
+            GetMainSignals().UpdatedBalance();
     }
 
     nLiquidityProvider = GetArg("-liquidityprovider", nLiquidityProvider);

@@ -32,6 +32,11 @@ class CBaseMainParams : public CBaseChainParams
 public:
     CBaseMainParams()
     {
+        nAPIAddr = "tcp://127.0.0.1:";
+        nAPIAuthREPPort = 15557;
+        nAPIOpenREPPort = 25558;
+        nAPIAuthPUBPort = 18332;
+        nAPIOpenPUBPort = 28333;
         nRPCPort = 8888;
     }
 };
@@ -45,6 +50,11 @@ class CBaseTestNetParams : public CBaseChainParams
 public:
     CBaseTestNetParams()
     {
+        nAPIAddr = "tcp://127.0.0.1:";
+        nAPIAuthREPPort = 25557;
+        nAPIOpenREPPort = 25558;
+        nAPIAuthPUBPort = 28332;
+        nAPIOpenPUBPort = 28333;
         nRPCPort = 18888;
         strDataDir = "testnet3";
     }
@@ -59,6 +69,11 @@ class CBaseRegTestParams : public CBaseChainParams
 public:
     CBaseRegTestParams()
     {
+        nAPIAddr = "tcp://127.0.0.1:";
+        nAPIAuthREPPort = 35557;
+        nAPIOpenREPPort = 25558;
+        nAPIAuthPUBPort = 38332;
+        nAPIOpenPUBPort = 28333;
         nRPCPort = 28888;
         strDataDir = "regtest";
     }
@@ -103,6 +118,15 @@ std::string ChainNameFromCommandLine()
         return CBaseChainParams::TESTNET;
     return CBaseChainParams::MAIN;
 }
+
+#ifdef ENABLE_CLIENTAPI
+bool IsZMQPort(int64_t port){
+    return (port == pCurrentBaseParams->APIAuthREPPort() ||
+            port == pCurrentBaseParams->APIOpenREPPort() ||
+            port == pCurrentBaseParams->APIAuthPUBPort() ||
+            port == pCurrentBaseParams->APIOpenPUBPort());
+}
+#endif
 
 bool AreBaseParamsConfigured()
 {

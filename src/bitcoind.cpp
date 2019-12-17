@@ -25,6 +25,10 @@
 
 #include <stdio.h>
 
+#ifdef ENABLE_CLIENTAPI
+#include "client-api/settings.h"
+#endif
+
 /* Introduction text for doxygen: */
 
 /*! \mainpage Developer documentation
@@ -118,6 +122,15 @@ bool AppInit(int argc, char* argv[])
             fprintf(stderr, "Error: %s\n", e.what());
             return false;
         }
+    bool fApi = false;
+#ifdef ENABLE_CLIENTAPI
+        fApi = GetBoolArg("-clientapi", false);
+        int port = GetArg("-rpcport", BaseParams().RPCPort());
+        if(fApi && IsZMQPort(port)){
+            fprintf(stderr, "Error: Cannot Initialize RPC: Port crossover with ZMQ. Please restart with a different port number for -rpcport.\n");
+            exit(EXIT_FAILURE);
+        }
+#endif
 
         // parse znode.conf
         std::string strErr;
@@ -166,6 +179,10 @@ bool AppInit(int argc, char* argv[])
         // Set this early so that parameter interactions go to console
         InitLogging();
         InitParameterInteraction();
+#ifdef ENABLE_CLIENTAPI
+        if(fApi)
+            ReadAPISettingsFile();
+#endif
         fRet = AppInit2(threadGroup, scheduler);
         LogPrintf("AppInit done!\n");
     }
