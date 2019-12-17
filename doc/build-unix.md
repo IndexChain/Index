@@ -36,7 +36,7 @@ These dependencies are required:
  libssl      | Crypto           | Random Number Generation, Elliptic Curve Cryptography
  libboost    | Utility          | Library for threading, data structures, etc
  libevent    | Networking       | OS independent asynchronous networking
- libzmq3     | ZMQ notification | IPC between the GUI and zcoind (requires ZMQ version >= 4.x)
+ libzmq3     | ZMQ notification | IPC between the GUI and indexd (requires ZMQ version >= 4.x)
 
 Optional dependencies:
 

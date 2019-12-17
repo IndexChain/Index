@@ -499,7 +499,7 @@ if ENABLE_WALLET
 qt_index_qt_LDADD += $(LIBBITCOIN_WALLET)
 endif
 if ENABLE_CLIENTAPI
-qt_zcoin_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+qt_index_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
 
 qt_index_qt_LDADD += tor/src/core/libtor-app.a \
@@ -548,11 +548,11 @@ qt_index_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) \
   $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 
 if ENABLE_CLIENTAPI
-qt_zcoin_qt_LDADD += $(MINIZIP_LIBS)
+qt_index_qt_LDADD += $(MINIZIP_LIBS)
 endif
 
-qt_zcoin_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
-qt_zcoin_qt_LIBTOOLFLAGS = --tag CXX
+qt_index_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+qt_index_qt_LIBTOOLFLAGS = --tag CXX
 
 #locale/foo.ts -> locale/foo.qm
 QT_QM=$(QT_TS:.ts=.qm)

@@ -3,7 +3,7 @@ This document is to describe the architecture of the Client API project. For API
 
 ### Running
 to run with API enabled:
-    - start `zcoind` with `clientapi=1` flag, either by passing via CLI or by putting into `zcoin.conf`.
+    - start `indexd` with `clientapi=1` flag, either by passing via CLI or by putting into `zcoin.conf`.
 
 ### Architecture 
 
@@ -11,14 +11,14 @@ to run with API enabled:
 
 ## ZMQ-Server
 `zmqserver` implements the transport mechanism, written in C ZMQ. 
-There are two possible delivery mechanisms - A PUBlisher and a REPlier, respectively the "push" and "pull" architectures. Clients connect to the PUBlisher via a SUBscriber mechanism and the REPlier via a REQuester. The PUBlisher periodically sends out data based on various events occuring within `zcoind`. The REPlier responds to requests for data from the REQuester.
+There are two possible delivery mechanisms - A PUBlisher and a REPlier, respectively the "push" and "pull" architectures. Clients connect to the PUBlisher via a SUBscriber mechanism and the REPlier via a REQuester. The PUBlisher periodically sends out data based on various events occuring within `indexd`. The REPlier responds to requests for data from the REQuester.
 
 ### ZMQ Abstract
 Both architecture types are abstracted out in `zmqserver/zmqabstract.*`. Here a set of common values and functions are created. 
 
 ### ZMQ Interface
 This module allows external events to interact with the ZMQ server. 
-`src/validationinterface.*` defines a set of virtual functions, such that as certain events occur in `zcoind`, any class which implements the function under which the event occurred will be called. For example, `UpdatedBlockTip` is implemented by various modules in `zcoind`, including ZMQ-Server. Once the block tip is updated, the publisher is triggered and sends data to a listening subscriber.
+`src/validationinterface.*` defines a set of virtual functions, such that as certain events occur in `indexd`, any class which implements the function under which the event occurred will be called. For example, `UpdatedBlockTip` is implemented by various modules in `indexd`, including ZMQ-Server. Once the block tip is updated, the publisher is triggered and sends data to a listening subscriber.
 
 ### Events/Topics
 The idea of an external event occuring has been discussed. There are situations where we want to trigger more than one Client-API function on an external event occuring. This is where the idea of `topics` comes from. Each ClientAPI function (that's triggered by the publisher) is considered as a single topic (see `zmqserver/zmqpublisher.h`).  Any topic that inherits from an event class is triggered on that event. Take for example, the `BlockInfo` topic, which publishes data about the blockchain state. If a new block is detected (`CZMQBlockEvent`), the number of connections changes (`CZMQConnectionsEvent`), or sync status changes (`CZMQStatusEvent`), the method `blockchain` in `client-api/blockchain.cpp` is triggered, and is sent to the listening subscriber.
@@ -55,7 +55,7 @@ You can then eg. generate blocks using `./zcoin-cli generate 10`, and you should
         `npm install`
 
 #### Using zcoin-client examples
-   You will need to rebuild `zcoind` without ZMQ authentication, as this is currently not implemented in the Node examples.
+   You will need to rebuild `indexd` without ZMQ authentication, as this is currently not implemented in the Node examples.
    - Open `zmqserver/zmqabstract.h` and change `ZMQ_AUTH` to `false`.
     
    in `zcoin-client`: `cd examples/api`
@@ -63,7 +63,7 @@ You can then eg. generate blocks using `./zcoin-cli generate 10`, and you should
 
 #### Using the GUI itself
    You can make calls from the `zcoin-client` GUI within Chrome Dev Tools. All methods are available but must be formatted correctly.
-    - First run `zcoind`
+    - First run `indexd`
     - then run `npm run dev` from `zcoin-client`
     - Open Chrome Dev Tools from the taskbar
     - Use the following command:
@@ -72,9 +72,9 @@ You can then eg. generate blocks using `./zcoin-cli generate 10`, and you should
    refer to https://github.com/zcoinofficial/zcoin/tree/client-api/src/client-api for data formats.
 
 ### Settings
-  As in Qt with `QSettings`, the client adds a level to the settings hierarchy in `zcoind`. The following is the current hierarchy, in descending order of importance:
+  As in Qt with `QSettings`, the client adds a level to the settings hierarchy in `indexd`. The following is the current hierarchy, in descending order of importance:
   `CLI -> zcoin.conf -> QSettings`
-  Where `CLI` is settings passed via the command line interface to `zcoind`, `zcoin.conf` is settings defined in the `zcoin.conf` file in your datadir, and ` QSettings` is Qt-specific settings. What this means is a setting passed via CLI will always override the same one set in either of the lower tiers.
+  Where `CLI` is settings passed via the command line interface to `indexd`, `zcoin.conf` is settings defined in the `zcoin.conf` file in your datadir, and ` QSettings` is Qt-specific settings. What this means is a setting passed via CLI will always override the same one set in either of the lower tiers.
 
   In `zcoin-client`, `QSettings` is replaced by the file `persistent/settings.json` in your datadir. Each setting here has the following format:
   ```
@@ -89,5 +89,5 @@ You can then eg. generate blocks using `./zcoin-cli generate 10`, and you should
   `changed`: If the client requests to change a setting, this will be set to `True` in that setting. Following restart, The setting will be enabled.
   `disabled`: if the same setting is defined further up the hierarchy, this is set this to `True`.
 
-  On `zcoind` start, this JSON file is parsed along with the CLI and conf selections, to produce the final list of settings.
+  On `indexd` start, this JSON file is parsed along with the CLI and conf selections, to produce the final list of settings.
 

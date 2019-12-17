@@ -313,7 +313,7 @@ libbitcoin_zmq_a_SOURCES = \
   rpc/client.cpp
 endif
 
-# wallet: shared between zcoind and zcoin-qt, but only linked
+# wallet: shared between indexd and zcoin-qt, but only linked
 # when wallet enabled
 libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
@@ -620,13 +620,13 @@ indexd_LDADD = \
   $(LIBSECP256K1)
 
 
-zcoind_LDADD += $(TOR_LIBS) $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+indexd_LDADD += $(TOR_LIBS) $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
 if ENABLE_CLIENTAPI
-zcoind_LDADD += $(MINIZIP_LIBS)
+indexd_LDADD += $(MINIZIP_LIBS)
 endif
 
-zcoind_LDADD += -lz
+indexd_LDADD += -lz
 
 
 # bitcoin-cli binary #

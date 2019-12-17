@@ -220,7 +220,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -233,7 +233,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -250,7 +250,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -263,7 +263,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -292,7 +292,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -305,7 +305,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -322,7 +322,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -335,7 +335,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -919,7 +919,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -932,7 +932,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -949,7 +949,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -962,7 +962,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -991,7 +991,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1004,7 +1004,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1021,7 +1021,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1034,7 +1034,7 @@ OPTIONAL: not a necessary parameter to pass.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1324,7 +1324,7 @@ The publisher module is comprised of various _topics_ that are triggered under s
 
 |               | _Event_       | NotifyAPIStatus  | SyncTransaction | NumConnectionsChanged | UpdatedBlockTip | UpdatedMintStatus  | UpdatedSettings | UpdatedZnode | UpdateSyncStatus |
 | ------------- | ------------- | ---------------  | --------------- | --------------------- | --------------- | -----------------  | --------------- | ------------ | ---------------- |
-| **_Topic_**   | Description   | API status notification | new transactions | zcoind peer list updated | blockchain head updated | mint transaction added/up dated | settings changed/updated | Znode update | Blockchain sync update
+| **_Topic_**   | Description   | API status notification | new transactions | indexd peer list updated | blockchain head updated | mint transaction added/up dated | settings changed/updated | Znode update | Blockchain sync update
 **address** (triggers [block](#block))                 | block tx data.                            | -  | -  | -  | ✅ | -  | -  | -  | -  |
 **apiStatus** (triggers [apiStatus](#apistatus))       | Status of API                             | ✅ | -  | -  | -  | -  | -  | -  | -  |
 **balance** (triggers [balance](#balance))             | Balance info                              | -  | -  | -  | ✅ | -  | -  | -  | -  |
@@ -1407,7 +1407,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1420,7 +1420,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1437,7 +1437,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1450,7 +1450,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1479,7 +1479,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1492,7 +1492,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1509,7 +1509,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
@@ -1522,7 +1522,7 @@ Methods specific to the publisher.
                                     category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
-                                    label: STRING (VAR : address is part of zcoind "account")
+                                    label: STRING (VAR : address is part of indexd "account")
                                     firstSeenAt: INT(secs), 
                                     blockHash: STRING,
                                     blockTime: INT(secs),                            
