@@ -2100,7 +2100,8 @@ bool ReadBlockHeaderFromDisk(CBlock &block, const CDiskBlockPos &pos) {
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, int nTime) {
     bool fPremineBlock = nHeight == 1;
     int nYearBlocksinmin = 525600;
-    bool phaseyear1 = nHeight > 1 && nHeight < nYearBlocksinmin;
+    bool phaseinitaldiff = nHeight > 1 && nHeight < 100;
+    bool phaseyear1 = nHeight > 100 && nHeight < nYearBlocksinmin;
     bool phaseyear2 = nHeight > nYearBlocksinmin && nHeight < (nYearBlocksinmin * 2);
     bool phaseyear3 = nHeight > (nYearBlocksinmin * 2) && nHeight < (nYearBlocksinmin * 3);
     bool phaseyear4 = nHeight > (nYearBlocksinmin * 3) && nHeight < (nYearBlocksinmin * 4);
@@ -2113,6 +2114,8 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, i
         return 0 * COIN;
     else if (fPremineBlock)
         return 300000000 * COIN;
+    else if (phaseinitaldiff)
+        return 0.1 * COIN;
     else if (phaseyear1)
         return 3 * COIN;
     else if (phaseyear2)
@@ -3696,26 +3699,12 @@ int GetInputAge(const CTxIn &txin) {
 }
 
 CAmount GetZnodePayment(const Consensus::Params &params, bool fMTP,int nHeight) {
-//    CAmount ret = blockValue * 30/100 ; // start at 30%
-//    int nMNPIBlock = Params().GetConsensus().nZnodePaymentsStartBlock;
-////    int nMNPIBlock = Params().GetConsensus().nZnodePaymentsIncreaseBlock;
-//    int nMNPIPeriod = Params().GetConsensus().nZnodePaymentsIncreasePeriod;
-//
-//    // mainnet:
-//    if (nHeight > nMNPIBlock) ret += blockValue / 20; // 158000 - 25.0% - 2014-10-24
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 1)) ret += blockValue / 20; // 175280 - 30.0% - 2014-11-25
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 2)) ret += blockValue / 20; // 192560 - 35.0% - 2014-12-26
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 3)) ret += blockValue / 40; // 209840 - 37.5% - 2015-01-26
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 4)) ret += blockValue / 40; // 227120 - 40.0% - 2015-02-27
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 5)) ret += blockValue / 40; // 244400 - 42.5% - 2015-03-30
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 6)) ret += blockValue / 40; // 261680 - 45.0% - 2015-05-01
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 7)) ret += blockValue / 40; // 278960 - 47.5% - 2015-06-01
-//    if (nHeight > nMNPIBlock + (nMNPIPeriod * 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03
-if(nHeight > 100)
+if(nHeight > Params().GetConsensus().nZnodePaymentsStartBlock)
 {
-    return GetBlockSubsidy(nHeight,params) * 0.2 * COIN;
+    //Give 80 % to masternode
+    return GetBlockSubsidy(nHeight,params) * 80/100 * COIN;
 }
-
+    //No reward before znodepaymentsstartblock
     return 0;
 }
 
