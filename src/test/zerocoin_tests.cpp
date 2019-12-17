@@ -446,7 +446,6 @@ BOOST_AUTO_TEST_CASE(zerocoin_mintspend_usedinput){
     printf("Testing denominations %s and %s\n", denominationsForTx[0].c_str(), denominationsForTx[1].c_str());
     string stringError;
 
-    denominationPairs.clear();
     for (int i = 0; i < 2; i++){
         std::pair<std::string, int> denominationPair(denominationsForTx[i].c_str(), 2);
         denominationPairs.push_back(denominationPair);

@@ -15,6 +15,14 @@
 #include "sync.h"
 #include "utilstrencodings.h"
 #include "utiltime.h"
+#include "univalue.h"
+
+#ifdef ENABLE_CLIENTAPI
+#include "minizip/zip.h"
+#include <zlib.h>
+#include <fstream>
+#endif
+
 #include <stdarg.h>
 
 #if (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
@@ -96,8 +104,6 @@ namespace boost {
 
 } // namespace boost
 
-using namespace std;
-
 // znode fZnode
 bool fZNode = false;
 bool fLiteMode = false;
@@ -113,6 +119,7 @@ bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
 bool fDaemon = false;
 bool fServer = false;
+bool fApi = false;
 string strMiscWarning;
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
@@ -561,6 +568,34 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
     return path;
 }
 
+boost::filesystem::path GetPersistentDataDir(bool fNetSpecific)
+{
+    namespace fs = boost::filesystem;
+
+    LOCK(csPathCached);
+
+    fs::path path = GetDataDir(fNetSpecific) / PERSISTENT_FILENAME;
+
+    if(!fs::exists(path)){
+        fs::create_directories(path);
+    }
+
+    return path;
+}
+
+boost::filesystem::path GetJsonDataDir(bool fNetSpecific, const char* filename)
+{
+    namespace fs = boost::filesystem;
+
+    LOCK(csPathCached);
+
+    fs::path path = GetPersistentDataDir(fNetSpecific);
+
+    fs::path newpath = path / filename;
+
+    return newpath;
+}
+
 void ClearDatadirCache()
 {
     pathCached = boost::filesystem::path();
@@ -572,6 +607,109 @@ boost::filesystem::path GetConfigFile()
     boost::filesystem::path pathConfigFile(GetArg("-conf", BITCOIN_CONF_FILENAME));
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir(false) / pathConfigFile;
+
+    return pathConfigFile;
+}
+
+boost::filesystem::path CreateTxMetadataFile(bool fNetSpecific)
+{
+    boost::filesystem::path pathConfigFile = GetJsonDataDir(fNetSpecific,TX_METADATA_FILENAME);
+
+    if(!boost::filesystem::exists(pathConfigFile)){
+        UniValue txMetadataUni(UniValue::VOBJ);
+        txMetadataUni.push_back(Pair("type", "tx_metadata"));
+        txMetadataUni.push_back(Pair("data", NullUniValue));
+        
+        //write back UniValue
+        std::ofstream txMetadataOut(pathConfigFile.string());
+
+        txMetadataOut << txMetadataUni.write(4,0) << endl;
+    }
+
+    return pathConfigFile;
+}
+
+void CreatePersistentFiles(bool fNetSpecific){
+    CreatePaymentRequestFile(fNetSpecific);
+    CreateTxTimestampFile(fNetSpecific);
+    CreateTxMetadataFile(fNetSpecific);
+    CreateZerocoinFile(fNetSpecific);
+}
+
+boost::filesystem::path CreatePaymentRequestFile(bool fNetSpecific)
+{
+    boost::filesystem::path pathConfigFile = GetJsonDataDir(fNetSpecific,PAYMENT_REQUEST_FILENAME);
+
+    LogPrintf("API: pathConfigFile payment request: %s\n", pathConfigFile.string());
+    if(!boost::filesystem::exists(pathConfigFile)){
+        LogPrintf("PR does not exist\n");
+        UniValue paymentRequestUni(UniValue::VOBJ);
+        paymentRequestUni.push_back(Pair("type", "payment_request"));
+        paymentRequestUni.push_back(Pair("data", NullUniValue));
+        
+        //write back UniValue
+        std::ofstream paymentRequestOut(pathConfigFile.string());
+
+        paymentRequestOut << paymentRequestUni.write(4,0) << endl;
+    }
+
+    return pathConfigFile;
+}
+
+boost::filesystem::path CreateZerocoinFile(bool fNetSpecific)
+{
+    boost::filesystem::path const &pathConfigFile = GetJsonDataDir(fNetSpecific,ZEROCOIN_FILENAME);
+    LogPrintf("API: pathConfigFile zerocoin: %s\n", pathConfigFile.string());
+    if(!boost::filesystem::exists(pathConfigFile)){
+        LogPrintf("zerocoin does not exist\n");
+        UniValue zerocoinUni(UniValue::VOBJ);
+        zerocoinUni.push_back(Pair("type", "zerocoin"));
+        zerocoinUni.push_back(Pair("data", NullUniValue));
+        
+        //write back UniValue
+        std::ofstream zerocoinOut(pathConfigFile.string());
+
+        zerocoinOut << zerocoinUni.write(4,0) << endl;
+    }
+
+    return pathConfigFile;
+}
+
+boost::filesystem::path CreateSettingsFile(bool fNetSpecific)
+{
+    boost::filesystem::path const &pathConfigFile = GetJsonDataDir(fNetSpecific, SETTINGS_FILENAME);
+    LogPrintf("API: pathConfigFile settings: %s\n", pathConfigFile.string());
+    if(!boost::filesystem::exists(pathConfigFile)){
+        LogPrintf("settings does not exist\n");
+        UniValue settingsUni(UniValue::VOBJ);
+        UniValue dataUni(UniValue::VOBJ);
+        settingsUni.push_back(Pair("type", "settings"));
+        settingsUni.push_back(Pair("data", dataUni));
+        
+        //write back UniValue
+        std::ofstream settingsOut(pathConfigFile.string());
+
+        settingsOut << settingsUni.write(4,0) << endl;
+    }
+
+    return pathConfigFile;
+}
+
+boost::filesystem::path CreateTxTimestampFile(bool fNetSpecific)
+{
+    boost::filesystem::path pathConfigFile = GetJsonDataDir(fNetSpecific,TX_TIMESTAMP_FILENAME);
+
+    if(!boost::filesystem::exists(pathConfigFile)){
+        LogPrintf("API:timestamp does not exist. Creating..\n");
+        UniValue txTimestampUni(UniValue::VOBJ);
+        txTimestampUni.push_back(Pair("type", "tx_timestamp"));
+        txTimestampUni.push_back(Pair("data", NullUniValue));
+        
+        //write back UniValue
+        std::ofstream txTimestampOut(pathConfigFile.string());
+
+        txTimestampOut << txTimestampUni.write(4,0) << endl;
+    }
 
     return pathConfigFile;
 }
@@ -608,7 +746,6 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
     ClearDatadirCache();
 }
 
-#ifndef WIN32
 boost::filesystem::path GetPidFile()
 {
     boost::filesystem::path pathPidFile(GetArg("-pid", BITCOIN_PID_FILENAME));
@@ -624,6 +761,87 @@ void CreatePidFile(const boost::filesystem::path &path, pid_t pid)
         fprintf(file, "%d\n", pid);
         fclose(file);
     }
+}
+
+#ifdef ENABLE_CLIENTAPI
+/*
+ * Creates a ZIP file -
+    after specifying an absolute path to a "root" directory, all filepaths derived from this path are stored in the ZIP file,
+    with only files and their paths from the root preserved.
+    eg. root path:                 /a/b/c/d/
+        filepaths(from root path): e/f.txt
+                                   g.dat
+
+    paths to folders (again, from a root) can be provided - in this case the method derives all sub-files and adds to "filePaths".
+    eg. folder path:  h/i
+        derives files: h/i/j.exe
+                       h/i/k.o
+                       h/i/l/m.jpeg
+
+    Breaking up the root and derived paths allows for easy unzipping from the same directory - the layout is preserved.
+*/
+bool CreateZipFile (std::string rootPath, std::vector<string> folderPaths, vector<string> filePaths, std::string destinationPath)
+{
+    zipFile zf = zipOpen(destinationPath.c_str(), APPEND_STATUS_CREATE);
+    if (zf == NULL)
+        return false;
+
+    BOOST_FOREACH(std::string folderPath, folderPaths){
+        boost::filesystem::directory_iterator end_iter;
+        std::string fullFolderPath = rootPath + folderPath;
+        for (boost::filesystem::directory_iterator dir_iter(fullFolderPath);
+        dir_iter != end_iter;
+        ++dir_iter)
+        {
+            std::string fullFolderFilePath = dir_iter->path().string();
+            std::string folderFilePath = fullFolderFilePath.substr(rootPath.length());
+            filePaths.push_back(folderFilePath);
+        }
+    }
+
+    bool failed = false;
+    BOOST_FOREACH(string filePath, filePaths)
+    {
+        if(failed){
+            break;
+        }
+        std::string fullPath = rootPath + filePath;
+        std::fstream file(fullPath.c_str(), std::ios::binary | std::ios::in);
+        if (file.is_open())
+        {
+            file.seekg(0, std::ios::end);
+            long size = file.tellg();
+            file.seekg(0, std::ios::beg);
+
+            std::vector<char> buffer(size);
+            if (size == 0 || file.read(&buffer[0], size)){
+                zip_fileinfo zfi = { 0 };
+                if (ZIP_OK == zipOpenNewFileInZip(zf, filePath.c_str(), &zfi, NULL, 0, NULL, 0, NULL, Z_DEFLATED, Z_DEFAULT_COMPRESSION))
+                {
+                    if (ZIP_OK != zipWriteInFileInZip(zf, size == 0 ? "" : &buffer[0], size)){
+                        failed = true;
+                    }
+
+                    if (ZIP_OK != zipCloseFileInZip(zf)){
+                        failed = true;
+                    }
+
+                    file.close();
+                    continue;
+                }
+            }
+            file.close();
+        }
+        failed = true;
+    }
+
+    zipClose(zf, NULL);
+
+    if (failed){
+        return false;
+    }
+
+    return true;
 }
 #endif
 

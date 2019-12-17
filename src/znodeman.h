@@ -227,6 +227,7 @@ public:
     void DsegUpdate(CNode* pnode);
 
     /// Find an entry
+    CZnode* Find(const std::string &txHash, const std::string outputIndex);
     CZnode* Find(const CScript &payee);
     CZnode* Find(const CTxIn& vin);
     CZnode* Find(const CPubKey& pubKeyZnode);
@@ -285,6 +286,8 @@ public:
     znode_info_t GetZnodeInfo(const CPubKey& pubKeyZnode);
 
     char* GetNotQualifyReason(CZnode& mn, int nBlockHeight, bool fFilterSigTime, int nMnCount);
+
+    UniValue GetNotQualifyReasonToUniValue(CZnode& mn, int nBlockHeight, bool fFilterSigTime, int nMnCount);
 
     /// Find an entry in the znode list that is next to be paid
     CZnode* GetNextZnodeInQueueForPayment(int nBlockHeight, bool fFilterSigTime, int& nCount);

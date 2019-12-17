@@ -367,6 +367,12 @@ bool RPCIsInWarmup(std::string *outStatus)
     return fRPCInWarmup;
 }
 
+bool RPCIsInWarmup()
+{
+    LOCK(cs_rpcWarmup);
+    return fRPCInWarmup;
+}
+
 void JSONRequest::parse(const UniValue& valRequest)
 {
     // Parse request
@@ -397,7 +403,7 @@ void JSONRequest::parse(const UniValue& valRequest)
         throw JSONRPCError(RPC_INVALID_REQUEST, "Params must be an array");
 }
 
-static UniValue JSONRPCExecOne(const UniValue& req)
+UniValue JSONRPCExecOne(const UniValue& req)
 {
     UniValue rpc_result(UniValue::VOBJ);
 

@@ -926,7 +926,7 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
 
     tooltip = tr("Processed %n block(s) of transaction history.", "", count);
 
-    if(!znodeSync.IsBlockchainSynced())
+    if(!znodeSync.GetBlockchainSynced())
     {
         // Represent time from last generated block in human readable text
         QString timeBehindText;
@@ -1004,7 +1004,7 @@ void BitcoinGUI::setAdditionalDataSyncProgress(int count, double nSyncProgress)
 
     // Set icon state: spinning if catching up, tick otherwise
 
-    if(znodeSync.IsBlockchainSynced())
+    if(znodeSync.GetBlockchainSynced())
     {
         QString strSyncStatus;
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;

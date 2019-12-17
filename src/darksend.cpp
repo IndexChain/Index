@@ -16,6 +16,7 @@
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
+#include "validationinterface.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -520,7 +521,7 @@ std::string CDarksendPool::GetStatus() {
     nStatusMessageProgress += 10;
     std::string strSuffix = "";
 
-    if ((pCurrentBlockIndex && pCurrentBlockIndex->nHeight - nCachedLastSuccessBlock < nMinBlockSpacing) || !znodeSync.IsBlockchainSynced())
+    if ((pCurrentBlockIndex && pCurrentBlockIndex->nHeight - nCachedLastSuccessBlock < nMinBlockSpacing) || !znodeSync.GetBlockchainSynced())
         return strAutoDenomResult;
 
     switch (nState) {
@@ -2508,7 +2509,7 @@ void ThreadCheckDarkSendPool() {
         // try to sync from all available nodes, one step at a time
         znodeSync.ProcessTick();
 
-        if (znodeSync.IsBlockchainSynced() && !ShutdownRequested()) {
+        if (znodeSync.GetBlockchainSynced() && !ShutdownRequested()) {
 
             nTick++;
 
@@ -2525,6 +2526,7 @@ void ThreadCheckDarkSendPool() {
                 mnodeman.CheckAndRemove();
                 mnpayments.CheckAndRemove();
                 instantsend.CheckAndRemove();
+                GetMainSignals().NotifyZnodeList();
             }
             if (fZNode && (nTick % (60 * 5) == 0)) {
                 mnodeman.DoFullVerificationStep();
