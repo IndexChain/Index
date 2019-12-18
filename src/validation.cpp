@@ -34,5 +34,17 @@
 #include "validationinterface.h"
 #include "versionbits.h"
 
-
+bool CheckIndexProof(const CBlockIndex& block, const Consensus::Params& consensusParams)
+{
+    // Get the hash of the proof
+    // After validating the PoS block the computed hash proof is saved in the block index, which is used to check the index
+    uint256 hashProof = block.IsProofOfWork() ? block.GetBlockHash() : block.hashProof;
+    // Check for proof after the hash proof is computed
+    if(block.IsProofOfStake()){
+        //blocks are loaded out of order, so checking PoS kernels here is not practical
+        return true; //CheckKernel(block.pprev, block.nBits, block.nTime, block.prevoutStake);
+    }else{
+        return CheckProofOfWork(hashProof, block.nBits, false, consensusParams);
+    }
+}
 

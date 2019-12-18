@@ -25,3 +25,4 @@
 #include <boost/unordered_map.hpp>
 #include <boost/filesystem/path.hpp>
 
+bool CheckIndexProof(const CBlockIndex& block, const Consensus::Params& consensusParams);

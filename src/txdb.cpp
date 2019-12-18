@@ -357,9 +357,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 pindexNew->sigmaMintedPubCoins   = diskindex.sigmaMintedPubCoins;
                 pindexNew->sigmaSpentSerials     = diskindex.sigmaSpentSerials;
 
-                if (!CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, consensusParams))
-                    if (!CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, consensusParams))
-                        return error("LoadBlockIndex(): CheckProofOfWork failed: %s", pindexNew->ToString());
+                if (!CheckIndexProof(*pindexNew, Params().GetConsensus()))
+                    return error("%s: CheckIndexProof failed: %s", __func__, pindexNew->ToString());
+
+                // NovaCoin: build setStakeSeen
+                if (pindexNew->IsProofOfStake())
+                    setStakeSeen.insert(std::make_pair(pindexNew->prevoutStake, pindexNew->nTime));
 
                 pcursor->Next();
             } else {

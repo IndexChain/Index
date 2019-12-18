@@ -6440,7 +6440,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             if (sscanf(pfrom->cleanSubVer.c_str(), "/Satoshi:%2d.%2d.%2d.%2d/",
                     &parsedVersion[0], &parsedVersion[1], &parsedVersion[2], &parsedVersion[3]) == 4) {
                 int peerClientVersion = parsedVersion[0]*1000000 + parsedVersion[1]*10000 + parsedVersion[2]*100 + parsedVersion[3];
-                if (peerClientVersion < MIN_ZCOIN_CLIENT_VERSION) {
+                if (peerClientVersion < MIN_INDEX_CLIENT_VERSION) {
                     pfrom->PushMessage(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, "This version is banned from the network");
                     pfrom->fDisconnect = 1;
                     LOCK(cs_main);
