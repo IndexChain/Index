@@ -82,6 +82,8 @@ std::string CBlock::ToString() const {
             hashPrevBlock.ToString(),
             hashMerkleRoot.ToString(),
             nTime, nBits, nNonce,
+            IsProofOfStake() ? "PoS" : "PoW",
+            prevoutStake.ToString(),
             vtx.size());
     for (unsigned int i = 0; i < vtx.size(); i++) {
         s << "  " << vtx[i].ToString() << "\n";

@@ -1098,3 +1098,9 @@ std::string CopyrightHolders(const std::string& strPrefix)
     }
     return strCopyrightHolders;
 }
+
+double nround(double value, int to)
+{
+    double places = pow(10.0, to);
+    return round(value * places) / places;
+}

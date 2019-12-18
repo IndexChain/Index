@@ -166,13 +166,44 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
     return next_target.GetCompact();
 }
 
+unsigned int PoSWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params)
+{
+    const CBlockIndex* LastPoSBlock = GetLastBlockIndex(pindexLast, true);
+    const arith_uint256 bnPosLimit = UintToArith256(params.posLimit);
+    int64_t nTargetSpacing = Params().GetConsensus().nPosTargetSpacing;
+    int64_t nTargetTimespan = Params().GetConsensus().nPosTargetTimespan;
+
+    int64_t nActualSpacing = 0;
+    if (LastPoSBlock->nHeight != 0)
+        nActualSpacing = LastPoSBlock->GetBlockTime() - LastPoSBlock->pprev->GetBlockTime();
+
+    if (nActualSpacing < 0)
+        nActualSpacing = 1;
+
+    // ppcoin: target change every block
+    // ppcoin: retarget with exponential moving toward target spacing
+    arith_uint256 bnNew;
+    bnNew.SetCompact(LastPoSBlock->nBits);
+
+    int64_t nInterval = nTargetTimespan / nTargetSpacing;
+    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+    if (bnNew <= 0 || bnNew > bnPosLimit)
+        bnNew = bnPosLimit;
+
+    return bnNew.GetCompact();
+}
+
 // Index GetNextWorkRequired
-unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params) {
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params, bool fProofOfStake) {
     // Special rule for regtest: we never retarget.
     if (params.fPowNoRetargeting) {
         return pindexLast->nBits;
     }
-    if(USE_DGW3)
+    if(fProofOfStake)
+        nBits = PoSWorkRequired(pindexLast, params);
+    else if(USE_DGW3)
        return DarkGravityWave(pindexLast, pblock, params);
     else if (USE_LWMA)
        return LwmaCalculateNextWorkRequired(pindexLast, pblock, params);
@@ -230,10 +261,14 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params 
     if (fNegative || bnTarget == 0 || fOverflow || bnTarget > UintToArith256(params.powLimit)){
         return false;
     }
-        // Check proof of work matches claimed amount
-        if (UintToArith256(hash) > bnTarget){
-           return error("CheckProofOfWork() : hash doesn't match nBits\n");
-        }
+    // Check proof of work matches claimed amount
+    if (UintToArith256(hash) > bnTarget) {
+        if (!fMining)
+            return error("CheckProofOfWork(): hash doesn't match nBits");
+        else
+            return false;
+    }
+
     return true;
 }
 
