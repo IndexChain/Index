@@ -6915,7 +6915,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
         CTxLockRequest txLockRequest;
         CDarksendBroadcastTx dstx;
         int nInvType = MSG_TX;
-        CTransaction tx;
+        CTransaction tx(deserialize, vRecv);
 //        vRecv >> tx;
         // LogPrintf("ProcessMessage() txHash=%s\n", tx.GetHash().ToString());
 
