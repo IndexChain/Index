@@ -97,11 +97,8 @@ public:
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
         consensus.nPowTargetTimespan = 60 * 60; // 60 minutes between retargets
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
-        consensus.nPosTargetTimespan = consensus.nPowTargetTimespan;
-        consensus.nPosTargetSpacing = consensus.nPowTargetSpacing;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.fPoSNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
         consensus.nMinerConfirmationWindow = 10800; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -241,11 +238,6 @@ public:
         consensus.nModulusV1StopBlock = ZC_MODULUS_V1_STOP_BLOCK;
         //LWMA related param
         consensus.nZawyLwmaAveragingWindow = 36;
-
-        //dual pow/pos
-        consensus.nLastPOWBlock = nTime;      // always have PoW
-        consensus.nMPoSRewardRecipients = 10;
-        consensus.nFirstMPoSBlock = 50;
 
         // Sigma related values.
         consensus.nSigmaStartBlock = ZC_SIGMA_STARTING_BLOCK;

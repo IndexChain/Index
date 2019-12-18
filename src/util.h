@@ -288,8 +288,6 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
     }
 }
 
-double nround(double value, int to);
-
 std::string CopyrightHolders(const std::string& strPrefix);
 
 #endif // BITCOIN_UTIL_H

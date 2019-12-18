@@ -16,9 +16,7 @@ class CBlockIndex;
 
 class uint256;
 
-unsigned int PoSWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params);
-
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params, bool fProofOfStake);
+unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &);
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex *pindexLast, int64_t nFirstBlockTime, const Consensus::Params &);
 
@@ -26,7 +24,7 @@ unsigned int BorisRidiculouslyNamedDifficultyFunction(const CBlockIndex *pindexL
                                          uint32_t PastBlocksMin, uint32_t PastBlocksMax);
 
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
-bool CheckProofOfWork(uint256 hash, unsigned int nBits, bool fMining, const Consensus::Params& params);
+bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params &);
 
 // Index - MTP
 bool CheckMerkleTreeProof(const CBlockHeader &block, const Consensus::Params &params);

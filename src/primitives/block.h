@@ -222,32 +222,10 @@ public:
 
     uint256 GetHash() const;
 
-    // ppcoin: two types of block: proof-of-work or proof-of-stake
-    virtual bool IsProofOfStake() const //qtum
-    {
-        return !prevoutStake.IsNull();
-    }
-
-    virtual uint32_t StakeTime() const
-    {
-        uint32_t ret = 0;
-        if(IsProofOfStake())
-        {
-            ret = nTime;
-        }
-        return ret;
-    }
-
     int64_t GetBlockTime() const
     {
         return (int64_t)nTime;
     }
-
-    virtual bool IsProofOfWork() const
-    {
-        return !IsProofOfStake();
-    }
-
     void InvalidateCachedPoWHash(int nHeight) const;
 
     bool IsMTP() const;
