@@ -34,6 +34,9 @@ static const unsigned int MAX_SIZE = 0x02000000;
  * Used to bypass the rule against non-const reference to temporary
  * where it makes sense with wrappers such as CFlatData or CTxDB
  */
+struct deserialize_type {};
+constexpr deserialize_type deserialize {};
+
 template<typename T>
 inline T& REF(const T& val)
 {
@@ -617,7 +620,6 @@ void Serialize(Stream &s, const std::shared_ptr <T> &item, int nType, int nVersi
 
 template<typename Stream, typename T>
 void Unserialize(Stream &s, std::shared_ptr <T> &item, int nType, int nVersion);
-
 
 // Index - MTP
 /**

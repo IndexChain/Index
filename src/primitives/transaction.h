@@ -441,9 +441,12 @@ public:
     std::vector<CTxOut> vout;
     CTxWitness wit; // Not const: can change without invalidating the txid cache
     const uint32_t nLockTime;
+    void UpdateHash() const;
 private:
     /** Memory only. */
     const uint256 hash;
+
+    CTransaction& operator=(const CTransaction &tx); 
 
     uint256 ComputeHash() const;
 
@@ -454,12 +457,21 @@ public:
 
     /** Convert a CMutableTransaction into a CTransaction. */
     CTransaction(const CMutableTransaction &tx);
-/** This deserializing constructor is provided instead of an Unserialize method.
-     *  Unserialize is not possible, since it would require overwriting const fields. */
-     template <typename Stream>
-     inline void Serialize(Stream& s) const {
-         SerializeTransaction(*this, s);
+    CTransaction(CMutableTransaction &&tx);
+
+    template <typename Stream>
+    inline void Serialize(Stream& s) const {
+        SerializeTransaction(*this, s);
     }
+    template <typename Stream>
+    inline void Unserialize(Stream& s) {
+        UnserializeTransaction(*this, s);
+    }
+
+    /** This deserializing constructor is provided instead of an Unserialize method.
+     *  Unserialize is not possible, since it would require overwriting const fields. */
+    template <typename Stream>
+    CTransaction(deserialize_type, Stream& s) : CTransaction(CMutableTransaction(deserialize, s)) {}
 
     bool IsNull() const {
         return vin.empty() && vout.empty();
@@ -475,7 +487,23 @@ public:
 
     // Compute a hash without changing later in 0.8
     uint256 GetNormalizedHash() const;
+    //! Implement serialization, as if this was a byte vector.
+    //! Compute the length of a pubkey with a given first byte.
+    unsigned char vch[65];
+    unsigned int static GetLen(unsigned char chHeader)
+    {
+        if (chHeader == 2 || chHeader == 3)
+            return 33;
+        if (chHeader == 4 || chHeader == 6 || chHeader == 7)
+            return 65;
+        return 0;
+    }
+    unsigned int size() const { return GetLen(vch[0]); }
 
+    unsigned int GetSerializeSize(int nType, int nVersion) const
+    {
+        return size() + 1;
+    }
     // Return sum of txouts.
     CAmount GetValueOut() const;
     // GetValueIn() is a method on CCoinsViewCache, because
@@ -535,31 +563,35 @@ struct CMutableTransaction
         SerializeTransaction(*this, s);
     }
 
+
     template <typename Stream>
     inline void Unserialize(Stream& s) {
         UnserializeTransaction(*this, s);
     }
 
+    template <typename Stream>
+    CMutableTransaction(deserialize_type, Stream& s) {
+        Unserialize(s);
+    }
+
+    /*template <typename Stream>
+    CMutableTransaction(deserialize_type, Stream& s) {
+        Unserialize(s);
+    }*/
+
     /** Compute the hash of this CMutableTransaction. This is computed on the
      * fly, as opposed to GetHash() in CTransaction, which uses a cached result.
      */
-    uint256 GetHash() const;
-
     std::string ToString() const;
-    friend bool operator==(const CMutableTransaction& a, const CMutableTransaction& b)
-    {
-        return a.GetHash() == b.GetHash();
-    }
-
-    friend bool operator!=(const CMutableTransaction& a, const CMutableTransaction& b)
-    {
-        return !(a == b);
-    }
+    uint256 GetHash() const;
 };
+
 
 typedef std::shared_ptr<const CTransaction> CTransactionRef;
 static inline CTransactionRef MakeTransactionRef() { return std::make_shared<const CTransaction>(); }
 template <typename Tx> static inline CTransactionRef MakeTransactionRef(Tx&& txIn) { return std::make_shared<const CTransaction>(std::forward<Tx>(txIn)); }
+static inline CTransactionRef MakeTransactionRef(const CTransactionRef& txIn) { return txIn; }
+static inline CTransactionRef MakeTransactionRef(CTransactionRef&& txIn) { return std::move(txIn); }
 
 /** Compute the weight of a transaction, as defined by BIP 141 */
 int64_t GetTransactionWeight(const CTransaction &tx);
