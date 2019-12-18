@@ -18,6 +18,7 @@
 #include "zerocoin_params.h"
 #include "util.h"
 #include "univalue.h"
+#include "chain.h"
 #include "chainparams.h"
 #include "coin_containers.h"
 #include "streams.h"
@@ -177,6 +178,9 @@ public:
     //! pointer to the index of some further predecessor of this block
     CBlockIndex* pskip;
 
+    //ppcoin: trust score of block chain
+    uint256 bnChainTrust;
+
     //! height of the entry in the chain. The genesis block has height 0
     int nHeight;
 
@@ -192,6 +196,8 @@ public:
     //! (memory only) Total amount of work (expected number of hashes) in the chain up to and including this block
     arith_uint256 nChainWork;
 
+    uint256 hashProof;
+
     //! Number of transactions in this block.
     //! Note: in a potential headers-first mode, this number cannot be relied upon
     unsigned int nTx;
@@ -203,6 +209,16 @@ public:
 
     //! Verification status of this block. See enum BlockStatus
     unsigned int nStatus;
+
+    bool fProofOfStake;
+    //COutPoint prevoutStake;
+
+    unsigned int nFlags; // ppcoin: block index flags
+    enum {
+        BLOCK_PROOF_OF_STAKE = (1 << 0), // is proof-of-stake block
+        BLOCK_STAKE_ENTROPY = (1 << 1),  // entropy bit for stake modifier
+        BLOCK_STAKE_MODIFIER = (1 << 2), // regenerated stake modifier
+    };
 
     //! block header
     int nVersion;
@@ -216,6 +232,16 @@ public:
     uint256 mtpHashValue;
     // Reserved fields
     uint256 reserved[2];
+
+    // proof-of-stake specific fields
+    arith_uint256 GetBlockTrust() const;
+    arith_uint256 nStakeModifier;             // hash modifier for proof-of-stake
+    //unsigned int nStakeModifierChecksum; // checksum of index; in-memeory only
+    COutPoint prevoutStake;
+    unsigned int nStakeTime;
+    uint256 hashProofOfStake;
+    int64_t nMint;
+    int64_t nMoneySupply;
 
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     uint32_t nSequenceId;
@@ -264,6 +290,17 @@ public:
         nBits          = 0;
         nNonce         = 0;
 
+        //Proof-of-Stake
+        fProofOfStake = false;
+
+        nMint = 0;
+        nMoneySupply = 0;
+        nFlags = 0;
+        nStakeModifier = 0;
+        //nStakeModifierChecksum = 0;
+        prevoutStake.SetNull();
+        nStakeTime = 0;
+
         nVersionMTP = 0;
         mtpHashValue = reserved[0] = reserved[1] = uint256();
 
@@ -288,6 +325,18 @@ public:
         nTime          = block.nTime;
         nBits          = block.nBits;
         nNonce         = block.nNonce;
+
+        nMoneySupply   = 0;
+        nStakeModifier = 0;
+        prevoutStake   = block.prevoutStake; // qtum
+        hashProof = uint256();
+
+        //Proof of Stake
+        bnChainTrust = uint256();
+        nMint = 0;
+        nFlags = 0;
+        //nStakeModifierChecksum = 0;
+        hashProofOfStake = uint256();
 
         if (block.IsMTP()) {
             nVersionMTP = block.nVersionMTP;
@@ -367,13 +416,13 @@ public:
         return pbegin[(pend - pbegin)/2];
     }
 
-    std::string ToString() const
+/*    std::string ToString() const
     {
         return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s)",
             pprev, nHeight,
             hashMerkleRoot.ToString(),
             GetBlockHash().ToString());
-    }
+    }*/
 
     UniValue ToJSON() const
     {
@@ -396,6 +445,46 @@ public:
         ret.push_back(Pair("nonce", to_string(nNonce)));
 
         return ret;
+    }
+
+    bool IsProofOfWork() const
+    {
+        return !(nFlags & BLOCK_PROOF_OF_STAKE);
+    }
+
+    bool IsProofOfStake() const
+    {
+        return (nFlags & BLOCK_PROOF_OF_STAKE);
+    }
+
+    void SetProofOfStake()
+    {
+        nFlags |= BLOCK_PROOF_OF_STAKE;
+    }
+
+    unsigned int GetStakeEntropyBit() const;
+
+    bool SetStakeEntropyBit(unsigned int nEntropyBit)
+    {
+        if (nEntropyBit > 1)
+            return false;
+        nFlags |= (nEntropyBit ? BLOCK_STAKE_ENTROPY : 0);
+        return true;
+    }
+
+    bool GeneratedStakeModifier() const
+    {
+        return (nFlags & BLOCK_STAKE_MODIFIER);
+    }
+
+    void SetStakeModifier(uint64_t nModifier, bool fGeneratedStakeModifier);
+
+    std::string ToString() const
+    {
+        return strprintf("CBlockIndex(pprev=%p, nHeight=%d, merkle=%s, hashBlock=%s)",
+                         pprev, nHeight,
+                         hashMerkleRoot.ToString(),
+                         GetBlockHash().ToString());
     }
 
     //! Check whether this block index entry is valid up to the passed validity level.
@@ -468,6 +557,20 @@ public:
         if (nStatus & BLOCK_HAVE_UNDO)
             READWRITE(VARINT(nUndoPos));
 
+        READWRITE(nMint);
+        READWRITE(nMoneySupply);
+        READWRITE(nFlags);
+        READWRITE(nStakeModifier);
+        if (IsProofOfStake()) {
+            READWRITE(prevoutStake);
+            READWRITE(nStakeTime);
+            READWRITE(hashProofOfStake);
+        } else {
+            const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
+            const_cast<CDiskBlockIndex*>(this)->nStakeTime = 0;
+            const_cast<CDiskBlockIndex*>(this)->hashProofOfStake = uint256();
+        }
+
         // block header
         READWRITE(this->nVersion);
         READWRITE(hashPrev);
@@ -518,7 +621,7 @@ public:
         return block.GetHash();
     }
 
-    std::string ToString() const
+   /* std::string ToString() const
     {
         std::string str = "CDiskBlockIndex(";
         str += CBlockIndex::ToString();
@@ -526,7 +629,7 @@ public:
             GetBlockHash().ToString(),
             hashPrev.ToString());
         return str;
-    }
+    }*/
 };
 
 /** An in-memory indexed chain of blocks. */

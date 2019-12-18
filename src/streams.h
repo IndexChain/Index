@@ -554,6 +554,13 @@ public:
         }
     }
 
+    // Disallow copies
+    CBufferedFile(const CBufferedFile&) = delete;
+    CBufferedFile& operator=(const CBufferedFile&) = delete;
+
+    int GetVersion() const { return nVersion; }
+    int GetType() const { return nType; }
+
     // check whether we're at the end of the source file
     bool eof() const {
         return nReadPos == nSrcPos && feof(src);

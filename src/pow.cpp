@@ -22,6 +22,13 @@
  bool USE_DGW3 =true;
 static CBigNum bnProofOfWorkLimit(~arith_uint256(0) >> 8);
 
+const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake)
+{
+    while (pindex && pindex->pprev && (pindex->IsProofOfStake() != fProofOfStake))
+        pindex = pindex->pprev;
+    return pindex;
+}
+
 double GetDifficultyHelper(unsigned int nBits) {
     int nShift = (nBits >> 24) & 0xff;
     double dDiff = (double) 0x0000ffff / (double) (nBits & 0x00ffffff);
@@ -197,6 +204,7 @@ unsigned int PoSWorkRequired(const CBlockIndex* pindexLast, const Consensus::Par
 
 // Index GetNextWorkRequired
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params, bool fProofOfStake) {
+    unsigned int nBits = 0;
     // Special rule for regtest: we never retarget.
     if (params.fPowNoRetargeting) {
         return pindexLast->nBits;
@@ -204,9 +212,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus:
     if(fProofOfStake)
         nBits = PoSWorkRequired(pindexLast, params);
     else if(USE_DGW3)
-       return DarkGravityWave(pindexLast, pblock, params);
+       return DarkGravityWave(pindexLast, params);
     else if (USE_LWMA)
-       return LwmaCalculateNextWorkRequired(pindexLast, pblock, params);
+       return LwmaCalculateNextWorkRequired(pindexLast, params);
 
 }
 

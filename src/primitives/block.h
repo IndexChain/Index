@@ -98,6 +98,9 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
+    COutPoint prevoutStake;
+    uint8_t fProofOfStake;
+    uint8_t fProofOfFullNode;
 
     // Index - MTP
     int32_t nVersionMTP = 0x1000;
@@ -134,6 +137,11 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        READWRITE(prevoutStake);
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(fProofOfStake);
+            READWRITE(fProofOfFullNode);
+        }
         // Index - MTP
         // On read: allocate and read. On write: write only if already allocated
         if (IsMTP()) {
@@ -178,6 +186,9 @@ public:
         nNonce = 0;
         isComputed = -1;
         powHash.SetNull();
+        fProofOfStake = 0;
+        fProofOfFullNode = 0;
+        prevoutStake.SetNull();
 
         // Index - MTP
         mtpHashData.reset();

@@ -18,6 +18,7 @@
 #include "net.h"
 #include "policy/policy.h"
 #include "pow.h"
+#include "pos.h"
 #include "primitives/transaction.h"
 #include "script/standard.h"
 #include "timedata.h"
@@ -136,7 +137,8 @@ void BlockAssembler::resetBlock()
 
 CBlockTemplate* BlockAssembler::CreateNewBlock(
     const CScript& scriptPubKeyIn,
-    const vector<uint256>& tx_ids)
+    const vector<uint256>& tx_ids,
+    bool fProofOfStake)
 {
     // Create new block
     LogPrintf("BlockAssembler::CreateNewBlock()\n");
@@ -315,6 +317,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         if (chainparams.MineBlocksOnDemand())
             pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
 
+        uint32_t txProofTime = nTime == 0 ? GetAdjustedTime() : nTime;
         if(txProofTime == 0) {
             txProofTime = GetAdjustedTime();
         }
@@ -324,7 +327,6 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         if (!fProofOfStake)
             UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
         pblock->nBits = GetNextWorkRequired(pindexPrev, chainparams.GetConsensus(), fProofOfStake);
-        const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
 
         int64_t nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST)
                                   ? nMedianTimePast
@@ -1339,9 +1341,9 @@ bool CheckStake(const std::shared_ptr<const CBlock> pblock, CWallet& wallet)
         return error("CheckStake() : proof-of-stake checking failed");
 
     //// debug print
-    LogPrint(BCLog::COINSTAKE, "CheckStake() : new proof-of-stake block found  \n  hash: %s \nproofhash: %s  \ntarget: %s\n", hashBlock.GetHex(), proofHash.GetHex(), hashTarget.GetHex());
-    LogPrint(BCLog::COINSTAKE, "%s\n", pblock->ToString());
-    LogPrint(BCLog::COINSTAKE, "out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
+    LogPrint("CheckStake() : new proof-of-stake block found  \n  hash: %s \nproofhash: %s  \ntarget: %s\n", hashBlock.GetHex(), proofHash.GetHex(), hashTarget.GetHex());
+    LogPrint("%s\n", pblock->ToString());
+    LogPrint("out %s\n", FormatMoney(pblock->vtx[1]->GetValueOut()));
 
     // Found a solution
     {
