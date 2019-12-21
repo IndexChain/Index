@@ -275,11 +275,11 @@ UniValue importprunedfunds(const UniValue& params, bool fHelp)
             "2. \"txoutproof\"     (string, required) The hex output from gettxoutproof that contains the transaction\n"
         );
 
-    CMutableTransaction tx;
-    if (!DecodeHexTx(tx, request.params[0].get_str()))
+    CTransaction tx;
+    if (!DecodeHexTx(tx, params[0].get_str()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
     uint256 hashTx = tx.GetHash();
-    CWalletTx wtx(pwalletMain, MakeTransactionRef(std::move(tx)));
+    CWalletTx wtx(pwalletMain,tx);
 
     CDataStream ssMB(ParseHexV(params[1], "proof"), SER_NETWORK, PROTOCOL_VERSION);
     CMerkleBlock merkleBlock;
@@ -312,8 +312,9 @@ UniValue importprunedfunds(const UniValue& params, bool fHelp)
 
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    if (pwalletMain->IsMine(wtx)) {
-        pwalletMain->AddToWallet(wtx, false);
+    if (pwalletMain->IsMine(tx)) {
+        CWalletDB walletdb(pwalletMain->strWalletFile, "r+", false);
+        pwalletMain->AddToWallet(wtx, false, &walletdb);
         return NullUniValue;
     }
 

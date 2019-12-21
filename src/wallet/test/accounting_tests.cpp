@@ -88,7 +88,7 @@ GetResults(CWalletDB& walletdb, std::map<CAmount, CAccountingEntry>& results)
     {
         CMutableTransaction tx(wtx);
         --tx.nLockTime;  // Just to change the hash :)
-        wtx.SetTx(MakeTransactionRef(std::move(tx)));
+        *static_cast<CTransaction*>(&wtx) = CTransaction(tx);
     }
     pwalletMain->AddToWallet(wtx, false, &walletdb);
     vpwtx.push_back(&pwalletMain->mapWallet[wtx.GetHash()]);
@@ -98,7 +98,7 @@ GetResults(CWalletDB& walletdb, std::map<CAmount, CAccountingEntry>& results)
     {
         CMutableTransaction tx(wtx);
         --tx.nLockTime;  // Just to change the hash :)
-        wtx.SetTx(MakeTransactionRef(std::move(tx)));
+        *static_cast<CTransaction*>(&wtx) = CTransaction(tx);
     }
     pwalletMain->AddToWallet(wtx, false, &walletdb);
     vpwtx.push_back(&pwalletMain->mapWallet[wtx.GetHash()]);

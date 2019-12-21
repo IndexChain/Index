@@ -267,19 +267,19 @@ UniValue getrawtransaction(const UniValue& params, bool fHelp)
     if (params.size() > 1)
         fVerbose = (params[1].get_int() != 0);
 
-    CTransactionRef tx;
+    CTransaction tx;
     uint256 hashBlock;
     if (!GetTransaction(hash, tx, Params().GetConsensus(), hashBlock, true))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
 
-    string strHex = EncodeHexTx(*tx);
+    string strHex = EncodeHexTx(tx, RPCSerializationFlags());
 
     if (!fVerbose)
         return strHex;
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("hex", strHex));
-    TxToJSON(*tx, hashBlock, result);
+    TxToJSON(tx, hashBlock, result);
     return result;
 }
 
@@ -338,7 +338,7 @@ UniValue gettxoutproof(const UniValue& params, bool fHelp)
 
     if (pblockindex == NULL)
     {
-        CTransactionRef tx;
+        CTransaction tx;
         if (!GetTransaction(oneTxid, tx, Params().GetConsensus(), hashBlock, false) || hashBlock.IsNull())
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Transaction not yet in block");
         if (!mapBlockIndex.count(hashBlock))
@@ -569,13 +569,13 @@ UniValue decoderawtransaction(const UniValue& params, bool fHelp)
     LOCK(cs_main);
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR));
 
-    CMutableTransaction mtx;
+    CTransaction tx;
 
-    if (!DecodeHexTx(mtx, request.params[0].get_str(), true))
+    if (!DecodeHexTx(tx, params[0].get_str(), true))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
 
     UniValue result(UniValue::VOBJ);
-    TxToJSON(CTransaction(std::move(mtx)), uint256(), result);
+    TxToJSON(tx, uint256(), result);
 
     return result;
 }
@@ -932,10 +932,9 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
     RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR)(UniValue::VBOOL));
 
     // parse hex string from parameter
-    CMutableTransaction mtx;
-    if (!DecodeHexTx(mtx, request.params[0].get_str()))
+    CTransaction tx;
+    if (!DecodeHexTx(tx, params[0].get_str()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
-    CTransaction tx(std::move(mtx));
     uint256 hashTx = tx.GetHash();
 
     CAmount nMaxRawTxFee = maxTxFee;

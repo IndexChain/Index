@@ -69,7 +69,7 @@ CAmount WalletModel::getBalance(const CCoinControl *coinControl, bool fExcludeLo
         wallet->AvailableCoins(vCoins, true, coinControl);
         BOOST_FOREACH(const COutput& out, vCoins)
             if(out.fSpendable)
-                nBalance += out.tx->tx->vout[out.i].nValue;
+                nBalance += out.tx->vout[out.i].nValue;
 
         return nBalance;
     }
@@ -716,15 +716,15 @@ void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins, 
 
         if(nCoinType == ALL_COINS){
             // We are now taking ALL_COINS to mean everything sans mints
-            if(out.tx.tx->vout[out.i].scriptPubKey.IsZerocoinMint() || out.tx.tx->vout[out.i].scriptPubKey.IsSigmaMint() || out.tx.tx->vout[out.i].scriptPubKey.IsZerocoinRemint())
+            if(out.tx->vout[out.i].scriptPubKey.IsZerocoinMint() || out.tx->vout[out.i].scriptPubKey.IsSigmaMint() || out.tx->vout[out.i].scriptPubKey.IsZerocoinRemint())
                 continue;
         } else if(nCoinType == ONLY_MINTS){
             // Do not consider anything other than mints
-            if(!(out.tx.tx->vout[out.i].scriptPubKey.IsZerocoinMint() || out.tx.tx->vout[out.i].scriptPubKey.IsSigmaMint() || out.tx.tx->vout[out.i].scriptPubKey.IsZerocoinRemint()))
+            if(!(out.tx->vout[out.i].scriptPubKey.IsZerocoinMint() || out.tx->vout[out.i].scriptPubKey.IsSigmaMint() || out.tx->vout[out.i].scriptPubKey.IsZerocoinRemint()))
                 continue;
         }
 
-        if (outpoint.n < out.tx.tx->vout.size() && wallet->IsMine(out.tx.tx->vout[outpoint.n]) == ISMINE_SPENDABLE)
+        if (outpoint.n < out.tx->vout.size() && wallet->IsMine(out.tx->vout[outpoint.n]) == ISMINE_SPENDABLE)
             vCoins.push_back(out);
     }
 
@@ -732,14 +732,14 @@ void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins, 
     {
         COutput cout = out;
 
-        while (cout.tx.tx->IsChange(static_cast<uint32_t>(cout.i)) && cout.tx->vin.size() > 0 && wallet->IsMine(cout.tx->vin[0]))
+        while (cout.tx->IsChange(static_cast<uint32_t>(cout.i)) && cout.tx->vin.size() > 0 && wallet->IsMine(cout.tx->vin[0]))
         {
-            if (!wallet->mapWallet.count(cout.tx->tx->vin[0].prevout.hash)) break;
-            cout = COutput(&wallet->mapWallet[cout.tx->tx->vin[0].prevout.hash], cout.tx->tx->vin[0].prevout.n, 0, true, true);
+            if (!wallet->mapWallet.count(cout.tx->vin[0].prevout.hash)) break;
+            cout = COutput(&wallet->mapWallet[cout.tx->vin[0].prevout.hash], cout.tx->vin[0].prevout.n, 0, true, true);
         }
 
         CTxDestination address;
-        if(cout.tx.tx->IsZerocoinMint() || cout.tx.tx->IsSigmaMint() || cout.tx.tx->IsZerocoinRemint()){
+        if(cout.tx->IsZerocoinMint() || cout.tx->IsSigmaMint() || cout.tx->IsZerocoinRemint()){
             mapCoins[QString::fromStdString("(mint)")].push_back(out);
             continue;
         }
