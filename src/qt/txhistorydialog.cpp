@@ -217,7 +217,7 @@ int TXHistoryDialog::PopulateHistoryMap()
             ui->txHistoryTable->setSortingEnabled(true); // re-enable sorting
         }
 
-        CTransaction wtx;
+        CTransactionRef wtx;
         uint256 blockHash;
         if (!GetTransaction(txHash, wtx, Params().GetConsensus(), blockHash, true)) continue;
         if (blockHash.IsNull() || NULL == GetBlockIndex(blockHash)) {

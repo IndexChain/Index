@@ -595,7 +595,7 @@ UniValue exodus_getpayload(const UniValue& params, bool fHelp)
 
     uint256 txid = ParseHashV(params[0], "txid");
 
-    CTransaction tx;
+    CTransactionRef tx;
     uint256 blockHash;
     if (!GetTransaction(txid, tx, Params().GetConsensus(), blockHash, true)) {
         PopulateFailure(MP_TX_NOT_FOUND);
@@ -1140,7 +1140,7 @@ UniValue exodus_getcrowdsale(const UniValue& params, bool fHelp)
 
     const uint256& creationHash = sp.txid;
 
-    CTransaction tx;
+    CTransactionRef tx;
     uint256 hashBlock;
     if (!GetTransaction(creationHash, tx, Params().GetConsensus(), hashBlock, true)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");
@@ -1266,7 +1266,7 @@ UniValue exodus_getactivecrowdsales(const UniValue& params, bool fHelp)
 
         const uint256& creationHash = sp.txid;
 
-        CTransaction tx;
+        CTransactionRef tx;
         uint256 hashBlock;
         if (!GetTransaction(creationHash, tx, Params().GetConsensus(), hashBlock, true)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available about transaction");

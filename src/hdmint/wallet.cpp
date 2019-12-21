@@ -276,7 +276,7 @@ void CHDMintWallet::SyncWithChain(bool fGenerateMintPool, boost::optional<std::l
                 found = true;
 
                 uint256 hashBlock;
-                CTransaction tx;
+                CTransactionRef tx;
                 if (!GetTransaction(txHash, tx, Params().GetConsensus(), hashBlock, true)) {
                     LogPrintf("%s : failed to get transaction for mint %s!\n", __func__, pMint.first.GetHex());
                     found = false;
@@ -413,7 +413,7 @@ bool CHDMintWallet::SetMintSeedSeen(std::pair<uint256,MintPoolEntry> mintPoolEnt
     CWalletDB walletdb(strWalletFile);
     int nHeightTx;
     uint256 txidSpend;
-    CTransaction txSpend;
+    CTransactionRef txSpend;
     if (IsSerialInBlockchain(hashSerial, nHeightTx, txidSpend, txSpend)) {
         //Find transaction details and make a wallettx and add to wallet
         LogPrintf("%s: Mint object is spent. Setting used..\n", __func__);
@@ -757,7 +757,7 @@ bool CHDMintWallet::RegenerateMint(const CHDMint& dMint, CSigmaEntry& sigma)
  * @param tx full transaction object
  * @return success
  */
-bool CHDMintWallet::IsSerialInBlockchain(const uint256& hashSerial, int& nHeightTx, uint256& txidSpend, CTransaction& tx)
+bool CHDMintWallet::IsSerialInBlockchain(const uint256& hashSerial, int& nHeightTx, uint256& txidSpend, CTransactionRef& tx)
 {
     txidSpend.SetNull();
     CMintMeta mMeta;

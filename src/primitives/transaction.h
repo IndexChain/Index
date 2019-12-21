@@ -362,49 +362,101 @@ inline void UnserializeTransaction(TxType& tx, Stream& s) {
     s >> tx.nLockTime;
 }
 
-template<typename Stream, typename TxType>
-inline void SerializeTransaction(const TxType& tx, Stream& s) {
-    const bool fAllowWitness = !(s.GetVersion() & SERIALIZE_TRANSACTION_NO_WITNESS);
-
-    s << tx.nVersion;
+/**
+ * Basic transaction serialization format:
+ * - int32_t nVersion
+ * - std::vector<CTxIn> vin
+ * - std::vector<CTxOut> vout
+ * - uint32_t nLockTime
+ *
+ * Extended transaction serialization format:
+ * - int32_t nVersion
+ * - unsigned char dummy = 0x00
+ * - unsigned char flags (!= 0)
+ * - std::vector<CTxIn> vin
+ * - std::vector<CTxOut> vout
+ * - if (flags & 1):
+ *   - CTxWitness wit;
+ * - uint32_t nLockTime
+ */
+template<typename Stream, typename Operation, typename TxType>
+inline void SerializeTransaction(TxType& tx, Stream& s, Operation ser_action, int nType, int nVersion) {
+    READWRITE(*const_cast<int32_t*>(&tx.nVersion));
     unsigned char flags = 0;
-    // Consistency check
-    assert(tx.wit.vtxinwit.size() <= tx.vin.size());
-    if (fAllowWitness) {
-        /* Check whether witnesses need to be serialized. */
-        if (!tx.wit.IsNull()) {
-            flags |= 1;
+    if (ser_action.ForRead()) {
+        const_cast<std::vector<CTxIn>*>(&tx.vin)->clear();
+        const_cast<std::vector<CTxOut>*>(&tx.vout)->clear();
+        const_cast<CTxWitness*>(&tx.wit)->SetNull();
+        /* Try to read the vin. In case the dummy is there, this will be read as an empty vector. */
+        READWRITE(*const_cast<std::vector<CTxIn>*>(&tx.vin));
+        if (tx.vin.size() == 0 && !(nVersion & SERIALIZE_TRANSACTION_NO_WITNESS)) {
+            /* We read a dummy or an empty vin. */
+            READWRITE(flags);
+            if (flags != 0) {
+                READWRITE(*const_cast<std::vector<CTxIn>*>(&tx.vin));
+                READWRITE(*const_cast<std::vector<CTxOut>*>(&tx.vout));
+            }
+        } else {
+            /* We read a non-empty vin. Assume a normal vout follows. */
+            READWRITE(*const_cast<std::vector<CTxOut>*>(&tx.vout));
         }
-    }
-    if (flags) {
-        /* Use extended format in case witnesses are to be serialized. */
-        std::vector<CTxIn> vinDummy;
-        s << vinDummy;
-        s << flags;
-    }
-    s << tx.vin;
-    s << tx.vout;
-    if (flags & 1) {
-        for (size_t i = 0; i < tx.vin.size(); i++) {
-            if (i < tx.wit.vtxinwit.size()) {
-                s << tx.wit.vtxinwit[i];
-            } else {
-                s << CTxInWitness();
+        if ((flags & 1) && !(nVersion & SERIALIZE_TRANSACTION_NO_WITNESS)) {
+            /* The witness flag is present, and we support witnesses. */
+            flags ^= 1;
+            const_cast<CTxWitness*>(&tx.wit)->vtxinwit.resize(tx.vin.size());
+            READWRITE(tx.wit);
+        }
+        if (flags) {
+            /* Unknown flag in the serialization */
+            throw std::ios_base::failure("Unknown transaction optional data");
+        }
+    } else {
+        // Consistency check
+        assert(tx.wit.vtxinwit.size() <= tx.vin.size());
+        if (!(nVersion & SERIALIZE_TRANSACTION_NO_WITNESS)) {
+            /* Check whether witnesses need to be serialized. */
+            if (!tx.wit.IsNull()) {
+                flags |= 1;
             }
         }
+        if (flags) {
+            /* Use extended format in case witnesses are to be serialized. */
+            std::vector<CTxIn> vinDummy;
+            READWRITE(vinDummy);
+            READWRITE(flags);
+        }
+        READWRITE(*const_cast<std::vector<CTxIn>*>(&tx.vin));
+        READWRITE(*const_cast<std::vector<CTxOut>*>(&tx.vout));
+        if (flags & 1) {
+            const_cast<CTxWitness*>(&tx.wit)->vtxinwit.resize(tx.vin.size());
+            READWRITE(tx.wit);
+        }
     }
-    s << tx.nLockTime;
+    READWRITE(*const_cast<uint32_t*>(&tx.nLockTime));
 }
 
+enum GetMinFee_mode
+{
+    GMF_BLOCK,
+    GMF_RELAY,
+    GMF_SEND,
+};
 
+/** The basic transaction that is broadcasted on the network and contained in
+ * blocks.  A transaction can contain multiple inputs and outputs.
+ */
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */
 class CTransaction
 {
+private:
+    /** Memory only. */
+    const uint256 hash;
+
 public:
     // Default transaction version.
-    static const int32_t CURRENT_VERSION = 1;
+    static const int32_t CURRENT_VERSION=1;
 
     // Changing the default transaction version requires a two step process: first
     // adapting relay policy by bumping MAX_STANDARD_VERSION, and then later date
@@ -425,28 +477,23 @@ public:
     CTxWitness wit; // Not const: can change without invalidating the txid cache
     const uint32_t nLockTime;
 
-private:
-    /** Memory only. */
-    const uint256 hash;
-
-    uint256 ComputeHash() const;
-
-public:
     /** Construct a CTransaction that qualifies as IsNull() */
     CTransaction();
 
     /** Convert a CMutableTransaction into a CTransaction. */
     CTransaction(const CMutableTransaction &tx);
 
-    template <typename Stream>
-    inline void Serialize(Stream& s) const {
-        SerializeTransaction(*this, s);
-    }
+    CTransaction& operator=(const CTransaction& tx);
 
-    /** This deserializing constructor is provided instead of an Unserialize method.
-     *  Unserialize is not possible, since it would require overwriting const fields. */
-    template <typename Stream>
-    CTransaction(deserialize_type, Stream& s) : CTransaction(CMutableTransaction(deserialize, s)) {}
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
+        SerializeTransaction(*this, s, ser_action, nType, nVersion);
+        if (ser_action.ForRead()) {
+            UpdateHash();
+        }
+    }
 
     bool IsNull() const {
         return vin.empty() && vout.empty();
@@ -473,13 +520,6 @@ public:
 
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
-
-    /**
-     * Get the total transaction size in bytes, including witness data.
-     * "Total Size" defined in BIP141 and BIP144.
-     * @return Total transaction size in bytes
-     */
-    unsigned int GetTotalSize() const;
 
     bool IsCoinBase() const;
 
@@ -509,6 +549,8 @@ public:
     }
 
     std::string ToString() const;
+
+    void UpdateHash() const;
 };
 
 /** A mutable version of CTransaction. */
@@ -530,7 +572,7 @@ struct CMutableTransaction
 
 
     template <typename Stream>
-    inline void Unserialize(Stream& s) {
+    inline void Unserialize(Stream& s,int ss,int v) {
         UnserializeTransaction(*this, s);
     }
 
@@ -553,5 +595,7 @@ struct CMutableTransaction
 
 /** Compute the weight of a transaction, as defined by BIP 141 */
 int64_t GetTransactionWeight(const CTransaction &tx);
-
+typedef std::shared_ptr<const CTransaction> CTransactionRef;
+static inline CTransactionRef MakeTransactionRef() { return std::make_shared<const CTransaction>(); }
+template <typename Tx> static inline CTransactionRef MakeTransactionRef(Tx&& txIn) { return std::make_shared<const CTransaction>(std::forward<Tx>(txIn)); }
 #endif // BITCOIN_PRIMITIVES_TRANSACTION_H

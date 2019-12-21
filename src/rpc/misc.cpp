@@ -1068,7 +1068,7 @@ bool getZerocoinSupply(CAmount & amount) {
     CAmount amt = 0;
 
     for(idx_rec const & idr : addressIndex) {
-        CTransaction tx;
+        CTransactionRef tx;
         uint256 hash;
 
         if(!GetTransaction(idr.first.txhash, tx, Params().GetConsensus(), hash, true))

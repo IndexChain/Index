@@ -526,7 +526,7 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate, int
         return true;
     }
     // No conflicts were found so far, check to see if it was already included in block
-    CTransaction txTmp;
+    CTransactionRef txTmp;
     uint256 hashBlock;
     if(GetTransaction(txHash, txTmp, Params().GetConsensus(), hashBlock, true) && hashBlock != uint256()) {
         LogPrint("instantsend", "CInstantSend::ResolveConflicts -- Done, %s is included in block %s\n", txHash.ToString(), hashBlock.ToString());
@@ -875,7 +875,7 @@ bool CTxLockRequest::IsValid(bool fRequireUnspent) const
             // Normally above sould be enough, but in case we are reprocessing this because of
             // a lot of legit orphan votes we should also check already spent outpoints.
             if(fRequireUnspent) return false;
-            CTransaction txOutpointCreated;
+            CTransactionRef txOutpointCreated;
             uint256 nHashOutpointConfirmed;
             if(!GetTransaction(txin.prevout.hash, txOutpointCreated, Params().GetConsensus(), nHashOutpointConfirmed, true) || nHashOutpointConfirmed == uint256()) {
                 LogPrint("instantsend", "CTxLockRequest::IsValid -- Failed to find outpoint %s\n", txin.prevout.ToStringShort());
@@ -959,7 +959,7 @@ bool CTxLockVote::IsValid(CNode* pnode) const
         LogPrint("instantsend", "CTxLockVote::IsValid -- Failed to find UTXO %s\n", outpoint.ToStringShort());
         // Validating utxo set is not enough, votes can arrive after outpoint was already spent,
         // if lock request was mined. We should process them too to count them later if they are legit.
-        CTransaction txOutpointCreated;
+        CTransactionRef txOutpointCreated;
         uint256 nHashOutpointConfirmed;
         if(!GetTransaction(outpoint.hash, txOutpointCreated, Params().GetConsensus(), nHashOutpointConfirmed, true) || nHashOutpointConfirmed == uint256()) {
             LogPrint("instantsend", "CTxLockVote::IsValid -- Failed to find outpoint %s\n", outpoint.ToStringShort());

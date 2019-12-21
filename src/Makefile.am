@@ -453,7 +453,6 @@ libbitcoin_consensus_a_SOURCES = \
   utilstrencodings.cpp \
   utilstrencodings.h \
   version.h \
-  auxpow.h \
   crypto/Lyra2Z/Lyra2.h \
   crypto/Lyra2Z/Lyra2.c \
   crypto/Lyra2Z/Lyra2Z.h \
@@ -485,7 +484,6 @@ libbitcoin_common_a_SOURCES = \
   base58.cpp \
   chainparams.cpp \
   coins.cpp \
-  auxpow.cpp \
   compressor.cpp \
   core_read.cpp \
   core_write.cpp \
@@ -645,9 +643,9 @@ index_cli_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-zcoin_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+index_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 if ENABLE_CLIENTAPI
-zcoin_cli_LDADD += $(MINIZIP_LIBS)
+index_cli_LDADD += $(MINIZIP_LIBS)
 endif
 
 # bitcoin-tx binary #
@@ -668,9 +666,9 @@ index_tx_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-zcoin_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+index_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 if ENABLE_CLIENTAPI
-zcoin_tx_LDADD += $(MINIZIP_LIBS)
+index_tx_LDADD += $(MINIZIP_LIBS)
 endif
 
 # bitcoinconsensus library #
