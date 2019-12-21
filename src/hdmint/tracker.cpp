@@ -442,7 +442,7 @@ bool CHDMintTracker::UpdateMetaStatus(const std::set<uint256>& setMempool, CMint
     bool isUsed = isPendingSpend || isConfirmedSpend;
 
     if ((mint.nHeight==-1) || (mint.nId==-1) || !isMintInChain || isUsed != mint.isUsed) {
-        CTransactionRef tx;
+        CTransaction tx;
         uint256 hashBlock;
 
         // Txid will be marked 0 if there is no knowledge of the final tx hash yet

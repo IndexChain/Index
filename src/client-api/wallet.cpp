@@ -71,7 +71,7 @@ CAmount getLockUnspentAmount()
 {
     LOCK2(cs_main, pwalletMain->cs_wallet);
 
-    CTransactionRef tx;
+    CTransaction tx;
     uint256 hashBlock;
     uint256 hash;
     vector<COutPoint> vOutpts;

@@ -227,7 +227,7 @@ void CDarksendPool::ProcessMessage(CNode *pfrom, std::string &strCommand, CDataS
 
                 LogPrint("privatesend", "DSVIN -- txin=%s\n", txin.ToString());
 
-                CTransactionRef txPrev;
+                CTransaction txPrev;
                 uint256 hash;
                 if (GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true)) {
                     if (txPrev.vout.size() > txin.prevout.n)
@@ -920,7 +920,7 @@ bool CDarksendPool::IsCollateralValid(const CTransaction &txCollateral) {
 
     BOOST_FOREACH(
     const CTxIn txin, txCollateral.vin) {
-        CTransactionRef txPrev;
+        CTransaction txPrev;
         uint256 hash;
         if (GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true)) {
             if (txPrev.vout.size() > txin.prevout.n)
@@ -2307,7 +2307,7 @@ bool CDarkSendSigner::IsVinAssociatedWithPubkey(const CTxIn &txin, const CPubKey
     CScript payee;
     payee = GetScriptForDestination(pubkey.GetID());
 
-    CTransactionRef tx;
+    CTransaction tx;
     uint256 hash;
     if (GetTransaction(txin.prevout.hash, tx, Params().GetConsensus(), hash, true)) {
         BOOST_FOREACH(CTxOut out, tx.vout)

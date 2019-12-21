@@ -805,7 +805,7 @@ bool CZnodeBroadcast::CheckOutpoint(int &nDos) {
     // verify that sig time is legit in past
     // should be at least not earlier than block when 1000 IDX tx got nZnodeMinimumConfirmations
     uint256 hashBlock = uint256();
-    CTransactionRef tx2;
+    CTransaction tx2;
     GetTransaction(vin.prevout.hash, tx2, Params().GetConsensus(), hashBlock, true);
     {
         LOCK(cs_main);

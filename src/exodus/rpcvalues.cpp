@@ -171,14 +171,14 @@ uint8_t ParseMetaDExAction(const UniValue& value)
 
 CTransaction ParseTransaction(const UniValue& value)
 {
-    CMutableTransaction mtx;
+    CTransaction tx;
     if (value.isNull() || value.get_str().empty()) {
-        return CTransaction(std::move(mtx));
+        return tx;
     }
-    if (!DecodeHexTx(mtx, value.get_str())) {
+    if (!DecodeHexTx(tx, value.get_str())) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Transaction deserialization failed");
     }
-        return CTransaction(std::move(mtx));
+    return tx;
 }
 
 CMutableTransaction ParseMutableTransaction(const UniValue& value)

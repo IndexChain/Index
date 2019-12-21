@@ -1904,15 +1904,15 @@ bool AcceptToMemoryPool(
 }
 
 /** Return transaction in txOut, and if it was found inside a block, its hash is placed in hashBlock */
-bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus::Params& consensusParams, uint256 &hashBlock, bool fAllowSlow)
-{
+bool
+GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::Params &consensusParams, uint256 &hashBlock,
+               bool fAllowSlow) {
     CBlockIndex *pindexSlow = NULL;
 
     LOCK(cs_main);
 
-    std::shared_ptr<const CTransactionRef> ptx = mempool.getx(hash);
-    if (ptx)
-    {
+    std::shared_ptr<const CTransaction> ptx = mempool.get(hash);
+    if (ptx) {
         txOut = *ptx;
         return true;
     }
@@ -1928,7 +1928,7 @@ bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus
                 file >> header;
                 fseek(file.Get(), postx.nTxOffset, SEEK_CUR);
                 file >> txOut;
-            } catch (const std::exception& e) {
+            } catch (const std::exception &e) {
                 return error("%s: Deserialize or I/O error - %s", __func__, e.what());
             }
             hashBlock = header.GetHash();
@@ -1941,8 +1941,8 @@ bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus
     if (fAllowSlow) { // use coin database to locate block that contains transaction, and scan it
         int nHeight = -1;
         {
-            const CCoinsViewCache& view = *pcoinsTip;
-            const CCoins* coins = view.AccessCoins(hash);
+            const CCoinsViewCache &view = *pcoinsTip;
+            const CCoins *coins = view.AccessCoins(hash);
             if (coins)
                 nHeight = coins->nHeight;
         }
@@ -1953,8 +1953,9 @@ bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus
     if (pindexSlow) {
         CBlock block;
         if (ReadBlockFromDisk(block, pindexSlow, consensusParams)) {
-            BOOST_FOREACH(const CTransactionRef &tx, block.vtx) {
-                if (tx->GetHash() == hash) {
+            BOOST_FOREACH(
+            const CTransaction &tx, block.vtx) {
+                if (tx.GetHash() == hash) {
                     txOut = tx;
                     hashBlock = pindexSlow->GetBlockHash();
                     return true;
@@ -1965,7 +1966,6 @@ bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus
 
     return false;
 }
-
 
 bool GetTimestampIndex(const unsigned int &high, const unsigned int &low, std::vector<uint256> &hashes)
 {
@@ -4617,7 +4617,7 @@ bool IsBlockHashInChain(const uint256& hashBlock)
     return chainActive.Contains(mapBlockIndex[hashBlock]);
 }
 
-bool IsTransactionInChain(const uint256& txId, int& nHeightTx, CTransactionRef& tx)
+bool IsTransactionInChain(const uint256& txId, int& nHeightTx, CTransaction& tx)
 {
     uint256 hashBlock;
     if (!GetTransaction(txId, tx, Params().GetConsensus(), hashBlock, true))
@@ -4631,7 +4631,7 @@ bool IsTransactionInChain(const uint256& txId, int& nHeightTx, CTransactionRef& 
 
 bool IsTransactionInChain(const uint256& txId, int& nHeightTx)
 {
-    CTransactionRef tx;
+    CTransaction tx;
     return IsTransactionInChain(txId, nHeightTx, tx);
 }
 

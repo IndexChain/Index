@@ -120,10 +120,10 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
             in.push_back(Pair("vout", (int64_t)txin.prevout.n));
             fillStdFields(in, txin);
 
-            CTransactionRef prevTx;
+            CTransaction prevTx;
             uint256 hashBlock;
             if (GetTransaction(txin.prevout.hash, prevTx, Params().GetConsensus(), hashBlock, true)) {
-                CTxOut const & txOut = prevTx->tx.vout.at(txin.prevout.n);
+                CTxOut const & txOut = prevTx.vout.at(txin.prevout.n);
 
                 in.push_back(Pair("value", ValueFromAmount(txOut.nValue)));
                 in.push_back(Pair("valueSat", txOut.nValue));

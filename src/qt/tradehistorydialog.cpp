@@ -340,7 +340,7 @@ int TradeHistoryDialog::PopulateTradeHistoryMap()
         }
 
         // tx not in historyMap, retrieve the transaction object
-        CTransactionRef wtx;
+        CTransaction wtx;
         uint256 blockHash;
         if (!GetTransaction(hash, wtx, Params().GetConsensus(), blockHash, true)) continue;
         if (blockHash.IsNull() || NULL == GetBlockIndex(blockHash)) continue;

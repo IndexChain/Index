@@ -666,7 +666,7 @@ static bool FillTxInputCache(const CTransaction& tx)
             ++nCacheMiss;
         }
 
-        CTransactionRef txPrev;
+        CTransaction txPrev;
         uint256 hashBlock;
         if (!GetTransaction(txIn.prevout.hash, txPrev, Params().GetConsensus(), hashBlock, true)) {
             return false;
@@ -2483,7 +2483,7 @@ bool CMPTxList::LoadFreezeState(int blockHeight)
     for (std::vector<std::pair<std::string, uint256> >::iterator it = loadOrder.begin(); it != loadOrder.end(); ++it) {
         uint256 hash = (*it).second;
         uint256 blockHash;
-        CTransactionRef wtx;
+        CTransaction wtx;
         CMPTransaction mp_obj;
         if (!GetTransaction(hash, wtx, Params().GetConsensus(), blockHash, true)) {
             PrintToLog("ERROR: While loading freeze transaction %s: tx in levelDB but does not exist.\n", hash.GetHex());
@@ -2558,7 +2558,7 @@ void CMPTxList::LoadActivations(int blockHeight)
     for (std::vector<std::pair<int64_t, uint256> >::iterator it = loadOrder.begin(); it != loadOrder.end(); ++it) {
         uint256 hash = (*it).second;
         uint256 blockHash;
-        CTransactionRef wtx;
+        CTransaction wtx;
         CMPTransaction mp_obj;
 
         if (!GetTransaction(hash, wtx, Params().GetConsensus(), blockHash, true)) {
@@ -2626,7 +2626,7 @@ void CMPTxList::LoadAlerts(int blockHeight)
     for (std::vector<std::pair<int64_t, uint256> >::iterator it = loadOrder.begin(); it != loadOrder.end(); ++it) {
         uint256 txid = (*it).second;
         uint256 blockHash;
-        CTransactionRef wtx;
+        CTransaction wtx;
         CMPTransaction mp_obj;
         if (!GetTransaction(txid, wtx, Params().GetConsensus(), blockHash, true)) {
             PrintToLog("ERROR: While loading alert %s: tx in levelDB but does not exist.\n", txid.GetHex());
