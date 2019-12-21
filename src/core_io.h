@@ -11,17 +11,18 @@
 class CBlock;
 class CScript;
 class CTransaction;
+class CMutableTransaction;
 class uint256;
 class UniValue;
 
 // core_read.cpp
-extern CScript ParseScript(const std::string& s);
-extern std::string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode = false);
-extern bool DecodeHexTx(CTransaction& tx, const std::string& strHexTx, bool fTryNoWitness = false);
-extern bool DecodeHexBlk(CBlock&, const std::string& strHexBlk);
-extern uint256 ParseHashUV(const UniValue& v, const std::string& strName);
-extern uint256 ParseHashStr(const std::string&, const std::string& strName);
-extern std::vector<unsigned char> ParseHexUV(const UniValue& v, const std::string& strName);
+CScript ParseScript(const std::string& s);
+std::string ScriptToAsmStr(const CScript& script, const bool fAttemptSighashDecode = false);
+bool DecodeHexTx(CMutableTransaction& tx, const std::string& strHexTx, bool fTryNoWitness = false);
+bool DecodeHexBlk(CBlock&, const std::string& strHexBlk);
+uint256 ParseHashUV(const UniValue& v, const std::string& strName);
+uint256 ParseHashStr(const std::string&, const std::string& strName);
+std::vector<unsigned char> ParseHexUV(const UniValue& v, const std::string& strName);
 
 // core_write.cpp
 extern std::string FormatScript(const CScript& script);
