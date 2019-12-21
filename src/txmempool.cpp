@@ -1022,14 +1022,6 @@ std::shared_ptr<const CTransaction> CTxMemPool::get(const uint256 &hash) const {
     return i->GetSharedTx();
 }
 
-std::shared_ptr<const CTransactionRef> CTxMemPool::getx(const uint256 &hash) const {
-    LOCK(cs);
-    indexed_transaction_set::const_iterator i = mapTx.find(hash);
-    if (i == mapTx.end())
-        return nullptr;
-    return i->GetSharedTx();
-}
-
 TxMempoolInfo CTxMemPool::info(const uint256 &hash) const {
     LOCK(cs);
     indexed_transaction_set::const_iterator i = mapTx.find(hash);
