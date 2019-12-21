@@ -640,6 +640,8 @@ public:
     }
 
     std::shared_ptr<const CTransaction> get(const uint256& hash) const;
+    std::shared_ptr<const CTransactionRef> getx(const uint256& hash) const;
+
     TxMempoolInfo info(const uint256& hash) const;
     std::vector<TxMempoolInfo> infoAll() const;
 

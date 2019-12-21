@@ -1910,7 +1910,7 @@ bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus
 
     LOCK(cs_main);
 
-    std::shared_ptr<const CTransactionRef> ptx = mempool.get(hash);
+    std::shared_ptr<const CTransactionRef> ptx = mempool.getx(hash);
     if (ptx)
     {
         txOut = *ptx;
@@ -1932,7 +1932,7 @@ bool GetTransaction(const uint256 &hash, CTransactionRef &txOut, const Consensus
                 return error("%s: Deserialize or I/O error - %s", __func__, e.what());
             }
             hashBlock = header.GetHash();
-            if (txOut.GetHash() != hash)
+            if (txOut->GetHash() != hash)
                 return error("%s: txid mismatch", __func__);
             return true;
         }
