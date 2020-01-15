@@ -227,7 +227,7 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransaction> vtx;
-
+    std::vector<unsigned char> vchBlockSig;//Proof Of Stake Block signature
     // memory only
     mutable CTxOut txoutZnode; // znode payment
     mutable std::vector<CTxOut> voutSuperblock; // superblock payment
@@ -262,6 +262,8 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
+        if (this->IsProofOfStake())
+            READWRITE(vchBlockSig);
     }
 
     template <typename Stream>
@@ -276,7 +278,18 @@ public:
         vtx.clear();
         txoutZnode = CTxOut();
         voutSuperblock.clear();
+        vchBlockSig.clear();
         fChecked = false;
+    }
+	// two types of block: proof-of-work or proof-of-stake
+    bool IsProofOfStake() const
+    {
+        return (vtx.size() > 1 && vtx[1].IsCoinStake());
+    }
+
+    bool IsProofOfWork() const
+    {
+        return !IsProofOfStake();
     }
 
     CBlockHeader GetBlockHeader() const

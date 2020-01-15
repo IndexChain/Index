@@ -36,7 +36,7 @@ A function with one or more operations.
 | Collection     | Description      | Port   | Passphrase | Warmup Ok
 | :------------- | :--------------- | :----- | :--------- | :--------- |
 | [apiStatus](#apistatus)           | Initial status of core. | 👁  | – |   ✅   |
-| [backup](#backup)                 | Creates a zip file from wallet.dat and the `persistent/` folder, and stores in the filepath specified, as `zcoin_backup-{TIMESTAMP}.zip`.  | 🔐 | – |  – |
+| [backup](#backup)                 | Creates a zip file from wallet.dat and the `persistent/` folder, and stores in the filepath specified, as `index_backup-{TIMESTAMP}.zip`.  | 🔐 | – |  – |
 | [balance](#balance)               | Coin balance of a number of different categories. | 🔐 | – | – |
 | [block](#block)                   | All transaction information from, and including, the blockHash parameter passed. | 🔐 | – | – |
 | [blockchain](#blockchain)         | Information related to chain sync status and tip. | 🔐 | – | – |

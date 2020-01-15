@@ -175,6 +175,10 @@ public:
     {
         return size() == 33;
     }
+	std::vector<unsigned char> getvch() const
+    {
+        return std::vector<unsigned char>(begin(), end());
+    }
 
     /**
      * Verify a DER signature (~72 bytes).

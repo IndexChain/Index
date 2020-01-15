@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(transaction_test)
     BOOST_CHECK_THROW(CallAPI(valRequest, true), runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(sendzcoin_test)
+BOOST_AUTO_TEST_CASE(sendindex_test)
 {
     // verify txid field is filled in result.
     UniValue valRequest(UniValue::VOBJ);

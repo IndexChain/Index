@@ -81,10 +81,17 @@ void EnsureSigmaWalletIsAvailable()
     }
 }
 
+// optional setting to unlock wallet for staking only
+// serves to disable the trivial sendmoney when OS account compromised
+// provides no real security
+bool fWalletUnlockStakingOnly = false;
+
 void EnsureWalletIsUnlocked()
 {
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
+    if (fWalletUnlockStakingOnly)
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for staking only.");
 }
 
 bool ValidMultiMint(const UniValue& data){
@@ -109,7 +116,7 @@ void WalletTxToJSON(const CWalletTx& wtx, UniValue& entry)
 {
     int confirms = wtx.GetDepthInMainChain();
     entry.push_back(Pair("confirmations", confirms));
-    if (wtx.IsCoinBase())
+    if (wtx.IsCoinBase() || wtx.IsCoinStake())
         entry.push_back(Pair("generated", true));
     if (confirms > 0)
     {
@@ -426,6 +433,11 @@ static void SendMoney(const CTxDestination &address, CAmount nValue, bool fSubtr
 
     if (nValue > curBalance)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
+    if (fWalletUnlockStakingOnly)
+    {
+            string strError = _("Error: Wallet unlocked for staking only, unable to create transaction.");
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
 
     // Parse Index address
     CScript scriptPubKey = GetScriptForDestination(address);
@@ -657,7 +669,7 @@ UniValue getreceivedbyaddress(const UniValue& params, bool fHelp)
     for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
     {
         const CWalletTx& wtx = (*it).second;
-        if (wtx.IsCoinBase() || !CheckFinalTx(wtx))
+        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !CheckFinalTx(wtx))
             continue;
 
         BOOST_FOREACH(const CTxOut& txout, wtx.vout)
@@ -2004,14 +2016,15 @@ UniValue walletpassphrase(const UniValue& params, bool fHelp)
     if (!EnsureWalletIsAvailable(fHelp))
         return NullUniValue;
 
-    if (pwalletMain->IsCrypted() && (fHelp || params.size() != 2))
+    if (pwalletMain->IsCrypted() && (fHelp || params.size() < 2 || params.size() > 3))
         throw runtime_error(
-            "walletpassphrase \"passphrase\" timeout\n"
+            "walletpassphrase \"passphrase\" timeout ( stakingonly )\n"
             "\nStores the wallet decryption key in memory for 'timeout' seconds.\n"
             "This is needed prior to performing transactions related to private keys such as sending indexs\n"
             "\nArguments:\n"
             "1. \"passphrase\"     (string, required) The wallet passphrase\n"
             "2. timeout            (numeric, required) The time to keep the decryption key in seconds.\n"
+            "3. stakingonly        (bool, optional, default=false) Unlock wallet for staking only.\n"
             "\nNote:\n"
             "Issuing the walletpassphrase command while the wallet is already unlocked will set a new unlock\n"
             "time that overrides the old one.\n"
@@ -2045,7 +2058,7 @@ UniValue walletpassphrase(const UniValue& params, bool fHelp)
     }
     else
         throw runtime_error(
-            "walletpassphrase <passphrase> <timeout>\n"
+            "walletpassphrase <passphrase> <timeout> [stakingonly]\n"
             "Stores the wallet decryption key in memory for <timeout> seconds.");
 
     pwalletMain->TopUpKeyPool();
@@ -2054,6 +2067,11 @@ UniValue walletpassphrase(const UniValue& params, bool fHelp)
     LOCK(cs_nWalletUnlockTime);
     nWalletUnlockTime = GetTime() + nSleepTime;
     RPCRunLater("lockwallet", boost::bind(LockWallet, pwalletMain), nSleepTime);
+    // ppcoin: if user OS account compromised prevent trivial sendmoney commands
+    if (params.size() > 2)
+        fWalletUnlockStakingOnly = params[2].get_bool();
+    else
+        fWalletUnlockStakingOnly = false;
 
     return NullUniValue;
 }
@@ -2398,7 +2416,9 @@ UniValue getwalletinfo(const UniValue& params, bool fHelp)
 
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
+    obj.push_back(Pair("total_balance", ValueFromAmount(pwalletMain->GetBalance() + pwalletMain->GetUnconfirmedBalance() + pwalletMain->GetImmatureBalance() + pwalletMain->GetStake())));
     obj.push_back(Pair("balance",       ValueFromAmount(pwalletMain->GetBalance())));
+    obj.push_back(Pair("staked_balance",      ValueFromAmount(pwalletMain->GetStake())));
     obj.push_back(Pair("unconfirmed_balance", ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
     obj.push_back(Pair("immature_balance",    ValueFromAmount(pwalletMain->GetImmatureBalance())));
     obj.push_back(Pair("txcount",       (int)pwalletMain->mapWallet.size()));

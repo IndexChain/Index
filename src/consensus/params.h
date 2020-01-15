@@ -75,6 +75,7 @@ struct Params {
     BIP9Deployment vDeployments[MAX_VERSION_BITS_DEPLOYMENTS];
     /** Proof of work parameters */
     uint256 powLimit;
+    uint256 posLimit;
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
@@ -189,7 +190,10 @@ struct Params {
     int nZawyLwmaAveragingWindow;
     int64_t DifficultyAdjustmentInterval(bool fMTP = false) const { return nPowTargetTimespan / (fMTP ? nPowTargetSpacingMTP : nPowTargetSpacing); }
     uint256 nMinimumChainWork;
-
+	
+    // proof-of-stake
+    int nLastPOWBlock;
+    int nStakeTimestampMask;
     bool IsMain() const { return chainType == chainMain; }
     bool IsTestnet() const { return chainType == chainTestnet; }
     bool IsRegtest() const { return chainType == chainRegtest; }

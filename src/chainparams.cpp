@@ -288,8 +288,12 @@ public:
         consensus.BIP34Height = 21111;
         consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 60 * 60; // 60 minutes between retargets
-        consensus.nPowTargetSpacing = 5 * 60; // 5 minute blocks
+        consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        //Proof-of-Stake related values
+        consensus.nLastPOWBlock = 600000;//TODO akshaynexus :This needs to be decided
+        consensus.nStakeTimestampMask = 0xf; // 15
+        consensus.nPowTargetTimespan = 5 * 60; // 5 minutes between retargets
+        consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains

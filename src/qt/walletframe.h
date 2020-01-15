@@ -41,6 +41,7 @@ public:
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
     void showOutOfSyncWarning(bool fShow);
+	WalletView *currentWalletView();
 
 private:
     QStackedWidget *walletStack;
@@ -100,6 +101,8 @@ public Q_SLOTS:
     void usedSendingAddresses();
     /** Show used receiving addresses */
     void usedReceivingAddresses();
+    void unlockForStaking();
+    void lockWallet();
 };
 
 #endif // BITCOIN_QT_WALLETFRAME_H

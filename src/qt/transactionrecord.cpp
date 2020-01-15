@@ -20,7 +20,7 @@
  */
 bool TransactionRecord::showTransaction(const CWalletTx &wtx)
 {
-    if (wtx.IsCoinBase())
+    if (wtx.IsCoinBase() || wtx.IsCoinStake())
     {
         // Ensures we show generated coins / mined transactions at depth 1
         if (!wtx.IsInMainChain())
@@ -131,7 +131,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         sub.address = QCoreApplication::translate("index-core", "Zerocoin->Sigma remint").toStdString();
         parts.append(sub);
     }
-    else if (nNet > 0 || wtx.IsCoinBase())
+    else if (nNet > 0 || wtx.IsCoinBase() || wtx.IsCoinStake())
     {
         //
         // Credit
@@ -163,6 +163,18 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     // Generated
                     sub.type = TransactionRecord::Generated;
+                } else if (wtx.IsCoinStake()) {
+                    sub.type = TransactionRecord::Stake;
+                }
+                if (wtx.IsCoinStake())
+                {
+                    if (isminetype mine = wallet->IsMine(wtx.vout[1])) {
+                        // Stake reward
+                        sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
+                        sub.type = TransactionRecord::Stake;
+                        sub.address = CBitcoinAddress(address).ToString();
+                        sub.credit = wtx.vout[1].nValue - nDebit;
+                    }
                 }
                 parts.append(sub);
             }
@@ -283,7 +295,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
     // Sort order, unrecorded transactions sort to the top
     status.sortKey = strprintf("%010d-%01d-%010u-%03d",
         (pindex ? pindex->nHeight : std::numeric_limits<int>::max()),
-        (wtx.IsCoinBase() ? 1 : 0),
+        (wtx.IsCoinBase() || wtx.IsCoinStake() ? 1 : 0),
         wtx.nTimeReceived,
         idx);
     status.countsForBalance = wtx.IsTrusted() && !(wtx.GetBlocksToMaturity() > 0);
@@ -305,6 +317,31 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
     }
     // For generated transactions, determine maturity
     else if(type == TransactionRecord::Generated)
+    {
+        if (wtx.GetBlocksToMaturity() > 0)
+        {
+            status.status = TransactionStatus::Immature;
+
+            if (wtx.IsInMainChain())
+            {
+                status.matures_in = wtx.GetBlocksToMaturity();
+
+                // Check if the block was requested by anyone
+                if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0)
+                    status.status = TransactionStatus::MaturesWarning;
+            }
+            else
+            {
+                status.status = TransactionStatus::NotAccepted;
+            }
+        }
+        else
+        {
+            status.status = TransactionStatus::Confirmed;
+        }
+    }
+    // For staked transactions, determine maturity
+    else if(type == TransactionRecord::Stake)
     {
         if (wtx.GetBlocksToMaturity() > 0)
         {

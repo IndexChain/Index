@@ -18,6 +18,7 @@
 #include "wallet/crypter.h"
 #include "wallet/walletdb.h"
 #include "wallet/rpcwallet.h"
+#include "pos.h"
 #include "wallet/mnemoniccontainer.h"
 #include "../base58.h"
 #include "zerocoin_params.h"
@@ -47,9 +48,11 @@ extern CHDMintWallet* zwalletMain;
  * Settings
  */
 extern CFeeRate payTxFee;
+extern CAmount nReserveBalance;
 extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fSendFreeTransactions;
+extern bool fWalletUnlockStakingOnly;
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
@@ -307,6 +310,7 @@ public:
     mutable bool fDebitCached;
     mutable bool fCreditCached;
     mutable bool fImmatureCreditCached;
+    mutable bool fImmatureStakeCreditCached;
     mutable bool fAvailableCreditCached;
     mutable bool fWatchDebitCached;
     mutable bool fWatchCreditCached;
@@ -316,6 +320,7 @@ public:
     mutable CAmount nDebitCached;
     mutable CAmount nCreditCached;
     mutable CAmount nImmatureCreditCached;
+    mutable CAmount nImmatureStakeCreditCached;
     mutable CAmount nAvailableCreditCached;
     mutable CAmount nWatchDebitCached;
     mutable CAmount nWatchCreditCached;
@@ -356,6 +361,7 @@ public:
         fDebitCached = false;
         fCreditCached = false;
         fImmatureCreditCached = false;
+        fImmatureStakeCreditCached = false;
         fAvailableCreditCached = false;
         fWatchDebitCached = false;
         fWatchCreditCached = false;
@@ -365,6 +371,7 @@ public:
         nDebitCached = 0;
         nCreditCached = 0;
         nImmatureCreditCached = 0;
+        nImmatureStakeCreditCached = 0;
         nAvailableCreditCached = 0;
         nWatchDebitCached = 0;
         nWatchCreditCached = 0;
@@ -459,6 +466,7 @@ public:
     CAmount GetDebit(const isminefilter& filter) const;
     CAmount GetCredit(const isminefilter& filter) const;
     CAmount GetImmatureCredit(bool fUseCache=true) const;
+    CAmount GetImmatureStakeCredit(bool fUseCache=true) const;
     CAmount GetAvailableCredit(bool fUseCache=true, bool fExcludeLocked = false) const;
     CAmount GetImmatureWatchOnlyCredit(const bool& fUseCache=true) const;
     CAmount GetAvailableWatchOnlyCredit(const bool& fUseCache=true) const;
@@ -655,6 +663,7 @@ private:
     int64_t nNextResend;
     int64_t nLastResend;
     bool fBroadcastTransactions;
+    std::map<COutPoint, CStakeCache> stakeCache;
 
     mutable bool fAnonymizableTallyCached;
     mutable std::vector<CompactTallyItem> vecAnonymizableTallyCached;
@@ -670,7 +679,8 @@ private:
     TxSpends mapTxSpends;
     void AddToSpends(const COutPoint& outpoint, const uint256& wtxid);
     void AddToSpends(const uint256& wtxid);
-
+	void RemoveFromSpends(const COutPoint& outpoint, const uint256& wtxid);
+    void RemoveFromSpends(const uint256& wtxid);
     /* Mark a transaction (and its in-wallet descendants) as conflicting with a particular block. */
     void MarkConflicted(const uint256& hashBlock, const uint256& hashTx);
 
@@ -860,6 +870,8 @@ public:
     CAmount GetBalance(bool fExcludeLocked = false) const;
     CAmount GetUnconfirmedBalance() const;
     CAmount GetImmatureBalance() const;
+    CAmount GetStake() const;
+    CAmount GetWatchOnlyStake() const;
     CAmount GetWatchOnlyBalance() const;
     CAmount GetUnconfirmedWatchOnlyBalance() const;
     CAmount GetImmatureWatchOnlyBalance() const;
@@ -1160,6 +1172,7 @@ public:
 
     //! get the current wallet format (the oldest client version guaranteed to understand this wallet)
     int GetVersion() { LOCK(cs_wallet); return nWalletVersion; }
+    void DisableTransaction(const CTransaction &tx);
 
     //! Get wallet transactions that conflict with given transaction (spend same outputs)
     std::set<uint256> GetConflicts(const uint256& txid) const;
@@ -1205,6 +1218,13 @@ public:
 
     /* Mark a transaction (and it in-wallet descendants) as abandoned so its inputs may be respent. */
     bool AbandonTransaction(const uint256& hashTx);
+
+	/* Staking */
+    bool CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64_t nTime, int64_t nSearchInterval, CAmount& nFees, CMutableTransaction& tx, CKey& key, CBlockTemplate *pblocktemplate);
+    bool SelectCoinsForStaking(CAmount& nTargetValue, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, CAmount& nValueRet) const;
+    void AvailableCoinsForStaking(std::vector<COutput>& vCoins) const;
+    bool HaveAvailableCoinsForStaking() const;
+    uint64_t GetStakeWeight() const;
 
     /* Returns the wallets help message */
     static std::string GetWalletHelpString(bool showDebug);

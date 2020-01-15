@@ -158,6 +158,9 @@ enum BlockStatus: uint32_t {
     BLOCK_FAILED_MASK        =   96,
 
     BLOCK_OPT_WITNESS       =   128, //!< block data in blk*.data was received with a witness-enforcing client
+    BLOCK_PROOF_OF_STAKE     =   256, //! is proof-of-stake block
+    BLOCK_STAKE_ENTROPY      =   512,
+    BLOCK_STAKE_MODIFIER     =   1024,
 };
 
 /** The block chain is a tree shaped structure starting with the
@@ -203,6 +206,9 @@ public:
 
     //! Verification status of this block. See enum BlockStatus
     unsigned int nStatus;
+
+	//! hash modifier of proof-of-stake
+    uint256 nStakeModifier;
 
     //! block header
     int nVersion;
@@ -272,6 +278,8 @@ public:
         accumulatorChanges.clear();
         spentSerials.clear();
         sigmaSpentSerials.clear();
+        //PoS
+        nStakeModifier = uint256();
     }
 
     CBlockIndex()
@@ -365,6 +373,26 @@ public:
 
         std::sort(pbegin, pend);
         return pbegin[(pend - pbegin)/2];
+    }
+
+	int64_t GetPastTimeLimit() const
+    {
+        return GetMedianTimePast();
+    }
+
+    bool IsProofOfWork() const
+    {
+        return !IsProofOfStake();
+    }
+
+    bool IsProofOfStake() const
+    {
+        return (nStatus & BLOCK_PROOF_OF_STAKE);
+    }
+
+    void SetProofOfStake()
+    {
+        nStatus |= BLOCK_PROOF_OF_STAKE;
     }
 
     std::string ToString() const
@@ -495,6 +523,12 @@ public:
             READWRITE(sigmaSpentSerials);
         }
 
+	    // PoS
+        if (IsProofOfStake()) {
+            LogPrintf("CDiskBlockIndex::SerializationOp(): proof-of-stake block found at height=%u\n", nHeight);
+            READWRITE(nStakeModifier);
+        }
+
         nDiskBlockVersion = nVersion;
     }
 
@@ -585,5 +619,6 @@ public:
     /** Find the last common block between this chain and a block index entry. */
     const CBlockIndex *FindFork(const CBlockIndex *pindex) const;
 };
+const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
 
 #endif // BITCOIN_CHAIN_H

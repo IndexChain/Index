@@ -224,6 +224,20 @@ void WalletFrame::backupWallet()
         walletView->backupWallet();
 }
 
+void WalletFrame::unlockForStaking()
+{
+    WalletView *walletView = currentWalletView();
+    if (walletView)
+        walletView->unlockWallet(true);
+}
+
+void WalletFrame::lockWallet()
+{
+    WalletView *walletView = currentWalletView();
+    if (walletView)
+        walletView->lockWallet();
+}
+
 void WalletFrame::changePassphrase()
 {
     WalletView *walletView = currentWalletView();

@@ -13,6 +13,7 @@
 #include "amount.h"
 #include "chain.h"
 #include "coins.h"
+#include "miner.h"
 #include "net.h"
 #include "script/script_error.h"
 #include "sync.h"
@@ -44,6 +45,7 @@ class CScriptCheck;
 class CTxMemPool;
 class CValidationInterface;
 class CValidationState;
+class CWallet;
 
 struct PrecomputedTransactionData;
 struct CNodeStateStats;
@@ -201,6 +203,8 @@ extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
 extern bool fCheckBlockIndex;
 extern bool fCheckpointsEnabled;
+extern int64_t nLastCoinStakeSearchInterval;
+
 //extern int nBestHeight;
 
 // Settings
@@ -514,7 +518,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true);
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true, int nHeight = INT_MAX, bool isVerifyDB = false);
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true, int nHeight = INT_MAX, bool isVerifyDB = false, bool fCheckSig = true);
 
 bool IsTransactionInChain(const uint256& txId, int& nHeightTx, CTransaction& tx);
 bool IsTransactionInChain(const uint256& txId, int& nHeightTx);
@@ -541,7 +545,10 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
 /** Reprocess a number of blocks to try and get on the correct chain again **/
 bool DisconnectBlocks(int blocks);
 void ReprocessBlocks(int nBlocks);
-
+/** Proof-of-stake checks */
+bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams);
+bool SignBlock(CBlock& block, CWallet& wallet, int64_t& nFees, CBlockTemplate *pblocktemplate);
+/** End PoS checks **/
 int GetUTXOHeight(const COutPoint& outpoint);
 int GetInputAge(const CTxIn &txin);
 int GetInputAgeIX(const uint256 &nTXHash, const CTxIn &txin);
