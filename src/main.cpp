@@ -2854,7 +2854,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
                   error("ConnectBlock(): tried to stake at depth %d", pindex->nHeight - coins->nHeight),
                     REJECT_INVALID, "bad-cs-premature");
 
-         if(!CheckStakeKernelHash(pindex->pprev, block.nBits,block.nTime,coins,prevout,pindex->nTime ))
+         if(!CheckKernel(pindex->pprev, block.nBits,block.nTime,prevout))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake hash doesn't match nBits"),
                                  REJECT_INVALID, "bad-cs-proofhash");
     }
