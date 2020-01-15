@@ -10,7 +10,8 @@
 #endif
 
 #include "zerocoin.h"
-
+#include "pow.h"
+#include "pos.h"
 #include "addrman.h"
 #include "arith_uint256.h"
 #include "blockencodings.h"
@@ -27,8 +28,6 @@
 #include "net.h"
 #include "policy/fees.h"
 #include "policy/policy.h"
-#include "pos.h"
-#include "pow.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
 #include "random.h"
@@ -2070,7 +2069,7 @@ bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos, int nHeight, con
    
 
     // Check the header
-    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){
+    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams) && block.IsProofOfWork()){
         //Maybe cache is not valid
         if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){
             return error("ReadBlockFromDisk: CheckProofOfWork: Errors in block header at %s", pos.ToString());
@@ -2855,7 +2854,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
                   error("ConnectBlock(): tried to stake at depth %d", pindex->nHeight - coins->nHeight),
                     REJECT_INVALID, "bad-cs-premature");
 
-         if(!CheckStakeKernelHash(pindex->pprev, block, coins, prevout, block.vtx[1].nTime))
+         if(!CheckStakeKernelHash(pindex->pprev, block.nBits,block.nTime,coins,prevout,pindex->nTime ))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake hash doesn't match nBits"),
                                  REJECT_INVALID, "bad-cs-proofhash");
     }
@@ -4465,7 +4464,7 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
 
         // Check that the header is valid (particularly PoW).  This is mostly
         // redundant with the call in AcceptBlockHeader.
-        if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW)) {
+        if (!CheckBlockHeader(block, state, consensusParams, block.IsProofOfWork() && fCheckPOW)) {
             LogPrintf("CheckBlock - CheckBlockHeader -> failed!\n");
             return false;
         }
@@ -4695,7 +4694,7 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
 		return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
 	// Check proof of work
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams) && block.nBits != GetNextTargetRequired(pindexPrev, &block, consensusParams,/** checkpos**/true))
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
 
     // Check timestamp against prev
@@ -5033,9 +5032,9 @@ AcceptBlock(const CBlock &block, CValidationState &state, const CChainParams &ch
     int nHeight = pindex->nHeight;
 //    LogPrintf("AcceptBlock() pindex->nHeight=%s\n", nHeight);
     // Check for the last proof of work block
-    if (block.IsProofOfWork() && nHeight > chainparams.GetConsensus().nLastPOWBlock)
-        return state.DoS(100, error("%s: reject proof-of-work at height %d",  __func__, nHeight),
-                        REJECT_INVALID, "bad-pow-height");
+    // if (block.IsProofOfWork() && nHeight > chainparams.GetConsensus().nLastPOWBlock)
+    //     return state.DoS(100, error("%s: reject proof-of-work at height %d",  __func__, nHeight),
+    //                     REJECT_INVALID, "bad-pow-height");
     // Write block to history file
     try {
         unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
@@ -5119,7 +5118,7 @@ bool TestBlockValidity(CValidationState &state, const CChainParams &chainparams,
     indexDummy.nHeight = pindexPrev->nHeight + 1;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
-    if (!ContextualCheckBlockHeader(block, state, chainparams.GetConsensus(), pindexPrev, GetAdjustedTime(), true))
+    if (!ContextualCheckBlockHeader(block, state, chainparams.GetConsensus(), pindexPrev, GetAdjustedTime()))
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__, FormatStateMessage(state));
 //    std::cout << "TestBlockValidity->CheckBlock() nHeight=" << indexDummy.nHeight << std::endl;
     if (!CheckBlock(block, state, chainparams.GetConsensus(), fCheckPOW, fCheckMerkleRoot, indexDummy.nHeight, false))

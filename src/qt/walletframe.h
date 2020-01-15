@@ -53,7 +53,6 @@ private:
 
     const PlatformStyle *platformStyle;
 
-    WalletView *currentWalletView();
 
 public Q_SLOTS:
     /** Switch to overview (home) page */

@@ -101,7 +101,7 @@ void SendMPDialog::setWalletModel(WalletModel *model)
     // use wallet model to get visibility into BTC balance changes for fees
     this->walletModel = model;
     if (model != NULL) {
-       connect(model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(updateFrom()));
+       connect(model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(updateFrom()));
     }
 }
 

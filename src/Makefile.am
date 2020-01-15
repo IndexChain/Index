@@ -282,6 +282,7 @@ libbitcoin_server_a_SOURCES = \
   policy/policy.cpp \
   primitives/zerocoin.cpp \
   pow.cpp \
+  pos.cpp \
   rest.cpp \
   rpc/blockchain.cpp \
   rpc/client.cpp \

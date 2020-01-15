@@ -438,6 +438,7 @@ public:
     std::vector<CTxOut> vout;
     CTxWitness wit; // Not const: can change without invalidating the txid cache
     const uint32_t nLockTime;
+    unsigned int     nTime;
 
     /** Construct a CTransaction that qualifies as IsNull() */
     CTransaction();

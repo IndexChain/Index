@@ -155,8 +155,6 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
     CAmount coin = COIN / nFeeReductionFactor;
 
     resetBlock();
-    CBlockIndex* pindexPrev = chainActive.Tip();
-    const int nHeight = pindexPrev->nHeight + 1;
     auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
         return NULL;
@@ -174,8 +172,6 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
         coinbaseTx.vout[0].nValue = 0;
     }
-    CBlockIndex* pindexPrev = chainActive.Tip();
-    const int nHeight = pindexPrev->nHeight + 1;
 
     // // To founders and investors
     // if ((nHeight + 1 > 0) && (nHeight + 1 < params.nSubsidyHalvingFirst)) {
@@ -285,7 +281,8 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
     unsigned int nBlockSigOps = 100;
     int lastFewTxs = 0;
     CAmount nFees = 0;
-
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    const int nHeight = pindexPrev->nHeight + 1;
     {
         LOCK2(cs_main, mempool.cs);
         pblock->nTime = nBlockTime;
@@ -549,13 +546,11 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
 
         // Compute final coinbase transaction.
-        if(fProofOfStake)//Only Set vout of coinbasetx as blockreward in PoW Blocks
+        if(!fProofOfStake)//Only Set vout of coinbasetx as blockreward in PoW Blocks
             coinbaseTx.vout[0].nValue += blockReward;
         coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
         pblock->vtx[0] = coinbaseTx;
         pblocktemplate->vTxFees[0] = -nFees;
-	    if (pFees)
-            *pFees = nFees;
 
         // Fill in header
         pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
@@ -596,7 +591,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlockWithKey(CReserveKey &reservekey) {
 
     CScript scriptPubKey = CScript() << pubkey << OP_CHECKSIG;
 //    CScript scriptPubKey = GetScriptForDestination(pubkey.GetID());;
-    return CreateNewBlock(scriptPubKey, {});
+    return CreateNewBlock(scriptPubKey, {},false);
 }
 
 bool BlockAssembler::isStillDependent(CTxMemPool::txiter iter)
@@ -1293,7 +1288,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
     while (true)
     {
         CBlockIndex* pindexPrev = chainActive.Tip();
-        const int nHeight = pindexPrev->nHeight + 1;
+        const int nHeight = pindexPrev->nHeight + 1;            
         if (nHeight >= Params().GetConsensus().nLastPOWBlock)
         {
             while (pwallet->IsLocked())
@@ -1304,6 +1299,8 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
             while (vNodes.empty() || IsInitialBlockDownload())
             {
                 nLastCoinStakeSearchInterval = 0;
+                    LogPrintf("ThreadStakeMiner(): sleep due to vnode empty or initalblockdnld\n");
+
                 fTryToSync = true;
                 MilliSleep(1000);
             }
@@ -1312,8 +1309,9 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                 fTryToSync = false;
                 if (vNodes.size() < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60)
                 {
-                    MilliSleep(60000);
-                    continue;
+                    // LogPrintf("ThreadStakeMiner(): sleep due to vnode\n");
+                    // MilliSleep(60000);
+                    // continue;
                 }
             }
 
@@ -1323,7 +1321,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
             if (pwallet->HaveAvailableCoinsForStaking()) {
                 int64_t nFees = 0;
                 // First just create an empty block. No need to process transactions until we know we can create a block
-                std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(reservekey.reserveScript, &nFees));
+                std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(reservekey.reserveScript, {},true));
                 if (!pblocktemplate.get()) {
                     LogPrintf("ThreadStakeMiner(): Could not get Blocktemplate\n");
                     return;

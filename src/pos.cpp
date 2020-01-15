@@ -172,7 +172,8 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
 
 bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTimeBlock, const COutPoint& prevout){
     std::map<COutPoint, CStakeCache> tmp;
-    return CheckKernel(pindexPrev, nBits, nTimeBlock, prevout, tmp);
+    int64_t pBlockTime = pindexPrev->GetBlockTime();
+    return CheckKernel(pindexPrev, nBits, nTimeBlock, prevout, tmp,&pBlockTime);
 }
 
 bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, const COutPoint& prevout, const std::map<COutPoint, CStakeCache>& cache, int64_t *pBlockTime)
@@ -204,8 +205,7 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, co
     } else {
         //found in cache
         const CStakeCache& stake = it->second;
-        
-        if (CheckStakeKernelHash(pindexPrev, nBits, new CCoins(stake.txPrev, pindexPrev->nHeight), prevout, nTime)) {
+        if (CheckStakeKernelHash(pindexPrev, nBits,nTime, new CCoins(stake.txPrev, pindexPrev->nHeight), prevout, *pBlockTime)) {
             // Cache could potentially cause false positive stakes in the event of deep reorgs, so check without cache also
             return CheckKernel(pindexPrev, nBits, nTime, prevout);
         }

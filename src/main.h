@@ -21,8 +21,6 @@
 #include "timedata.h"
 #include "chainparams.h"
 #include "spentindex.h"
-
-
 #include <algorithm>
 #include <exception>
 #include <map>

@@ -10,6 +10,7 @@
 #include "base58.h"
 #include "checkpoints.h"
 #include "chain.h"
+#include "chainparams.h"
 #include "coincontrol.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
@@ -966,9 +967,11 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
         CBlock *pblock = &pblocktemplate->block;
 
-        // noirnode payments
+        // znode payments
         if (nHeight >= Params().GetConsensus().nZnodePaymentsStartBlock) {
-            CAmount znodePayment = GetZnodePayment(nHeight, nFees + GetBlockSubsidy(nHeight, Params().GetConsensus()));
+            const CChainParams &chainparams = Params();
+            const Consensus::Params &params = chainparams.GetConsensus();
+            CAmount znodePayment = GetZnodePayment(chainparams.GetConsensus(),false,nHeight);
             nReward -= znodePayment;
             FillBlockPayments(txNew, nHeight, znodePayment, pblock->txoutZnode, pblock->voutSuperblock);
         }
@@ -2246,7 +2249,7 @@ CAmount CWalletTx::GetCredit(const isminefilter &filter) const {
 }
 
 CAmount CWalletTx::GetImmatureCredit(bool fUseCache) const {
-    if ((IsCoinBase() || IsCoinStake()) && GetBlocksToMaturity() > 0 && IsInMainChain()) {
+    if ((IsCoinBase()) && GetBlocksToMaturity() > 0 && IsInMainChain()) {
         if (fUseCache && fImmatureCreditCached)
             return nImmatureCreditCached;
         nImmatureCreditCached = pwallet->GetCredit(*this, ISMINE_SPENDABLE);

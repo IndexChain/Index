@@ -124,10 +124,9 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     CBlockIndex *pnext = chainActive.Next(blockindex);
     if (pnext)
         result.push_back(Pair("nextblockhash", pnext->GetBlockHash().GetHex()));
-    if (block.IsProofOfStake()){
+    if (blockindex->IsProofOfStake()){
         result.push_back(Pair("flags", blockindex->IsProofOfStake()? "proof-of-stake" : "proof-of-work"));
         result.push_back(Pair("modifier", blockindex->nStakeModifier.GetHex()));
-        result.push_back(Pair("signature", HexStr(block.vchBlockSig.begin(), block.vchBlockSig.end())));
     }
 
     return result;
