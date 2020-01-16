@@ -48,7 +48,7 @@ unsigned char GetNfactor(int64_t nTimestamp) {
 }
 
 uint256 CBlockHeader::GetHash() const {
-       return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+       return HashX16RV2(BEGIN(nVersion), END(fProofOfStake), hashPrevBlock);
 }
 
 bool CBlockHeader::IsMTP() const {
@@ -58,14 +58,8 @@ bool CBlockHeader::IsMTP() const {
 }
 
 uint256 CBlockHeader::GetPoWHash() const {
-
-    try {
         //Changed hash algo to X16Rv2
-           return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
-
-    } catch (std::exception &e) {
-        LogPrintf("excepetion: %s", e.what());
-    }
+           return HashX16RV2(BEGIN(nVersion), END(fProofOfStake), hashPrevBlock);
 }
 
 void CBlockHeader::InvalidateCachedPoWHash(int nHeight) const {

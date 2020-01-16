@@ -1296,14 +1296,14 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                 nLastCoinStakeSearchInterval = 0;
                 MilliSleep(10000);
             }
-            while (vNodes.empty() || IsInitialBlockDownload())
-            {
-                nLastCoinStakeSearchInterval = 0;
-                    LogPrintf("ThreadStakeMiner(): sleep due to vnode empty or initalblockdnld\n");
+            // while (vNodes.empty() || IsInitialBlockDownload())
+            // {
+            //     nLastCoinStakeSearchInterval = 0;
+            //         LogPrintf("ThreadStakeMiner(): sleep due to vnode empty or initalblockdnld\n");
 
-                fTryToSync = true;
-                MilliSleep(1000);
-            }
+            //     fTryToSync = true;
+            //     MilliSleep(1000);
+            // }
             if (fTryToSync)
             {
                 fTryToSync = false;

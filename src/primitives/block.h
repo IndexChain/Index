@@ -98,7 +98,7 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
-
+    bool fProofOfStake;
     // Index - MTP
     int32_t nVersionMTP = 0x1000;
     uint256 mtpHashValue;
@@ -134,6 +134,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        READWRITE(fProofOfStake);
         // Index - MTP
         // On read: allocate and read. On write: write only if already allocated
         if (IsMTP()) {
@@ -160,6 +161,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        READWRITE(fProofOfStake);
         if (IsMTP()) {
             READWRITE(nVersionMTP);
             READWRITE(mtpHashValue);
@@ -176,6 +178,7 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
+        fProofOfStake = false;
         isComputed = -1;
         powHash.SetNull();
 
@@ -262,7 +265,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
-        if (this->IsProofOfStake())
+        if (this->fProofOfStake)
             READWRITE(vchBlockSig);
     }
 
@@ -301,6 +304,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.fProofOfStake = fProofOfStake || IsProofOfStake();
         if (block.IsMTP()) {
             block.nVersionMTP = nVersionMTP;
             block.mtpHashData = mtpHashData;

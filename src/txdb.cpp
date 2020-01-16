@@ -356,6 +356,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
 
                 pindexNew->sigmaMintedPubCoins   = diskindex.sigmaMintedPubCoins;
                 pindexNew->sigmaSpentSerials     = diskindex.sigmaSpentSerials;
+                pindexNew->fProofOfStake = diskindex.fProofOfStake;
 		        if (diskindex.IsProofOfStake()){
                     pindexNew->nStakeModifier = diskindex.nStakeModifier;
                 }

@@ -206,7 +206,7 @@ public:
 
     //! Verification status of this block. See enum BlockStatus
     unsigned int nStatus;
-
+    bool fProofOfStake;
 	//! hash modifier of proof-of-stake
     uint256 nStakeModifier;
 
@@ -269,7 +269,7 @@ public:
         nTime          = 0;
         nBits          = 0;
         nNonce         = 0;
-
+        fProofOfStake  = false;
         nVersionMTP = 0;
         mtpHashValue = reserved[0] = reserved[1] = uint256();
 
@@ -296,7 +296,7 @@ public:
         nTime          = block.nTime;
         nBits          = block.nBits;
         nNonce         = block.nNonce;
-
+        fProofOfStake = block.fProofOfStake;
         if (block.IsMTP()) {
             nVersionMTP = block.nVersionMTP;
             mtpHashValue = block.mtpHashValue;
@@ -333,6 +333,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.fProofOfStake = fProofOfStake;
 
         // Index - MTP
         if(block.IsMTP()){
@@ -387,12 +388,13 @@ public:
 
     bool IsProofOfStake() const
     {
-        return (nStatus & BLOCK_PROOF_OF_STAKE);
+        return fProofOfStake;
     }
 
     void SetProofOfStake()
     {
         nStatus |= BLOCK_PROOF_OF_STAKE;
+        fProofOfStake = true;
     }
 
     std::string ToString() const
@@ -503,6 +505,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        READWRITE(fProofOfStake);
 
         // Index - MTP
         if (nTime > ZC_GENESIS_BLOCK_TIME && nTime >= Params().GetConsensus().nMTPSwitchTime) {
@@ -541,7 +544,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-
+        block.fProofOfStake = fProofOfStake;
         if (block.IsMTP()) {
             block.nVersionMTP = nVersionMTP;
             block.mtpHashValue = mtpHashValue;

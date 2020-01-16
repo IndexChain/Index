@@ -161,7 +161,7 @@ ReadStatus PartiallyDownloadedBlock::FillBlock(CBlock& block, const std::vector<
 
     CValidationState state;
     LogPrintf("PartiallyDownloadedBlock->CheckBlock() hash=%s", block.GetHash().ToString());
-    if (!CheckBlock(block, state, Params().GetConsensus())) {
+    if (!CheckBlock(block, state, Params().GetConsensus(),true,true,INT_MAX, false,false)) {
         // TODO: We really want to just check merkle tree manually here,
         // but that is expensive, and CheckBlock caches a block's
         // "checked-status" (in the CBlock?). CBlock should be able to

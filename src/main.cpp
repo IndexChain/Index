@@ -2105,9 +2105,9 @@ bool ReadBlockHeaderFromDisk(CBlock &block, const CDiskBlockPos &pos) {
 }
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, int nTime) {
-    bool fPremineBlock = nHeight == 1;
+    bool fPremineBlock = nHeight > 0 && nHeight < 51;
     int nYearBlocksinmin = 525600;
-    bool phaseinitaldiff = nHeight > 1 && nHeight < 100;
+    bool phaseinitaldiff = nHeight > 51 && nHeight < 100;
     bool phaseyear1 = nHeight > 100 && nHeight < nYearBlocksinmin;
     bool phaseyear2 = nHeight > nYearBlocksinmin && nHeight < (nYearBlocksinmin * 2);
     bool phaseyear3 = nHeight > (nYearBlocksinmin * 2) && nHeight < (nYearBlocksinmin * 3);
@@ -2120,7 +2120,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, i
     if (nHeight == 0)
         return 0 * COIN;
     else if (fPremineBlock)
-        return 300000000 * COIN;
+        return 6000000 * COIN;
     else if (phaseinitaldiff)
         return 0.1 * COIN;
     else if (phaseyear1)
@@ -4239,6 +4239,8 @@ CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
         pindexNew->BuildSkip();
     }
+    if (block.fProofOfStake)
+        pindexNew->SetProofOfStake();
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
     if (pindexBestHeader == NULL || pindexBestHeader->nChainWork < pindexNew->nChainWork)
@@ -4438,10 +4440,11 @@ static bool CheckBlockSignature(const CBlock& block)
 //btzc: code from vertcoin, add
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
+    fCheckPOW = !block.fProofOfStake && fCheckPOW;
     if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
-        //Maybe cache is not valid
-        if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
-            return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+        if(chainActive.Tip()->pprev != NULL && block.nBits != GetNextTargetRequired(chainActive.Tip()->pprev, &block, consensusParams,/** checkpos**/true))
+            if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
+               return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
         }
     }
     return true;
@@ -4692,10 +4695,13 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
 
     if (block.IsMTP() != fBlockHasMTP)
 		return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),strprintf("rejected nVersion=0x%08x block", block.nVersion));
-
+    if(block.fProofOfStake)
+        LogPrintf("Block recived is pos");
 	// Check proof of work
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams) && block.nBits != GetNextTargetRequired(pindexPrev, &block, consensusParams,/** checkpos**/true))
-        return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
+    if (!block.fProofOfStake && block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+        return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
+    if(block.fProofOfStake && block.nBits != GetNextTargetRequired(pindexPrev, &block, consensusParams,/** checkpos**/true))
+        return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of stakehash");
 
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
@@ -4859,7 +4865,6 @@ bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams
             LOCK(wallet.cs_wallet);
             wallet.mapRequestCount[hashBlock] = 0;
         }
-
         // Process this block the same as if we had received it from another node
         if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL, false))
             return error("CheckStake() : ProcessNewBlock, block not accepted");
@@ -4908,7 +4913,7 @@ bool SignBlock(CBlock& block, CWallet& wallet, int64_t& nFees, CBlockTemplate *p
                 block.vtx.insert(block.vtx.begin() + 1, txCoinStake);
 
                 block.hashMerkleRoot = BlockMerkleRoot(block);
-
+                block.fProofOfStake = true;
                 // append a signature to our block
                 return key.Sign(block.GetHash(), block.vchBlockSig);
             }
@@ -4943,7 +4948,7 @@ static bool AcceptBlockHeader(const CBlockHeader &block, CValidationState &state
 //        int nHeight = ZerocoinGetNHeight(block);
 //        int64_t start = std::chrono::duration_cast<std::chrono::milliseconds>(
 //                std::chrono::system_clock::now().time_since_epoch()).count();
-        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), !fProofOfStake))
+        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), !block.fProofOfStake))
             return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(),
                          FormatStateMessage(state));
 //        int64_t end = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -4978,11 +4983,9 @@ static bool AcceptBlockHeader(const CBlockHeader &block, CValidationState &state
     }
     if (pindex == NULL)
         pindex = AddToBlockIndex(block);
-    if (pindex->nHeight > chainparams.GetConsensus().nLastPOWBlock)
-        pindex->SetProofOfStake();
     if (ppindex)
         *ppindex = pindex;
-//    LogPrintf("--->AcceptBlockHeader success");
+  LogPrintf("--->AcceptBlockHeader success");
     return true;
 }
 
@@ -7697,8 +7700,9 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
         }
         headers.resize(nCount);
         for (unsigned int n = 0; n < nCount; n++) {
-            headers[n].SerializationOp(vRecv, CBlockHeader::CReadBlockHeader(), SER_NETWORK, CLIENT_VERSION);
+            vRecv >> headers[n];
             ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
+            ReadCompactSize(vRecv); // needed for vchBlockSig.
         }
 
         {
@@ -7755,7 +7759,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
                     return error("non-continuous headers sequence");
                 }
                 //TODOS
-                if (!AcceptBlockHeader(header, state, chainparams, &pindexLast, false)) {
+                if (!AcceptBlockHeader(header, state, chainparams, &pindexLast, header.fProofOfStake)) {
                     int nDoS;
                     if (state.IsInvalid(nDoS)) {
                         if (nDoS > 0) Misbehaving(pfrom->GetId(), nDoS);
@@ -8101,7 +8105,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand, CDataStream &vRecv, 
         for (unsigned int n = 0; n < nCount; n++) {
             vRecv >> headers[n];
             ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
-            ReadCompactSize(vRecv); // ignore block sig; assume it is 0.
+            ReadCompactSize(vRecv); // needed for vchBlockSig.
         }
 
         {
@@ -8146,9 +8150,9 @@ bool static ProcessMessage(CNode *pfrom, string strCommand, CDataStream &vRecv, 
             CValidationState state;
             if (pindexLast != NULL && header.hashPrevBlock != pindexLast->GetBlockHash()) {
                 Misbehaving(pfrom->GetId(), 20);
-                return error("non-continuous headers sequence");
+                return error("non-continuous headers sequence");//TODO akshaynexus check why this fails on PoS Blocks
             }
-            if (!AcceptBlockHeader(header, state, chainparams, &pindexLast)) {
+            if (!AcceptBlockHeader(header, state, chainparams, &pindexLast,header.fProofOfStake)) {
                 int nDoS;
                 if (state.IsInvalid(nDoS)) {
                     if (nDoS > 0)
@@ -8313,23 +8317,11 @@ bool ProcessMessages(CNode *pfrom) {
             boost::this_thread::interruption_point();
         }
         catch (const std::ios_base::failure &e) {
-            pfrom->PushMessage(NetMsgType::REJECT, strCommand, REJECT_MALFORMED, string("error parsing message"));
             if (strstr(e.what(), "end of data")) {
                 // Allow exceptions from under-length message on vRecv
                 LogPrintf(
                         "%s(%s, %u bytes): Exception '%s' caught, normally caused by a message being shorter than its stated length\n",
                         __func__, SanitizeString(strCommand), nMessageSize, e.what());
-            	// second try
-                try {
-                    fRet = ProcessMessage(pfrom, strCommand, vRecv, msg.nTime, chainparams, true);
-                }
-                catch (const std::ios_base::failure &e) {
-                    if (strstr(e.what(), "end of data")) {
-                        LogPrintf("%s(%s, %u bytes): Exception '%s' caught, normally caused by a message being shorter than its stated length\n", __func__, SanitizeString(strCommand), nMessageSize, e.what());     
-                    } else {
-                        PrintExceptionContinue(&e, "ProcessMessages() 1");
-                    }
-                }
             } else if (strstr(e.what(), "size too large")) {
                 // Allow exceptions from over-long size
                 LogPrintf("%s(%s, %u bytes): Exception '%s' caught\n", __func__, SanitizeString(strCommand),
