@@ -4443,8 +4443,11 @@ static bool CheckBlockSignature(const CBlock& block)
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
     fCheckPOW = !block.fProofOfStake && fCheckPOW;
-    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
+    if (block.fProofOfStake){
         if(chainActive.Tip()->pprev != NULL && block.nBits != GetNextTargetRequired(chainActive.Tip()->pprev, &block, consensusParams,/** checkpos**/true))
+               return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of stake targethash check failed");
+    }
+    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
             if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
                return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
         }
