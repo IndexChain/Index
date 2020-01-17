@@ -4239,8 +4239,8 @@ CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
         pindexNew->BuildSkip();
     }
-    if (block.fProofOfStake)
-        pindexNew->SetProofOfStake();
+    // if (block.fProofOfStake)
+    //     pindexNew->SetProofOfStake();
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
     if (pindexBestHeader == NULL || pindexBestHeader->nChainWork < pindexNew->nChainWork)
@@ -4396,7 +4396,7 @@ static bool CheckBlockSignature(const CBlock& block)
         return block.vchBlockSig.empty();
 
     if (block.vchBlockSig.empty())
-        return false;
+        return error("Blocksig is empty on a proofofstake block\n");
 
     vector<vector<unsigned char> > vSolutions;
     txnouttype whichType;
@@ -4404,12 +4404,13 @@ static bool CheckBlockSignature(const CBlock& block)
     const CTxOut& txout = block.vtx[1].vout[1];
 
     if (!Solver(txout.scriptPubKey, whichType, vSolutions))
-        return false;
-
+        return error("Unable to get solution with coinstake vtx\n");
     if (whichType == TX_PUBKEY)
     {
         vector<unsigned char>& vchPubKey = vSolutions[0];
-        return CPubKey(vchPubKey).Verify(block.GetHash(), block.vchBlockSig);
+        if(!CPubKey(vchPubKey).Verify(block.GetHash(), block.vchBlockSig)){
+            return error("Signature doesnt match TX_PUBKEY\n");
+        }
     }
     else
     {
@@ -4424,17 +4425,18 @@ static bool CheckBlockSignature(const CBlock& block)
         uint256 hash = block.GetHash();
 
         if (!script.GetOp(pc, opcode, vchPushValue))
-            return false;
+            return error("Cannot getop of pubkey\n");
         if (opcode != OP_RETURN)
-            return false;
+            return error("OP Code is not OP_RETURN\n");
         if (!script.GetOp(pc, opcode, vchPushValue))
-            return false;
+            return error("Canot get opcode2\n");
         if (!IsCompressedOrUncompressedPubKey(vchPushValue))
-            return false;
-        return CPubKey(vchPushValue).Verify(hash, block.vchBlockSig);
+            return error("Failed IsCompressedOrUncompressedPubKey Check\n");
+        if(!CPubKey(vchPushValue).Verify(hash, block.vchBlockSig))
+            return error("Signature doesnt match pubkey of vchpushvalue\n");
     }
 
-    return false;
+    return true;
 }
 
 //btzc: code from vertcoin, add
@@ -4695,8 +4697,6 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
 
     if (block.IsMTP() != fBlockHasMTP)
 		return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),strprintf("rejected nVersion=0x%08x block", block.nVersion));
-    if(block.fProofOfStake)
-        LogPrintf("Block recived is pos");
 	// Check proof of work
     if (!block.fProofOfStake && block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
@@ -7702,7 +7702,9 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
         for (unsigned int n = 0; n < nCount; n++) {
             vRecv >> headers[n];
             ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
+            if(headers[n].fProofOfStake){
             ReadCompactSize(vRecv); // needed for vchBlockSig.
+            }
         }
 
         {
