@@ -365,6 +365,31 @@ public:
     {
         return (int64_t)nTime;
     }
+    /**
+     * Duplicate from bitcoinrpc that originaly define this method.
+     * May require some cleanup since this method should be available both for rpc
+     * and qt clients.
+     */
+    double GetBlockDifficulty() const
+    {
+        int nShift = (nBits >> 24) & 0xff;
+
+        double dDiff =
+            (double)0x0000ffff / (double)(nBits & 0x00ffffff);
+
+        while (nShift < 29)
+        {
+            dDiff *= 256.0;
+            nShift++;
+        }
+        while (nShift > 29)
+        {
+            dDiff /= 256.0;
+            nShift--;
+        }
+
+        return dDiff;
+    }
 
     enum { nMedianTimeSpan=11 };
 

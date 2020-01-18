@@ -95,7 +95,7 @@ public:
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
-        consensus.nPowTargetTimespan = 60 * 60; // 60 minutes between retargets
+        consensus.nPowTargetTimespan = 2 * 60; // 2 minutes between retargets
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
