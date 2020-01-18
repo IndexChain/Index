@@ -383,6 +383,7 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/x16Rv2/sph_simd.h \
   crypto/x16Rv2/sph_echo.h \
   crypto/x16Rv2/sph_shavite.h \
+  crypto/x16Rv2/sph_shabal.h \
   crypto/x16Rv2/sph_sha2.h \
   crypto/x16Rv2/sph_haval.h \
   crypto/x16Rv2/sph_tiger.h \

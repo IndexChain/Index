@@ -13,6 +13,11 @@ AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([src/config/bitcoin-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
+AC_CONFIG_LINKS([src/crypto/x16Rv2/md_helper.c:src/crypto/x16Rv2/md_helper.c])
+AC_CONFIG_LINKS([src/crypto/x16Rv2/hamsi_helper.c:src/crypto/x16Rv2/hamsi_helper.c])
+AC_CONFIG_LINKS([src/crypto/x16Rv2/sph_md_helper.c:src/crypto/x16Rv2/sph_md_helper.c])
+AC_CONFIG_LINKS([src/crypto/x16Rv2/aes_helper.c:src/crypto/x16Rv2/aes_helper.c])
+AC_CONFIG_LINKS([src/crypto/x16Rv2/haval_helper.c:src/crypto/x16Rv2/haval_helper.c])
 
 BITCOIN_DAEMON_NAME=indexd
 BITCOIN_GUI_NAME=index-qt

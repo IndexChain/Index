@@ -360,6 +360,8 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
 		        if (diskindex.IsProofOfStake()){
                     pindexNew->nStakeModifier = diskindex.nStakeModifier;
                 }
+                pindexNew->vchBlockSig    = diskindex.vchBlockSig; // qtum
+
                 if (!diskindex.IsProofOfStake() && !CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, consensusParams))
                     if (!CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, consensusParams))
                         return error("LoadBlockIndex(): CheckProofOfWork failed: %s", pindexNew->ToString());

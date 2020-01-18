@@ -99,6 +99,7 @@ public:
     uint32_t nBits;
     uint32_t nNonce;
     bool fProofOfStake;
+    std::vector<unsigned char> vchBlockSig;//Proof Of Stake Block signature
     // Index - MTP
     int32_t nVersionMTP = 0x1000;
     uint256 mtpHashValue;
@@ -135,6 +136,7 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(fProofOfStake);
+        READWRITE(vchBlockSig);
         // Index - MTP
         // On read: allocate and read. On write: write only if already allocated
         if (IsMTP()) {
@@ -162,6 +164,7 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(fProofOfStake);
+        READWRITE(vchBlockSig);
         if (IsMTP()) {
             READWRITE(nVersionMTP);
             READWRITE(mtpHashValue);
@@ -181,6 +184,7 @@ public:
         fProofOfStake = false;
         isComputed = -1;
         powHash.SetNull();
+        vchBlockSig.clear();
 
         // Index - MTP
         mtpHashData.reset();
@@ -265,8 +269,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
-        if (this->fProofOfStake)
-            READWRITE(vchBlockSig);
+        READWRITE(vchBlockSig);
     }
 
     template <typename Stream>
@@ -305,6 +308,7 @@ public:
         block.nBits          = nBits;
         block.nNonce         = nNonce;
         block.fProofOfStake = fProofOfStake || IsProofOfStake();
+        block.vchBlockSig    = vchBlockSig;
         if (block.IsMTP()) {
             block.nVersionMTP = nVersionMTP;
             block.mtpHashData = mtpHashData;
