@@ -4390,27 +4390,26 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 
     return true;
 }
-static bool CheckBlockSignature(const CBlock& block)
+bool GetBlockPublicKey(const CBlock& block, std::vector<unsigned char>& vchPubKey)
 {
     if (block.IsProofOfWork())
-        return block.vchBlockSig.empty();
+        return false;
 
-    if (block.vchBlockSig.empty() && block.IsProofOfStake())
-        return error("Blocksig is empty on a proofofstake block\n");
+    if (block.vchBlockSig.empty())
+        return false;
 
     vector<vector<unsigned char> > vSolutions;
-    txnouttype whichType;
-
     const CTxOut& txout = block.vtx[1].vout[1];
+    txnouttype whichType;
+    Solver(txout.scriptPubKey,whichType, vSolutions);
 
-    if (!Solver(txout.scriptPubKey, whichType, vSolutions))
-        return error("Unable to get solution with coinstake vtx\n");
+    if (whichType == TX_NONSTANDARD)
+        return error("Nonstandard TX/Stake\n");
+
     if (whichType == TX_PUBKEY)
     {
-        vector<unsigned char>& vchPubKey = vSolutions[0];
-        if(!CPubKey(vchPubKey).Verify(block.GetHash(), block.vchBlockSig)){
-            return error("Signature doesnt match TX_PUBKEY\n");
-        }
+        vchPubKey = vSolutions[0];
+        return true;
     }
     else
     {
@@ -4420,25 +4419,37 @@ static bool CheckBlockSignature(const CBlock& block)
         const CScript& script = txout.scriptPubKey;
         CScript::const_iterator pc = script.begin();
         opcodetype opcode;
-        vector<unsigned char> vchPushValue;
 
-        uint256 hash = block.GetHash();
-
-        if (!script.GetOp(pc, opcode, vchPushValue))
+        if (!script.GetOp(pc, opcode, vchPubKey))
             return error("Cannot getop of pubkey\n");
         if (opcode != OP_RETURN)
             return error("OP Code is not OP_RETURN\n");
-        if (!script.GetOp(pc, opcode, vchPushValue))
+        if (!script.GetOp(pc, opcode, vchPubKey))
             return error("Canot get opcode2\n");
-        if (!IsCompressedOrUncompressedPubKey(vchPushValue))
+        if (!IsCompressedOrUncompressedPubKey(vchPubKey))
             return error("Failed IsCompressedOrUncompressedPubKey Check\n");
-        if(!CPubKey(vchPushValue).Verify(hash, block.vchBlockSig))
-            return error("Signature doesnt match pubkey of vchpushvalue\n");
+        return true;
     }
 
-    return true;
+            return error("Fallthroughx\n");
 }
+static bool CheckBlockSignature(const CBlock& block)
+{
+    if (block.IsProofOfWork())
+        return block.vchBlockSig.empty();
 
+    std::vector<unsigned char> vchPubKey;
+    if(!GetBlockPublicKey(block, vchPubKey))
+    {
+        return false;
+    }
+        CPubKey key_id;
+
+    CPubKey posPubKey;
+    posPubKey.RecoverCompact(block.GetHash(), block.vchBlockSig);
+        key_id = CPubKey(vchPubKey);
+    return posPubKey == key_id;
+}
 //btzc: code from vertcoin, add
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
@@ -4533,7 +4544,7 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
                 return state.DoS(100, false, REJECT_INVALID, "bad-cs-multiple", false, "more than one coinstake");
         }
 
-        // Check proof-of-stake block signature
+        // // Check proof-of-stake block signature
         if (nHeight > Params().GetConsensus().nLastPOWBlock)
         {
             if (fCheckSig && !CheckBlockSignature(block))
@@ -4914,7 +4925,15 @@ bool SignBlock(CBlock& block, CWallet& wallet, int64_t& nFees, CBlockTemplate *p
                 block.hashMerkleRoot = BlockMerkleRoot(block);
                 block.fProofOfStake = true;
                 // append a signature to our block
-                return key.Sign(block.GetHash(), block.vchBlockSig);
+                key.SignCompact(block.GetHash(), block.vchBlockSig);
+                if(!block.vchBlockSig.empty()){
+    
+                    LogPrintf("Block signed\n");
+                    return true;
+                }
+                else
+                    LogPrintf("Didnt sign");
+            return false;
             }
         }
         nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
@@ -7699,9 +7718,8 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
         }
         headers.resize(nCount);
         for (unsigned int n = 0; n < nCount; n++) {
-            vRecv >> headers[n];
-            headers[n].SerializationOp(vRecv, CBlockHeader::CReadBlockHeader(), SER_NETWORK, CLIENT_VERSION);
-            ReadCompactSize(vRecv); // needed for vchBlockSig.
+	        headers[n].SerializationOp(vRecv, CBlockHeader::CReadBlockHeader(), SER_NETWORK, CLIENT_VERSION);
+            ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
         }
 
         {

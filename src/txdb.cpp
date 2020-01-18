@@ -327,6 +327,14 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 // Construct block index object
             	//if(diskindex.hashBlock != uint256()
             	//	&& diskindex.hashPrev != uint256()){
+                // For some reason Veil & Index has a tendency to duplicate an index (literraly), and store the second under a different key
+                // ignore any duplicates and mark them to be erased
+                // uint256 hashBlock = diskindex.GetBlockHash();
+                // if (hashBlock != key.second) {
+                //     pcursor->Next();
+                //     continue;
+                // }
+
                 CBlockIndex* pindexNew    = insertBlockIndex(diskindex.GetBlockHash());
                 pindexNew->pprev 		  = insertBlockIndex(diskindex.hashPrev);
 
@@ -357,13 +365,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 pindexNew->sigmaMintedPubCoins   = diskindex.sigmaMintedPubCoins;
                 pindexNew->sigmaSpentSerials     = diskindex.sigmaSpentSerials;
                 pindexNew->fProofOfStake = diskindex.fProofOfStake;
-		        if (diskindex.IsProofOfStake()){
+		        if (diskindex.fProofOfStake){
                     pindexNew->nStakeModifier = diskindex.nStakeModifier;
+                    pindexNew->vchBlockSig    = diskindex.vchBlockSig; // qtum
                 }
-                pindexNew->vchBlockSig    = diskindex.vchBlockSig; // qtum
 
-                if (!diskindex.IsProofOfStake() && !CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, consensusParams))
-                    if (!CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, consensusParams))
+                if (!diskindex.fProofOfStake && !CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
                         return error("LoadBlockIndex(): CheckProofOfWork failed: %s", pindexNew->ToString());
 
                 pcursor->Next();

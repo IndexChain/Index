@@ -136,7 +136,8 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(fProofOfStake);
-        READWRITE(vchBlockSig);
+        if(fProofOfStake)
+            READWRITE(vchBlockSig);
         // Index - MTP
         // On read: allocate and read. On write: write only if already allocated
         if (IsMTP()) {
@@ -164,7 +165,8 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(fProofOfStake);
-        READWRITE(vchBlockSig);
+        if(fProofOfStake)
+            READWRITE(vchBlockSig);
         if (IsMTP()) {
             READWRITE(nVersionMTP);
             READWRITE(mtpHashValue);
@@ -234,7 +236,6 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransaction> vtx;
-    std::vector<unsigned char> vchBlockSig;//Proof Of Stake Block signature
     // memory only
     mutable CTxOut txoutZnode; // znode payment
     mutable std::vector<CTxOut> voutSuperblock; // superblock payment
@@ -269,7 +270,6 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
-        READWRITE(vchBlockSig);
     }
 
     template <typename Stream>
@@ -284,7 +284,6 @@ public:
         vtx.clear();
         txoutZnode = CTxOut();
         voutSuperblock.clear();
-        vchBlockSig.clear();
         fChecked = false;
     }
 	// two types of block: proof-of-work or proof-of-stake

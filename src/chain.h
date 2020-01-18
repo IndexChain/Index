@@ -299,7 +299,8 @@ public:
         nBits          = block.nBits;
         nNonce         = block.nNonce;
         fProofOfStake = block.fProofOfStake;
-        vchBlockSig    = block.vchBlockSig; // qtum
+        if(fProofOfStake)
+            vchBlockSig    = block.vchBlockSig; // qtum
         if (block.IsMTP()) {
             nVersionMTP = block.nVersionMTP;
             mtpHashValue = block.mtpHashValue;
@@ -337,7 +338,8 @@ public:
         block.nBits          = nBits;
         block.nNonce         = nNonce;
         block.fProofOfStake = fProofOfStake;
-        block.vchBlockSig    = vchBlockSig;
+        if(fProofOfStake)
+            block.vchBlockSig    = vchBlockSig;
 
         // Index - MTP
         if(block.IsMTP()){
@@ -510,7 +512,8 @@ public:
         READWRITE(nBits);
         READWRITE(nNonce);
         READWRITE(fProofOfStake);
-        READWRITE(vchBlockSig); // qtum
+        if(fProofOfStake)
+            READWRITE(vchBlockSig); // qtum
 
         // Index - MTP
         if (nTime > ZC_GENESIS_BLOCK_TIME && nTime >= Params().GetConsensus().nMTPSwitchTime) {
@@ -549,7 +552,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        block.vchBlockSig     = vchBlockSig;
+        block.fProofOfStake  = fProofOfStake;
         if (block.IsMTP()) {
             block.nVersionMTP = nVersionMTP;
             block.mtpHashValue = mtpHashValue;
