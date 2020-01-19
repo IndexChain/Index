@@ -165,7 +165,7 @@ public:
         //Ignore,not used anyways
         strZnodePaymentsPubKey = "04549ac134f694c0243f503e8c8a9a986f5de6610049c40b07816809b0d1d06a21b07be27b9bb555931773f62ba6cf35a25fd52f694d4e1106ccd237a7bb899fdd";
         //Stake stuff
-        consensus.nLastPOWBlock = 1;//TODO akshaynexus :This needs to be decided
+        consensus.nFirstPOSBlock = 1;//TODO akshaynexus :This needs to be decided
         consensus.nStakeTimestampMask = 0xf; // 15
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
@@ -259,7 +259,8 @@ public:
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
         fTestnetToBeDeprecatedFieldRPC = false;
-
+        nConsecutivePoWHeight = 100;
+        nMaxPoWBlocks = 5;
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
                     (0, genesis.GetHash()),
@@ -331,7 +332,7 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //Proof-of-Stake related values
-        consensus.nLastPOWBlock = 135;//TODO akshaynexus :This needs to be decided
+        consensus.nFirstPOSBlock = 135;//TODO akshaynexus :This needs to be decided
         consensus.nStakeTimestampMask = 0xf; // 15
         consensus.nPowTargetTimespan = 5 * 60; // 5 minutes between retargets
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks

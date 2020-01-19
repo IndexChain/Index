@@ -1289,7 +1289,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
     {
         CBlockIndex* pindexPrev = chainActive.Tip();
         const int nHeight = pindexPrev->nHeight + 1;            
-        if (nHeight >= Params().GetConsensus().nLastPOWBlock)
+        if (nHeight >= Params().GetConsensus().nFirstPOSBlock)
         {
             while (pwallet->IsLocked())
             {

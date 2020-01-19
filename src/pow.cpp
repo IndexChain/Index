@@ -43,7 +43,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
     unsigned int nTargetLimit = UintToArith256(Params().GetConsensus().posLimit).GetCompact();
 
     // Genesis block or first proof-of-stake block
-    if (pindexLast == NULL || pindexLast->nHeight == Params().GetConsensus().nLastPOWBlock)
+    if (pindexLast == NULL || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
         return UintToArith256(params.posLimit).GetCompact();
 
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);

@@ -2124,21 +2124,21 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, i
     else if (phaseinitaldiff)
         return 0.1 * COIN;
     else if (phaseyear1)
-        return 3 * COIN;
+        return 1 * COIN;//Next years it reduces by 20% each year
     else if (phaseyear2)
-        return 2.5 * COIN;
+        return 0.8 * COIN;
     else if (phaseyear3)
-        return 2 * COIN;
+        return 0.512 * COIN;
     else if (phaseyear4)
-        return 1.5 * COIN;
+        return 0.4096 * COIN;
     else if (phaseyear5)
-        return 1 * COIN;
+        return 0.32768 * COIN;
     else if (phaseyear6)
-        return 0.75 * COIN;
+        return 0.262144 * COIN;
     else if (phaseyear7)
-        return 0.5 * COIN;
+        return 0.2097152 * COIN;
     else
-        return 0.5 * COIN;
+        return 0.2097152 * COIN;
 }
 
 bool IsInitialBlockDownload() {
@@ -2841,7 +2841,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
     pindex->nStakeModifier = ComputeStakeModifier(pindex->pprev, block.IsProofOfStake() ? block.vtx[1].vin[0].prevout.hash : block.GetHash());
 
     // Check proof-of-stake
-    if (block.IsProofOfStake()) {
+    if (block.IsProofOfStake() && block.fProofOfStake) {
          const COutPoint &prevout = block.vtx[1].vin[0].prevout;
          const CCoins *coins = view.AccessCoins(prevout.hash);
           if (!coins)
@@ -3740,7 +3740,7 @@ CAmount GetZnodePayment(const Consensus::Params &params, bool fMTP,int nHeight) 
 if(nHeight > Params().GetConsensus().nZnodePaymentsStartBlock)
 {
     //Give 80 % to masternode
-    return GetBlockSubsidy(nHeight,params) * 80/100 * COIN;
+    return GetBlockSubsidy(nHeight,params) * 0.7;
 }
     //No reward before znodepaymentsstartblock
     return 0;
@@ -4545,7 +4545,7 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
         }
 
         // // Check proof-of-stake block signature
-        if (nHeight > Params().GetConsensus().nLastPOWBlock)
+        if (nHeight > Params().GetConsensus().nFirstPOSBlock)
         {
             if (fCheckSig && !CheckBlockSignature(block))
                 return state.DoS(100, false, REJECT_INVALID, "bad-block-signature", false, "bad proof-of-stake block signature");
@@ -4731,6 +4731,24 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
     return true;
 }
 
+bool CheckConsecutivePoW(const CBlock& block, CBlockIndex* pindexPrev) {
+    // the current block being PoS means that there are 0 consecutive PoW blocks
+    if (block.IsProofOfStake()) {
+        return true;
+    }
+    CBlockIndex *pindexCheck = pindexPrev;
+    // iterate through previous block indexes until the genesis block is hit,
+    // a proof of stake block is hit, or the limit is reached for pow blocks
+    for (int i = 1; i <= Params().MaxConsecutivePoWBlocks(); i++) {
+        if (!pindexCheck || pindexCheck->IsProofOfStake()) {
+            return true;
+        }
+
+        pindexCheck = pindexCheck->pprev;
+    }
+
+    return false;
+}
 bool IsBlockHashInChain(const uint256& hashBlock)
 {
     if (hashBlock.IsNull() || !mapBlockIndex.count(hashBlock))
@@ -4843,6 +4861,9 @@ bool ContextualCheckBlock(const CBlock &block, CValidationState &state, CBlockIn
     // failed).
     if (GetBlockWeight(block) > MAX_BLOCK_WEIGHT) {
         return state.DoS(100, error("ContextualCheckBlock(): weight limit failed"), REJECT_INVALID, "bad-blk-weight");
+    }
+    if (pindexPrev->nHeight >= Params().ConsecutivePoWHeight() && !CheckConsecutivePoW(block, pindexPrev)) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-pow", false, "too many consecutive pow blocks");
     }
 
     return true;
@@ -5053,7 +5074,7 @@ AcceptBlock(const CBlock &block, CValidationState &state, const CChainParams &ch
     int nHeight = pindex->nHeight;
 //    LogPrintf("AcceptBlock() pindex->nHeight=%s\n", nHeight);
     // Check for the last proof of work block
-    // if (block.IsProofOfWork() && nHeight > chainparams.GetConsensus().nLastPOWBlock)
+    // if (block.IsProofOfWork() && nHeight > chainparams.GetConsensus().nFirstPOSBlock)
     //     return state.DoS(100, error("%s: reject proof-of-work at height %d",  __func__, nHeight),
     //                     REJECT_INVALID, "bad-pow-height");
     // Write block to history file
@@ -8104,165 +8125,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
     }
     return true;
 }
-// Special implementation of Processmessage for proof-of-stake
-bool static ProcessMessage(CNode *pfrom, string strCommand, CDataStream &vRecv, int64_t nTimeReceived,
-                           const CChainParams &chainparams, bool secondTry) {
-    if (strCommand == NetMsgType::HEADERS && !fImporting && !fReindex) // Ignore headers received while importing
-    {
-        std::vector <CBlockHeader> headers;
 
-        // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
-        unsigned int nCount = ReadCompactSize(vRecv);
-        if (nCount > MAX_HEADERS_RESULTS) {
-            LOCK(cs_main);
-            Misbehaving(pfrom->GetId(), 20);
-            return error("headers message size = %u", nCount);
-        }
-        headers.resize(nCount);
-        for (unsigned int n = 0; n < nCount; n++) {
-            vRecv >> headers[n];
-            ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
-            ReadCompactSize(vRecv); // needed for vchBlockSig.
-        }
-
-        {
-        LOCK(cs_main);
-
-        if (nCount == 0) {
-            // Nothing interesting. Stop asking this peers for more headers.
-            return true;
-        }
-
-        CNodeState *nodestate = State(pfrom->GetId());
-
-        // If this looks like it could be a block announcement (nCount <
-        // MAX_BLOCKS_TO_ANNOUNCE), use special logic for handling headers that
-        // don't connect:
-        // - Send a getheaders message in response to try to connect the chain.
-        // - The peer can send up to MAX_UNCONNECTING_HEADERS in a row that
-        //   don't connect before giving DoS points
-        // - Once a headers message is received that is valid and does connect,
-        //   nUnconnectingHeaders gets reset back to 0.
-        if (mapBlockIndex.find(headers[0].hashPrevBlock) == mapBlockIndex.end() && nCount < MAX_BLOCKS_TO_ANNOUNCE) {
-            nodestate->nUnconnectingHeaders++;
-            pfrom->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexBestHeader), uint256());
-            LogPrint("net", "received header %s: missing prev block %s, sending getheaders (%d) to end (peer=%d, nUnconnectingHeaders=%d)\n",
-                    headers[0].GetHash().ToString(),
-                    headers[0].hashPrevBlock.ToString(),
-                    pindexBestHeader->nHeight,
-                    pfrom->id, nodestate->nUnconnectingHeaders);
-            // Set hashLastUnknownBlock for this peer, so that if we
-            // eventually get the headers - even from a different peer -
-            // we can use this peer to download.
-            UpdateBlockAvailability(pfrom->GetId(), headers.back().GetHash());
-
-            if (nodestate->nUnconnectingHeaders % MAX_UNCONNECTING_HEADERS == 0) {
-                Misbehaving(pfrom->GetId(), 20);
-            }
-            return true;
-        }
-
-        CBlockIndex *pindexLast = NULL;
-        BOOST_FOREACH(const CBlockHeader& header, headers) {
-            CValidationState state;
-            if (pindexLast != NULL && header.hashPrevBlock != pindexLast->GetBlockHash()) {
-                Misbehaving(pfrom->GetId(), 20);
-                return error("non-continuous headers sequence");//TODO akshaynexus check why this fails on PoS Blocks
-            }
-            if (!AcceptBlockHeader(header, state, chainparams, &pindexLast,header.fProofOfStake)) {
-                int nDoS;
-                if (state.IsInvalid(nDoS)) {
-                    if (nDoS > 0)
-                        Misbehaving(pfrom->GetId(), nDoS);
-                    return error("invalid header received");
-                }
-            }
-        }
-
-        if (nodestate->nUnconnectingHeaders > 0) {
-            LogPrint("net", "peer=%d: resetting nUnconnectingHeaders (%d -> 0)\n", pfrom->id, nodestate->nUnconnectingHeaders);
-        }
-        nodestate->nUnconnectingHeaders = 0;
-
-        assert(pindexLast);
-        UpdateBlockAvailability(pfrom->GetId(), pindexLast->GetBlockHash());
-
-        if (nCount == MAX_HEADERS_RESULTS) {
-            // Headers message had its maximum size; the peer may have more headers.
-            // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
-            // from there instead.
-            pfrom->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexLast), uint256());
-        }
-
-            bool fCanDirectFetch = CanDirectFetch(chainparams.GetConsensus());
-            // If this set of headers is valid and ends in a block with at least as
-            // much work as our tip, download as much as possible.
-            if (fCanDirectFetch && pindexLast->IsValid(BLOCK_VALID_TREE) &&
-                chainActive.Tip()->nChainWork <= pindexLast->nChainWork) {
-                vector < CBlockIndex * > vToFetch;
-                CBlockIndex *pindexWalk = pindexLast;
-                // Calculate all the blocks we'd need to switch to pindexLast, up to a limit.
-                while (pindexWalk && !chainActive.Contains(pindexWalk) &&
-                       vToFetch.size() <= MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
-                    if (!(pindexWalk->nStatus & BLOCK_HAVE_DATA) &&
-                        !mapBlocksInFlight.count(pindexWalk->GetBlockHash()) &&
-                        (!IsWitnessEnabled(pindexWalk->pprev, chainparams.GetConsensus()) ||
-                         State(pfrom->GetId())->fHaveWitness)) {
-                        // We don't have this block, and it's not yet in flight.
-                        vToFetch.push_back(pindexWalk);
-                    }
-                    pindexWalk = pindexWalk->pprev;
-                }
-                // If pindexWalk still isn't on our main chain, we're looking at a
-                // very large reorg at a time we think we're close to caught up to
-                // the main chain -- this shouldn't really happen.  Bail out on the
-                // direct fetch and rely on parallel download instead.
-                if (!chainActive.Contains(pindexWalk)) {
-//                    LogPrint("net", "Large reorg, won't direct fetch to %s (%d)\n",
-//                             pindexLast->GetBlockHash().ToString(),
-//                             pindexLast->nHeight);
-                } else {
-                    vector <CInv> vGetData;
-                    // Download as much as possible, from earliest to latest.
-                    BOOST_REVERSE_FOREACH(CBlockIndex * pindex, vToFetch)
-                    {
-                        if (nodestate->nBlocksInFlight >= MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
-                            // Can't download any more from this peer
-                            break;
-                        }
-                        uint32_t nFetchFlags = GetFetchFlags(pfrom, pindex->pprev, chainparams.GetConsensus());
-                        vGetData.push_back(CInv(MSG_BLOCK | nFetchFlags, pindex->GetBlockHash()));
-                        MarkBlockAsInFlight(pfrom->GetId(), pindex->GetBlockHash(), chainparams.GetConsensus(), pindex);
-                        LogPrint("net", "Requesting block %s from  peer=%d\n",
-                                 pindex->GetBlockHash().ToString(), pfrom->id);
-                    }
-                    if (vGetData.size() > 1) {
-                        LogPrint("net", "Downloading blocks toward %s (%d) via headers direct fetch\n",
-                                 pindexLast->GetBlockHash().ToString(), pindexLast->nHeight);
-                    }
-                    if (vGetData.size() > 0) {
-                        /*if (nodestate->fSupportsDesiredCmpctVersion && vGetData.size() == 1 &&
-                            mapBlocksInFlight.size() == 1 && pindexLast->pprev->IsValid(BLOCK_VALID_CHAIN)) {
-                            // We seem to be rather well-synced, so it appears pfrom was the first to provide us
-                            // with this block! Let's get them to announce using compact blocks in the future.
-                            MaybeSetPeerAsAnnouncingHeaderAndIDs(nodestate, pfrom);
-                            // In any case, we want to download using a compact block, not a regular one
-                            vGetData[0] = CInv(MSG_CMPCT_BLOCK, vGetData[0].hash);
-                        }*/
-                        pfrom->PushMessage(NetMsgType::GETDATA, vGetData);
-                    }
-                }
-            }
-
-            CheckBlockIndex(chainparams.GetConsensus());
-        }
-
-        NotifyHeaderTip();
-    }
-    else {
-        return false;
-    }
-}
 // requires LOCK(cs_vRecvMsg)
 bool ProcessMessages(CNode *pfrom) {
     const CChainParams &chainparams = Params();

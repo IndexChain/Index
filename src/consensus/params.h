@@ -192,7 +192,7 @@ struct Params {
     uint256 nMinimumChainWork;
 	
     // proof-of-stake
-    int nLastPOWBlock;
+    int nFirstPOSBlock;
     int nStakeTimestampMask;
     bool IsMain() const { return chainType == chainMain; }
     bool IsTestnet() const { return chainType == chainTestnet; }

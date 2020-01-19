@@ -14,6 +14,7 @@
 #include "txmempool.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "spork.h"
 #ifdef ENABLE_WALLET
 #include "znode-sync.h"
 #include "wallet/wallet.h"
@@ -284,6 +285,70 @@ CScript _createmultisig_redeemScript(const UniValue& params)
     return result;
 }
 
+UniValue createsporkkeypair(const UniValue& params, bool fHelp)
+{
+    if (fHelp)
+        throw runtime_error(
+            "createsporkkeypair\n"
+            "\nReturns a public and private key pair for use in chainparams and in conf for the spork controller\n"
+
+            "\nResult:\n"
+            "{\n"
+            "  \"indexaddr\" : \"indexaddr\", (string) The Index public address \n"
+            "  \"strsporkpubkey\" : \"pubsporkkey\", (string) The spork pubkey \n"
+            "  \"sporkkey\" : \"privsporkkey\", (string) The privatekey of the spork pubkey\n"
+            "}\n"
+
+            "\nExamples:\n" +
+            HelpExampleCli("createsporkkeypair", "") + HelpExampleRpc("createsporkkeypair", ""));
+
+#ifdef ENABLE_WALLET
+    LOCK2(cs_main, pwalletMain ? &pwalletMain->cs_wallet : NULL);
+#else
+    LOCK(cs_main);
+#endif
+
+    EnsureWalletIsUnlocked();
+    //check if wallet is locked
+    if (!pwalletMain->IsLocked()){
+      pwalletMain->TopUpKeyPool();
+    }
+    string strAccount = "";
+    // Generate a new key that is added to wallet
+    CPubKey newKey;
+    //check if keypool has ran out
+    if (!pwalletMain->GetKeyFromPool(newKey))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    CKeyID keyID = newKey.GetID();
+    CKey vchSecret;
+    pwalletMain->SetAddressBook(keyID, strAccount, "receive");
+    //get address from KeyID
+    CBitcoinAddress address(keyID);
+    //get addr in str format
+    string currentAddress = address.ToString();
+    //check if private key is known
+    if (!pwalletMain->GetKey(keyID, vchSecret))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + currentAddress + " is not known");
+    bool isValid = address.IsValid();
+    UniValue ret(UniValue::VOBJ);
+    //only return data if addr is valid
+    if (isValid) {
+        //akshaynexus: combine validateaddress and dumpprivkey to generate sporkkey pairs needed for testing/making new spork pairs
+        CTxDestination dest = address.Get();
+        //get public address
+        ret.push_back(Pair("indexaddr", currentAddress));
+        CScript scriptPubKey = GetScriptForDestination(dest);
+        //get scriptpubkey
+        ret.push_back(Pair("strsporkpubkey", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
+        //get privkey
+        ret.push_back(Pair("sporkkey",CBitcoinSecret(vchSecret).ToString()));
+    }
+    else{
+        throw JSONRPCError(RPC_WALLET_ERROR, "Address returned is not valid");
+    }
+    return ret;
+}
+
 UniValue znsync(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
@@ -417,6 +482,50 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
         return false;
 
     return (pubkey.GetID() == keyID);
+}
+/*
+    Used for updating/reading spork settings on the network
+*/
+UniValue spork(const UniValue& params, bool fHelp)
+{
+    if(params.size() == 1 && params[0].get_str() == "show"){
+        UniValue ret(UniValue::VOBJ);
+        for(int nSporkID = SPORK_START; nSporkID <= SPORK_END; nSporkID++){
+            if(sporkManager.GetSporkNameByID(nSporkID) != "Unknown")
+                ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.GetSporkValue(nSporkID)));
+        }
+        return ret;
+    } else if(params.size() == 1 && params[0].get_str() == "active"){
+        UniValue ret(UniValue::VOBJ);
+        for(int nSporkID = SPORK_START; nSporkID <= SPORK_END; nSporkID++){
+            if(sporkManager.GetSporkNameByID(nSporkID) != "Unknown")
+                ret.push_back(Pair(sporkManager.GetSporkNameByID(nSporkID), sporkManager.IsSporkActive(nSporkID)));
+        }
+        return ret;
+    } else if (params.size() == 2){
+        int nSporkID = sporkManager.GetSporkIDByName(params[0].get_str());
+        if(nSporkID == -1){
+            return "Invalid spork name";
+        }
+
+        // SPORK VALUE
+        int64_t nValue = params[1].get_int64();
+
+        //broadcast new spork
+        if(sporkManager.UpdateSpork(nSporkID, nValue)){
+            sporkManager.ExecuteSpork(nSporkID, nValue);
+            return "success";
+        } else {
+            return "failure";
+        }
+
+    }
+
+    throw runtime_error(
+        "spork <name> [<value>]\n"
+        "<name> is the corresponding spork name, or 'show' to show all current spork settings, active to show which sporks are active"
+        "<value> is a epoch datetime to enable or disable spork"
+        + HelpRequiringPassphrase());
 }
 
 UniValue signmessagewithprivkey(const UniValue& params, bool fHelp)

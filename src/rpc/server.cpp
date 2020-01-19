@@ -282,6 +282,8 @@ static const CRPCCommand vRPCCommands[] =
     { "index",               "znsync",                &znsync,                 true  },
     { "index",               "znodelist",             &znodelist,              true  },
     { "index",               "znodebroadcast",        &znodebroadcast,         true  },
+    { "index",               "spork",                 &spork,                  true  },
+    { "index" ,              "createsporkkeypair",    &createsporkkeypair,     true  },
     { "index",               "getpoolinfo",           &getpoolinfo,            true  },
 };
 

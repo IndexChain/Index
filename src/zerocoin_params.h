@@ -13,7 +13,7 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 #define ZC_CHECK_BUG_FIXED_AT_BLOCK         1
 
 // Before this block we allowed not paying to the znodes.
-#define ZC_ZNODE_PAYMENT_BUG_FIXED_AT_BLOCK         107246
+#define ZC_ZNODE_PAYMENT_BUG_FIXED_AT_BLOCK         1
 
 // Do strict check on duplicate minted public coin value after this block
 #define ZC_CHECK_DUPLICATE_MINT_AT_BLOCK    1
@@ -63,7 +63,7 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 
 // Number of blocks after ZC_SIGMA_STARTING_BLOCK during which we still accept zerocoin V2 spends into mempool.
 #define ZC_V2_SPEND_GRACEFUL_MEMPOOL_PERIOD         1
-#define ZC_V2_SPEND_TESTNET_GRACEFUL_MEMPOOL_PERIOD 1500
+#define ZC_V2_SPEND_TESTNET_GRACEFUL_MEMPOOL_PERIOD 1
 
 // Number of blocks after ZC_SIGMA_STARTING_BLOCK during which we still accept zerocoin V2 spends to newly mined blocks.
 #define ZC_V2_SPEND_GRACEFUL_PERIOD         1

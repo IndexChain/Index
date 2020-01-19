@@ -82,7 +82,9 @@ public:
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     std::string SporkPubKey() const { return strSporkPubKey; }
     std::string ZnodePaymentPubKey() const { return strZnodePaymentsPubKey; }
-	
+    /** Veil Consecutive POW Limit code **/
+	int MaxConsecutivePoWBlocks() const { return nMaxPoWBlocks; }
+    int ConsecutivePoWHeight() const { return nConsecutivePoWHeight; }
 	/** Zerocoin-related block numbers when features are changed */
 	int nSpendV15StartBlock;
 	int nSpendV2ID_1, nSpendV2ID_10, nSpendV2ID_25, nSpendV2ID_50, nSpendV2ID_100;
@@ -102,6 +104,8 @@ protected:
     std::vector<unsigned char> base58Prefixes[MAX_BASE58_TYPES];
     std::string strNetworkID;
     CBlock genesis;
+    int nMaxPoWBlocks;
+    int nConsecutivePoWHeight;
     std::vector<SeedSpec6> vFixedSeeds;
     bool fMiningRequiresPeers;
     bool fDefaultConsistencyChecks;

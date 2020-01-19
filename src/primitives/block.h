@@ -307,7 +307,8 @@ public:
         block.nBits          = nBits;
         block.nNonce         = nNonce;
         block.fProofOfStake = fProofOfStake || IsProofOfStake();
-        block.vchBlockSig    = vchBlockSig;
+        if(block.fProofOfStake)
+            block.vchBlockSig    = vchBlockSig;
         if (block.IsMTP()) {
             block.nVersionMTP = nVersionMTP;
             block.mtpHashData = mtpHashData;
