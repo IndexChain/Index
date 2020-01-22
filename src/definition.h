@@ -16,7 +16,7 @@ enum {
     BLOCK_VERSION_CHAIN_START = (1 << 16),
     BLOCK_VERSION_CHAIN_END = (1 << 30),
 };
-static const int64_t nStartRewardTime = 1475020800;
+static const int64_t nStartRewardTime = 1580217929;//Date and time (GMT): Tuesday, January 28, 2020 1:25:29 PM
 
 #endif //BTZC_DEFINITION_H
 

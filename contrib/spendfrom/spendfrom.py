@@ -38,10 +38,10 @@ def check_json_precision():
 def determine_db_dir():
     """Return the default location of the bitcoin data directory"""
     if platform.system() == "Darwin":
-        return os.path.expanduser("~/Library/Application Support/IndexCore/")
+        return os.path.expanduser("~/Library/Application Support/IndexChain/")
     elif platform.system() == "Windows":
-        return os.path.join(os.environ['APPDATA'], "IndexCore")
-    return os.path.expanduser("~/.IndexCore")
+        return os.path.join(os.environ['APPDATA'], "IndexChain")
+    return os.path.expanduser("~/.IndexChain")
 
 def read_bitcoin_config(dbdir):
     """Read the bitcoin.conf file from dbdir, returns dictionary of settings"""

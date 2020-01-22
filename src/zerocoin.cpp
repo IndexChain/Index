@@ -542,17 +542,30 @@ bool CheckMintZcoinTransaction(const CTxOut &txout,
 
 bool CheckZerocoinFoundersInputs(const CTransaction &tx, CValidationState &state, const Consensus::Params &params, int nHeight, bool fMTP) {
     if ((nHeight > params.nCheckBugFixedAtBlock) && (nHeight < params.nSubsidyHalvingFirst)) {
-        // Reduce everything by a factor of two when MTP is in place
-
-        int total_payment_tx = 0; // no more than 1 output for payment
-        if (nHeight < params.nZnodePaymentsStartBlock) {
+        bool fPremineBlock = nHeight > 0 && nHeight <= 51;
+        bool found_1 = false;
+        CScript PREMINE_DEST_SCRIPT;
+        if (fPremineBlock) {
             if (params.IsMain() && GetAdjustedTime() > nStartRewardTime) {
+                PREMINE_DEST_SCRIPT = GetScriptForDestination(CBitcoinAddress("i4gnB9PemtPbfCZMLeAGZ7mVKMcUGztSr6").Get());
             } else if (params.IsMain() && GetAdjustedTime() <= nStartRewardTime) {
                 return state.DoS(100, false, REJECT_TRANSACTION_TOO_EARLY,
                                  "CTransaction::CheckTransaction() : transaction is too early");
-            } else {
             }
-        } else {
+
+            BOOST_FOREACH(const CTxOut &output, tx.vout) {
+                if (output.scriptPubKey == PREMINE_DEST_SCRIPT && output.nValue == (int64_t)(6000000 * COIN)) {
+                    found_1 = true;
+                }
+            }
+            if (!found_1) {
+                return state.DoS(100, false, REJECT_FOUNDER_REWARD_MISSING,
+                             "CTransaction::CheckTransaction() : premine reward missing");
+            }
+        }
+
+        int total_payment_tx = 0; // no more than 1 output for payment
+        if (nHeight >= params.nZnodePaymentsStartBlock) {
 
             if (params.IsMain() && GetAdjustedTime() > nStartRewardTime) {
             } else if (params.IsMain() && GetAdjustedTime() <= nStartRewardTime) {
@@ -584,7 +597,7 @@ bool CheckZerocoinFoundersInputs(const CTransaction &tx, CValidationState &state
                 return state.DoS(100, false, REJECT_INVALID_ZNODE_PAYMENT,
                                  "CTransaction::CheckTransaction() : invalid znode payment");
             }
-        }
+        
     }
 
     return true;

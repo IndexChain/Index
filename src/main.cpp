@@ -2105,22 +2105,22 @@ bool ReadBlockHeaderFromDisk(CBlock &block, const CDiskBlockPos &pos) {
 }
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, int nTime) {
-    bool fPremineBlock = nHeight > 0 && nHeight < 51;
+    bool fPremineBlock = nHeight > 0 && nHeight <= 51;
     int nYearBlocksinmin = 525600;
-    bool phaseinitaldiff = nHeight > 51 && nHeight < 100;
-    bool phaseyear1 = nHeight > 100 && nHeight < nYearBlocksinmin;
-    bool phaseyear2 = nHeight > nYearBlocksinmin && nHeight < (nYearBlocksinmin * 2);
-    bool phaseyear3 = nHeight > (nYearBlocksinmin * 2) && nHeight < (nYearBlocksinmin * 3);
-    bool phaseyear4 = nHeight > (nYearBlocksinmin * 3) && nHeight < (nYearBlocksinmin * 4);
-    bool phaseyear5 = nHeight > (nYearBlocksinmin * 4) && nHeight < (nYearBlocksinmin * 5);
-    bool phaseyear6 = nHeight > (nYearBlocksinmin * 5) && nHeight < (nYearBlocksinmin * 6);
-    bool phaseyear7 = nHeight > (nYearBlocksinmin * 6) && nHeight < (nYearBlocksinmin * 7);
+    bool phaseinitaldiff = nHeight > 51 && nHeight <= 100;
+    bool phaseyear1 = nHeight > 100 && nHeight <= nYearBlocksinmin;
+    bool phaseyear2 = nHeight > nYearBlocksinmin && nHeight <= (nYearBlocksinmin * 2);
+    bool phaseyear3 = nHeight > (nYearBlocksinmin * 2) && nHeight <= (nYearBlocksinmin * 3);
+    bool phaseyear4 = nHeight > (nYearBlocksinmin * 3) && nHeight <= (nYearBlocksinmin * 4);
+    bool phaseyear5 = nHeight > (nYearBlocksinmin * 4) && nHeight <= (nYearBlocksinmin * 5);
+    bool phaseyear6 = nHeight > (nYearBlocksinmin * 5) && nHeight <= (nYearBlocksinmin * 6);
+    bool phaseyear7 = nHeight > (nYearBlocksinmin * 6) && nHeight <= (nYearBlocksinmin * 7);
 
     // Genesis block is 0 coin
     if (nHeight == 0)
         return 0 * COIN;
     else if (fPremineBlock)
-        return 6000000 * COIN;
+        return 6000000.1 * COIN;//0.1 Extra for The Miners who mine it
     else if (phaseinitaldiff)
         return 0.1 * COIN;
     else if (phaseyear1)
