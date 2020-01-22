@@ -99,7 +99,7 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 #define ZC_MINT_CONFIRMATIONS               6
 
 // Genesis block timestamp
-#define ZC_GENESIS_BLOCK_TIME               1575937045
+#define ZC_GENESIS_BLOCK_TIME               1580217929
 
 #define SWITCH_TO_MTP_BLOCK_HEADER INT_MAX // NEVER
 #define SWITCH_TO_MTP_5MIN_BLOCK            INT_MAX
