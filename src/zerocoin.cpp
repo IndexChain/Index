@@ -559,7 +559,7 @@ bool CheckZerocoinFoundersInputs(const CTransaction &tx, CValidationState &state
                 }
             }
             if (!found_1) {
-                return state.DoS(100, false, REJECT_FOUNDER_REWARD_MISSING,
+                return state.DoS(100, false, REJECT_PREMINE_REWARD_MISSING,
                              "CTransaction::CheckTransaction() : premine reward missing");
             }
         }

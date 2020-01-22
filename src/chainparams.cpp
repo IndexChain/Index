@@ -155,7 +155,7 @@ public:
         consensus.nInitialMTPDifficulty = 0x1c021e57;
         consensus.nMTPRewardReduction = 2;
 
-        consensus.nDisableZerocoinStartBlock = 157000;
+        consensus.nDisableZerocoinStartBlock = 1;
 
         nMaxTipAge = 6 * 60 * 60; // ~144 blocks behind -> 2 x fork detection time, was 24 * 60 * 60 in bitcoin
 
@@ -195,7 +195,7 @@ public:
         extraNonce[1] = 0x3a;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 664167, 504365040, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 794833, 504365040, 2, 0 * COIN, extraNonce);
         // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
         consensus.hashGenesisBlock = genesis.GetHash();    
@@ -236,7 +236,7 @@ public:
         // std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
         // std::cout << "\n";
         // return;
-        assert(consensus.hashGenesisBlock == uint256S("0x000001f09c48d08586835909e18e356754c8bf2f922a370d6d636c507ba290dc"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000f90351396dcf74aebc8a79a80fa1374a6a9a3b10355f82f9b669e33111b"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));

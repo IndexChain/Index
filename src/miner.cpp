@@ -164,6 +164,8 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
     coinbaseTx.vout.resize(1);
+    CBlockIndex* pindexPrev = chainActive.Tip();
+    const int nHeight = pindexPrev->nHeight + 1;
     if (fProofOfStake)
     {
         // Make the coinbase tx empty in case of proof of stake
@@ -176,7 +178,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         if (params.IsMain() && (GetAdjustedTime() <= nStartRewardTime)) {
                 throw std::runtime_error("CreateNewBlock() : Create new block too early");
         }
-        if ((nHeight + 1 > 0) && (nHeight + 1 <= 51)) {
+        if ((nHeight > 0) && (nHeight <= 51)) {
         CScript PREMINE_DEST_SCRIPT;
         if (nHeight < params.nZnodePaymentsStartBlock) {
             // Take some reward away from us
@@ -224,8 +226,6 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
     unsigned int nBlockSigOps = 100;
     int lastFewTxs = 0;
     CAmount nFees = 0;
-    CBlockIndex* pindexPrev = chainActive.Tip();
-    const int nHeight = pindexPrev->nHeight + 1;
     {
         LOCK2(cs_main, mempool.cs);
         pblock->nTime = nBlockTime;

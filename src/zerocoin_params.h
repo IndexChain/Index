@@ -99,7 +99,7 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 #define ZC_MINT_CONFIRMATIONS               6
 
 // Genesis block timestamp
-#define ZC_GENESIS_BLOCK_TIME               1580217929
+#define ZC_GENESIS_BLOCK_TIME               1579710729
 
 #define SWITCH_TO_MTP_BLOCK_HEADER INT_MAX // NEVER
 #define SWITCH_TO_MTP_5MIN_BLOCK            INT_MAX
@@ -108,19 +108,19 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 #define ZC_SPEND_LIMIT         5
 
 // Value of sigma spends allowed per block
-#define ZC_SIGMA_VALUE_SPEND_LIMIT_PER_BLOCK  (600 * COIN)
+#define ZC_SIGMA_VALUE_SPEND_LIMIT_PER_BLOCK  (20000 * COIN)
 
 // Amount of sigma spends allowed per block
 #define ZC_SIGMA_INPUT_LIMIT_PER_BLOCK         50
 
 // Value of sigma spends allowed per transaction
-#define ZC_SIGMA_VALUE_SPEND_LIMIT_PER_TRANSACTION     (500 * COIN)
+#define ZC_SIGMA_VALUE_SPEND_LIMIT_PER_TRANSACTION     (20000 * COIN)
 
 // Amount of sigma spends allowed per transaction
-#define ZC_SIGMA_INPUT_LIMIT_PER_TRANSACTION            35
+#define ZC_SIGMA_INPUT_LIMIT_PER_TRANSACTION            70
 
 // Number of zerocoin mints allowed per transaction
-#define ZC_MINT_LIMIT         100
+#define ZC_MINT_LIMIT         250
 
 /** Maximum number of outbound peers designated as Dandelion destinations */
 #define DANDELION_MAX_DESTINATIONS 2
