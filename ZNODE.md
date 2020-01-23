@@ -14,7 +14,7 @@ Step 1. Build
 ----------------------
 **1.1.**  Check out from source:
 
-    git clone https://github.com/indexofficial/index
+    git clone https://github.com/IndexChain/Index
 
 **1.2.**  See [README.md](README.md) for instructions on building.
 

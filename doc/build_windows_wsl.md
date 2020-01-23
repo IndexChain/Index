@@ -12,7 +12,7 @@ There are two possibilities of compiling Index code on Windows 10.
  * [WSL/Ubuntu](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) installed
 ---
 For the more complex second execution method, you need to install
- * [Xming](http://www.straightrunning.com/XmingNotes/) latest version, if you are planning to compile using [unix compiling instruction](https://github.com/indexofficial/index/blob/master/doc/build-unix.md)
+ * [Xming](http://www.straightrunning.com/XmingNotes/) latest version, if you are planning to compile using [unix compiling instruction](https://github.com/IndexChain/Index/blob/master/doc/build-unix.md)
 
 
 ## Pre common steps
@@ -49,7 +49,7 @@ For the more complex second execution method, you need to install
 
 5. Clone git repository into newly created directory and go to the right branch
    
-            git clone https://github.com/indexofficial/index.git
+            git clone https://github.com/IndexChain/Index.git
             cd index
     If you are not authorized in git, configure git to always use LF and (optionally) specify your name/email. Global Windows git settings (if set)
     won't be inherited if git is invoked from Ubuntu shell.
@@ -120,7 +120,7 @@ For the more complex second execution method, you need to install
         C:\Users\<username>\index\src\qt
 ----
 ## Second method - Ubuntu + Xming
-1. Use existing paper [build-unix](https://github.com/indexofficial/index/blob/master/doc/build-unix.md) and
+1. Use existing paper [build-unix](https://github.com/IndexChain/Index/blob/master/doc/build-unix.md) and
     * Install all dependencies
     * Build app
 2. Start installed Xming in Windows

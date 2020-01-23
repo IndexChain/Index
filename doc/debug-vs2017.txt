@@ -40,7 +40,7 @@ Building
       ln -s /mnt/c/Users/<username>/index index 
 
  4. Clone git resository into newly created directory and go to the right branch
-      git clone https://github.com/indexofficial/index.git
+      git clone https://github.com/IndexChain/Index.git
       cd index
       git checkout core_upgrade
     Configure git to always use LF and (optionally) specify your name/email. Global Windows git settings (if set)

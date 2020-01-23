@@ -45,5 +45,5 @@ parts:
   after: [libboost]
   plugin: autotools
   configflags: [--without-gui]
-  source: https://github.com/indexofficial/index.git
+  source: https://github.com/IndexChain/Index.git
   source-branch: master

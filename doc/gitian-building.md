@@ -309,7 +309,7 @@ Clone the git repositories for bitcoin and Gitian.
 
 ```bash
 git clone https://github.com/devrandom/gitian-builder.git
-git clone https://github.com/indexofficial/index
+git clone https://github.com/IndexChain/Index
 git clone https://github.com/bitcoin-core/gitian.sigs.git
 ```
 

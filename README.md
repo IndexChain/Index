@@ -1,12 +1,12 @@
 Index
 ===============
 
-[![latest-release](https://img.shields.io/github/release/indexofficial/index)](https://github.com/indexofficial/index/releases)
-[![GitHub last-release](https://img.shields.io/github/release-date/indexofficial/index)](https://github.com/indexofficial/index/releases)
-[![GitHub downloads](https://img.shields.io/github/downloads/indexofficial/index/total)](https://github.com/indexofficial/index/releases)
-[![GitHub commits-since-last-version](https://img.shields.io/github/commits-since/indexofficial/index/latest/master)](https://github.com/indexofficial/index/graphs/commit-activity)
-[![GitHub commits-per-month](https://img.shields.io/github/commit-activity/m/indexofficial/index)](https://github.com/indexofficial/index/graphs/code-frequency)
-[![GitHub last-commit](https://img.shields.io/github/last-commit/indexofficial/index)](https://github.com/indexofficial/index/commits/master)
+[![latest-release](https://img.shields.io/github/release/indexofficial/index)](https://github.com/IndexChain/Index/releases)
+[![GitHub last-release](https://img.shields.io/github/release-date/indexofficial/index)](https://github.com/IndexChain/Index/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/indexofficial/index/total)](https://github.com/IndexChain/Index/releases)
+[![GitHub commits-since-last-version](https://img.shields.io/github/commits-since/indexofficial/index/latest/master)](https://github.com/IndexChain/Index/graphs/commit-activity)
+[![GitHub commits-per-month](https://img.shields.io/github/commit-activity/m/indexofficial/index)](https://github.com/IndexChain/Index/graphs/code-frequency)
+[![GitHub last-commit](https://img.shields.io/github/last-commit/indexofficial/index)](https://github.com/IndexChain/Index/commits/master)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/indexofficial/index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/indexofficial/index/alerts/)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/indexofficial/index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/indexofficial/index/context:cpp)
 
@@ -101,7 +101,7 @@ Build
 ----------------------
 1.  Clone the source:
 
-        git clone https://github.com/indexofficial/index
+        git clone https://github.com/IndexChain/Index
 
 2.  Build Index-core:
 

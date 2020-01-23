@@ -22,8 +22,8 @@ packages:
 - "ca-certificates"
 - "python"
 remotes:
-- "url": "https://github.com/indexofficial/index"
-  "dir": "index"
+- "url": "https://github.com/IndexChain/Index"
+  "dir": "Index"
 files: []
 script: |
   WRAP_DIR=$HOME/wrapped
