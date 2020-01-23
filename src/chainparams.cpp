@@ -161,7 +161,7 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "04549ac134f694c0243f503e8c8a9a986f5de6610049c40b07816809b0d1d06a21b07be27b9bb555931773f62ba6cf35a25fd52f694d4e1106ccd237a7bb899fdd";
+        strSporkPubKey = "024faf77b973d9c858991c6e1d6b5865f6221831467691718108ebbb907e7d5ccd";
         //Ignore,not used anyways
         strZnodePaymentsPubKey = "04549ac134f694c0243f503e8c8a9a986f5de6610049c40b07816809b0d1d06a21b07be27b9bb555931773f62ba6cf35a25fd52f694d4e1106ccd237a7bb899fdd";
         //Stake stuff
@@ -195,7 +195,7 @@ public:
         extraNonce[1] = 0x3a;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 794833, 504365040, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 168676, 504365040, 2, 0 * COIN, extraNonce);
         // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
         consensus.hashGenesisBlock = genesis.GetHash();    
@@ -208,7 +208,7 @@ public:
         // int genesisNonce = 0;
         // uint256 TempHashHolding = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
         // uint256 BestBlockHash = uint256S("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        // for (int i=0;i<40000000;i++) {
+        // for (int i=10000;i<40000000;i++) {
         //     genesis = CreateGenesisBlock(nGenesisTime, i, 504365040, 2, 0 * COIN,extraNonce);
         //     //genesis.hashPrevBlock = TempHashHolding;
         //     consensus.hashGenesisBlock = genesis.GetHash();
@@ -236,7 +236,7 @@ public:
         // std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
         // std::cout << "\n";
         // return;
-        assert(consensus.hashGenesisBlock == uint256S("0x00000f90351396dcf74aebc8a79a80fa1374a6a9a3b10355f82f9b669e33111b"));
+        assert(consensus.hashGenesisBlock == uint256S("0x00000a8c889c227ed22b7a5b852a51e65036aeeadf2316db22cc96501da2ada7"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));

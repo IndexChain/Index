@@ -6,7 +6,7 @@
 
 #ifndef BTZC_DEFINITION_H
 #define BTZC_DEFINITION_H
-
+#include "zerocoin_params.h"
 enum {
     // primary version
     BLOCK_VERSION_DEFAULT = (1 << 0),
@@ -16,7 +16,7 @@ enum {
     BLOCK_VERSION_CHAIN_START = (1 << 16),
     BLOCK_VERSION_CHAIN_END = (1 << 30),
 };
-static const int64_t nStartRewardTime = 1579710729;//Date and time (GMT): Tuesday, January 28, 2020 1:25:29 PM
+static const int64_t nStartRewardTime = ZC_GENESIS_BLOCK_TIME;//Date and time (GMT): Thursday, January 23, 2020 9:40:53 PM
 
 #endif //BTZC_DEFINITION_H
 

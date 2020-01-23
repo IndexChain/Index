@@ -5073,10 +5073,10 @@ AcceptBlock(const CBlock &block, CValidationState &state, const CChainParams &ch
     }
     int nHeight = pindex->nHeight;
 //    LogPrintf("AcceptBlock() pindex->nHeight=%s\n", nHeight);
-    // Check for the last proof of work block
-    // if (block.IsProofOfWork() && nHeight > chainparams.GetConsensus().nFirstPOSBlock)
-    //     return state.DoS(100, error("%s: reject proof-of-work at height %d",  __func__, nHeight),
-    //                     REJECT_INVALID, "bad-pow-height");
+    // Check for the first proof of work block
+    if (block.IsProofOfStake() && nHeight < chainparams.GetConsensus().nFirstPOSBlock)
+        return state.DoS(100, error("%s: reject proof-of-stake at height %d",  __func__, nHeight),
+                        REJECT_INVALID, "bad-pos-height");
     // Write block to history file
     try {
         unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
