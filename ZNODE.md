@@ -30,7 +30,7 @@ Step 3. First run on your Local Wallet
 ----------------------
 **3.0.**  Go to the checked out folder
 
-    cd index
+    cd Index
 
 **3.1.**  Start daemon in testnet mode:
 

@@ -50,7 +50,7 @@ For the more complex second execution method, you need to install
 5. Clone git repository into newly created directory and go to the right branch
    
             git clone https://github.com/IndexChain/Index.git
-            cd index
+            cd Index
     If you are not authorized in git, configure git to always use LF and (optionally) specify your name/email. Global Windows git settings (if set)
     won't be inherited if git is invoked from Ubuntu shell.
 

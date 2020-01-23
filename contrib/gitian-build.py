@@ -223,7 +223,7 @@ def main():
     if args.setup:
         setup()
 
-    os.chdir('index')
+    os.chdir('Index')
     if args.pull:
         subprocess.check_call(['git', 'fetch', args.url, 'refs/pull/'+args.version+'/merge'])
         os.chdir('../gitian-builder/inputs/index')
