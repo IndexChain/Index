@@ -195,7 +195,7 @@ public:
         extraNonce[1] = 0x3a;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 168676, 504365040, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 939185, 504365040, 2, 0 * COIN, extraNonce);
         // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
         consensus.hashGenesisBlock = genesis.GetHash();    
@@ -236,7 +236,7 @@ public:
         // std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
         // std::cout << "\n";
         // return;
-        assert(consensus.hashGenesisBlock == uint256S("0x00000a8c889c227ed22b7a5b852a51e65036aeeadf2316db22cc96501da2ada7"));
+        assert(consensus.hashGenesisBlock == uint256S("0x000000dce8c8f0bc6c1ff56f6b0eb2a0ac12ffe56432cf14eb3faa5e6ace463f"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));
