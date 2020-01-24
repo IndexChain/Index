@@ -315,7 +315,7 @@ libbitcoin_zmq_a_SOURCES = \
   rpc/client.cpp
 endif
 
-# wallet: shared between indexd and zcoin-qt, but only linked
+# wallet: shared between indexd and index-qt, but only linked
 # when wallet enabled
 libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)

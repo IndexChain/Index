@@ -45,38 +45,38 @@ For an example of the publisher in action, see `client-api/examples/sub_example.
 - can also run on Windows Subsysten for Linux (WSL):
     `python sub_example.py regtest auth windows_wsl`
 
-You can then eg. generate blocks using `./zcoin-cli generate 10`, and you should see block updates being published in your terminal window.
+You can then eg. generate blocks using `./index-cli generate 10`, and you should see block updates being published in your terminal window.
 
 ### Replier
 
-   To use the examples for the replier, please first download and setup the `zcoin-client` repo.
+   To use the examples for the replier, please first download and setup the `index-client` repo.
     You will need Node.js installed.
-        `git clone https://github.com/zcoinofficial/zcoin-client`
+        `git clone https://github.com/IndexChain/Index-client`
         `npm install`
 
-#### Using zcoin-client examples
+#### Using index-client examples
    You will need to rebuild `indexd` without ZMQ authentication, as this is currently not implemented in the Node examples.
    - Open `zmqserver/zmqabstract.h` and change `ZMQ_AUTH` to `false`.
     
-   in `zcoin-client`: `cd examples/api`
+   in `index-client`: `cd examples/api`
      Then run an example, eg. `node apiStatus.js`
 
 #### Using the GUI itself
-   You can make calls from the `zcoin-client` GUI within Chrome Dev Tools. All methods are available but must be formatted correctly.
+   You can make calls from the `index-client` GUI within Chrome Dev Tools. All methods are available but must be formatted correctly.
     - First run `indexd`
-    - then run `npm run dev` from `zcoin-client`
+    - then run `npm run dev` from `index-client`
     - Open Chrome Dev Tools from the taskbar
     - Use the following command:
         `await $daemon.send(null, '{TYPE}', '{METHOD_NAME}', {JSON_ARGS})`
 
-   refer to https://github.com/zcoinofficial/zcoin/tree/client-api/src/client-api for data formats.
+   refer to https://github.com/IndexChain/Index/tree/client-api/src/client-api for data formats.
 
 ### Settings
   As in Qt with `QSettings`, the client adds a level to the settings hierarchy in `indexd`. The following is the current hierarchy, in descending order of importance:
   `CLI -> zcoin.conf -> QSettings`
   Where `CLI` is settings passed via the command line interface to `indexd`, `zcoin.conf` is settings defined in the `zcoin.conf` file in your datadir, and ` QSettings` is Qt-specific settings. What this means is a setting passed via CLI will always override the same one set in either of the lower tiers.
 
-  In `zcoin-client`, `QSettings` is replaced by the file `persistent/settings.json` in your datadir. Each setting here has the following format:
+  In `index-client`, `QSettings` is replaced by the file `persistent/settings.json` in your datadir. Each setting here has the following format:
   ```
   "-settingname": {
       "data": STRING,
