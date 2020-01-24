@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        docker { image 'indexofficial/index-builder:latest' }
+        docker { image 'IndexChain/Index-builder:latest' }
     }
     environment {
         CCACHE_DIR = '/tmp/.ccache'

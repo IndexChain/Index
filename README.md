@@ -1,14 +1,14 @@
 Index
 ===============
 
-[![latest-release](https://img.shields.io/github/release/indexofficial/index)](https://github.com/IndexChain/Index/releases)
-[![GitHub last-release](https://img.shields.io/github/release-date/indexofficial/index)](https://github.com/IndexChain/Index/releases)
-[![GitHub downloads](https://img.shields.io/github/downloads/indexofficial/index/total)](https://github.com/IndexChain/Index/releases)
-[![GitHub commits-since-last-version](https://img.shields.io/github/commits-since/indexofficial/index/latest/master)](https://github.com/IndexChain/Index/graphs/commit-activity)
-[![GitHub commits-per-month](https://img.shields.io/github/commit-activity/m/indexofficial/index)](https://github.com/IndexChain/Index/graphs/code-frequency)
-[![GitHub last-commit](https://img.shields.io/github/last-commit/indexofficial/index)](https://github.com/IndexChain/Index/commits/master)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/indexofficial/index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/indexofficial/index/alerts/)
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/indexofficial/index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/indexofficial/index/context:cpp)
+[![latest-release](https://img.shields.io/github/release/IndexChain/Index)](https://github.com/IndexChain/Index/releases)
+[![GitHub last-release](https://img.shields.io/github/release-date/IndexChain/Index)](https://github.com/IndexChain/Index/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/IndexChain/Index/total)](https://github.com/IndexChain/Index/releases)
+[![GitHub commits-since-last-version](https://img.shields.io/github/commits-since/IndexChain/Index/latest/master)](https://github.com/IndexChain/Index/graphs/commit-activity)
+[![GitHub commits-per-month](https://img.shields.io/github/commit-activity/m/IndexChain/Index)](https://github.com/IndexChain/Index/graphs/code-frequency)
+[![GitHub last-commit](https://img.shields.io/github/last-commit/IndexChain/Index)](https://github.com/IndexChain/Index/commits/master)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/IndexChain/Index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/IndexChain/Index/alerts/)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/IndexChain/Index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/IndexChain/Index/context:cpp)
 
 What is Index?
 --------------
@@ -33,13 +33,13 @@ Please note that we currently don't support the GUI when running with Docker. Th
 Pull our latest official Docker image:
 
 ```sh
-docker pull indexofficial/indexd
+docker pull IndexChain/Indexd
 ```
 
 Start Index daemon:
 
 ```sh
-docker run --detach --name indexd indexofficial/indexd
+docker run --detach --name indexd IndexChain/Indexd
 ```
 
 View current block count (this might take a while since the daemon needs to find other nodes and download blocks first):
