@@ -259,7 +259,7 @@ public:
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
         fTestnetToBeDeprecatedFieldRPC = false;
-        nConsecutivePoWHeight = 100;
+        nConsecutivePoWHeight = 1000;
         nMaxPoWBlocks = 5;
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
