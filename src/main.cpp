@@ -5023,7 +5023,7 @@ static bool AcceptBlockHeader(const CBlockHeader &block, CValidationState &state
         pindex = AddToBlockIndex(block);
     if (ppindex)
         *ppindex = pindex;
-  LogPrintf("--->AcceptBlockHeader success");
+//   LogPrintf("--->AcceptBlockHeader success");
     return true;
 }
 
