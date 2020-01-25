@@ -4861,7 +4861,7 @@ bool ContextualCheckBlock(const CBlock &block, CValidationState &state, CBlockIn
     if (GetBlockWeight(block) > MAX_BLOCK_WEIGHT) {
         return state.DoS(100, error("ContextualCheckBlock(): weight limit failed"), REJECT_INVALID, "bad-blk-weight");
     }
-    if (pindexPrev->nHeight >= Params().ConsecutivePoWHeight() && !CheckConsecutivePoW(block, pindexPrev)) {
+    if ( !fReindex && pindexPrev->nHeight >= Params().ConsecutivePoWHeight() && !CheckConsecutivePoW(block, pindexPrev) && pindexPrev != NULL) {
         return state.DoS(100, false, REJECT_INVALID, "bad-pow", false, "too many consecutive pow blocks");
     }
 
