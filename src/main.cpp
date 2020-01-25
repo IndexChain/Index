@@ -2068,13 +2068,13 @@ bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos, int nHeight, con
 
    
 
-    // Check the header
-    if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams) && block.IsProofOfWork()){
-        //Maybe cache is not valid
-        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){
-            return error("ReadBlockFromDisk: CheckProofOfWork: Errors in block header at %s", pos.ToString());
-        }
-    }
+    // // Check the header
+    // if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams) && block.IsProofOfWork()){
+    //     //Maybe cache is not valid
+    //     if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)){
+    //         return error("ReadBlockFromDisk: CheckProofOfWork: Errors in block header at %s", pos.ToString());
+    //     }
+    // }
     return true;
 }
 
@@ -2853,10 +2853,9 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
               return state.DoS(100,
                   error("ConnectBlock(): tried to stake at depth %d", pindex->nHeight - coins->nHeight),
                     REJECT_INVALID, "bad-cs-premature");
-
-         if(!CheckKernel(pindex->pprev, block.nBits,block.nTime,prevout))
-              return state.DoS(100, error("ConnectBlock(): proof-of-stake hash doesn't match nBits"),
-                                 REJECT_INVALID, "bad-cs-proofhash");
+         if(!CheckStakeBlockTimestamp(block.nTime))
+              return state.DoS(100, error("ConnectBlock(): proof-of-stake time check failed"),
+                                 REJECT_INVALID, "bad-cs-timecheck");
     }
     bool fScriptChecks = true;
     if (fCheckpointsEnabled) {
