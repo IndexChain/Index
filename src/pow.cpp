@@ -100,9 +100,9 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     }
 
     const CBlockIndex *pindex = pindexLast;
-    if(!pblock->fProofOfStake){
-        pindex = GetLastBlockIndex(pindexLast,false);
-    }
+    //Get last block of specific type,can be either PoW or PoS
+    pindex = GetLastBlockIndex(pindexLast,pblock->fProofOfStake);
+
     arith_uint256 bnPastTargetAvg;
 
     for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
