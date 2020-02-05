@@ -25,38 +25,10 @@
 #include "precomputed_hash.h"
 #include "crypto/x16Rv2/hash_algos.h"
 
-
-unsigned char GetNfactor(int64_t nTimestamp) {
-    int l = 0;
-    if (nTimestamp <= Params().GetConsensus().nChainStartTime)
-        return Params().GetConsensus().nMinNFactor;
-
-    int64_t s = nTimestamp - Params().GetConsensus().nChainStartTime;
-    while ((s >> 1) > 3) {
-        l += 1;
-        s >>= 1;
-    }
-    s &= 3;
-    int n = (l * 158 + s * 28 - 2670) / 100;
-    if (n < 0) n = 0;
-    if (n > 255)
-        LogPrintf("GetNfactor(%d) - something wrong(n == %d)\n", nTimestamp, n);
-
-    unsigned char N = (unsigned char) n;
-
-    return std::min(std::max(N, Params().GetConsensus().nMinNFactor), Params().GetConsensus().nMaxNFactor);
-}
-
 uint256 CBlockHeader::GetHash() const {
 
     return HashX16RV2(BEGIN(nVersion), END(fProofOfStake), hashPrevBlock);
 
-}
-
-bool CBlockHeader::IsMTP() const {
-    // In case if nTime == ZC_GENESIS_BLOCK_TIME we're being called from CChainParams() constructor and
-    // it is not possible to get Params()
-    return false;
 }
 
 uint256 CBlockHeader::GetPoWHash() const {

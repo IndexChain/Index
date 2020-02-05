@@ -72,7 +72,7 @@ CMPSPInfo::CMPSPInfo(const boost::filesystem::path& path, bool fWipe)
     implied_exodus.category = "N/A";
     implied_exodus.subcategory = "N/A";
     implied_exodus.name = "Exodus";
-    implied_exodus.url = "https://www.index.io";
+    implied_exodus.url = "https://www.indexchain.org";
     implied_exodus.data = "Exodus serve as the binding between Index, smart properties and contracts created on the Exodus Layer.";
     implied_texodus.issuer = GetSystemAddress().ToString();
     implied_texodus.prop_type = EXODUS_PROPERTY_TYPE_DIVISIBLE;
@@ -80,7 +80,7 @@ CMPSPInfo::CMPSPInfo(const boost::filesystem::path& path, bool fWipe)
     implied_texodus.category = "N/A";
     implied_texodus.subcategory = "N/A";
     implied_texodus.name = "Test Exodus";
-    implied_texodus.url = "https://www.index.io";
+    implied_texodus.url = "https://www.indexchain.org";
     implied_texodus.data = "Test Exodus serve as the binding between Index, smart properties and contracts created on the Exodus Layer.";
 
     init();

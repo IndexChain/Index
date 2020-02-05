@@ -74,7 +74,7 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
     int nRequests = wtx.GetRequestCount();
     if (nRequests != -1)
     {
-        if (nRequests == 0)
+        if (nRequests == 0 && !wtx.IsCoinStake())
             strHTML += tr(", has not been successfully broadcast yet");
         else if (nRequests > 0)
             strHTML += tr(", broadcast through %n node(s)", "", nRequests);

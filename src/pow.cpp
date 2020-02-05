@@ -15,8 +15,6 @@
 #include "chainparams.h"
 #include "libzerocoin/bitcoin_bignum/bignum.h"
 #include "utilstrencodings.h"
-#include "crypto/MerkleTreeProof/mtp.h"
-#include "mtpstate.h"
 #include "fixed.h"
 bool USE_LWMA = false;
 bool USE_DGW3 = true;
@@ -213,10 +211,11 @@ unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHead
     if (params.fPowNoRetargeting) {
         return pindexLast->nBits;
     }
+    
     if(USE_DGW3)
        return DarkGravityWave(pindexLast, pblock, params);
-    else if (USE_LWMA)
-       return LwmaCalculateNextWorkRequired(pindexLast, pblock, params);
+
+    return LwmaCalculateNextWorkRequired(pindexLast, pblock, params);
 
 }
 
@@ -242,24 +241,6 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex *pindexLast, int64_t nF
         bnNew = bnPowLimit;
 
     return bnNew.GetCompact();
-}
-
-// Index - MTP
-bool CheckMerkleTreeProof(const CBlockHeader &block, const Consensus::Params &params) {
-    if (!block.IsMTP())
-        return true;
-
-    if (!block.mtpHashData)
-        return false;
-
-    uint256 calculatedMtpHashValue;
-    bool isVerified = mtp::verify(block.nNonce, block, Params().GetConsensus().powLimit, &calculatedMtpHashValue) &&
-                      block.mtpHashValue == calculatedMtpHashValue;
-
-    if(!isVerified)
-        return false;
-
-    return true;
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params &params) {

@@ -49,7 +49,6 @@
 #include "versionbits.h"
 #include "definition.h"
 #include "utiltime.h"
-#include "mtpstate.h"
 
 #include "darksend.h"
 #include "instantx.h"
@@ -2856,6 +2855,10 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
          if(!CheckStakeBlockTimestamp(block.nTime))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake time check failed"),
                                  REJECT_INVALID, "bad-cs-timecheck");
+        if (!CheckProofOfStake(mapBlockIndex[block.hashPrevBlock], block.vtx[1], block.nTime, block.nBits, state))
+              return state.DoS(100, error("ConnectBlock(): proof-of-stake hash doesn't match nBits"),
+                                 REJECT_INVALID, "bad-cs-proofhash");
+        
     }
     bool fScriptChecks = true;
     if (fCheckpointsEnabled) {
@@ -3102,7 +3105,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
         return state.DoS(0, error("ConnectBlock(): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
-    if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, blockReward, block.IsMTP())) {
+    if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, blockReward)) {
         mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
         return state.DoS(0, error("ConnectBlock(): couldn't find znode or superblock payments"),
                          REJECT_INVALID, "bad-cb-payee");
@@ -4500,10 +4503,6 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
                 LogPrintf("CheckBlock - mutated -> failed!\n");
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-duplicate", true, "duplicate transaction");
             }
-
-            // Index - MTP
-            if (block.IsMTP() && !CheckMerkleTreeProof(block, consensusParams))
-                return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
         }
 
         // All potential-corruption validation must be done before we do any
@@ -4583,7 +4582,7 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
         if (nHeight == INT_MAX)
             nHeight = ZerocoinGetNHeight(block.GetBlockHeader());
 
-        if (!CheckZerocoinFoundersInputs(block.vtx[0], state, Params().GetConsensus(), nHeight, block.IsMTP())) {
+        if (!CheckZerocoinFoundersInputs(block.vtx[0], state, Params().GetConsensus(), nHeight, false)) {
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(), "Founders' reward check failed");
         }
 
@@ -4701,11 +4700,6 @@ GenerateCoinbaseCommitment(CBlock &block, const CBlockIndex *pindexPrev, const C
 bool
 ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams,
                            CBlockIndex *const pindexPrev, int64_t nAdjustedTime, bool isTestBlockValidity) {
-	// Index - MTP
-    bool fBlockHasMTP = (block.nVersion & 4096) != 0 || (pindexPrev && consensusParams.nMTPSwitchTime == 0);
-
-    if (block.IsMTP() != fBlockHasMTP)
-		return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),strprintf("rejected nVersion=0x%08x block", block.nVersion));
 	// Check proof of work
     if (!block.fProofOfStake && block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
@@ -4717,8 +4711,10 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
         return state.Invalid(false, REJECT_INVALID, "time-too-old", "block's timestamp is too early");
 
     // Check timestamp
-    if (block.GetBlockTime() > nAdjustedTime + 2 * 60 * 60)
+    if (block.GetBlockTime() > nAdjustedTime + 2 * 60 * 60 && !block.fProofOfStake)
         return state.Invalid(false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
+    if (block.GetBlockTime() > nAdjustedTime + 180 && block.fProofOfStake)
+       return state.Invalid(false, REJECT_INVALID, "time-too-new-pos", "block timestamp too far in the future on PoS Block"); 
 
     // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
     for (int32_t version = 2; version < 5; ++version) // check for version 2, 3 and 4 upgrades
@@ -5469,8 +5465,6 @@ bool static LoadBlockIndexDB() {
         setDirtyBlockIndex.insert(changes.begin(), changes.end());
         FlushStateToDisk();
     }
-    // Initialize MTP state
-    MTPState::GetMTPState()->InitializeFromChain(&chainActive, chainparams.GetConsensus());
 
     LogPrintf("%s: hashBestChain=%s height=%d date=%s progress=%f\n", __func__,
               chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(),

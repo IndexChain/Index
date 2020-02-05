@@ -39,7 +39,6 @@
 #include "utilmoneystr.h"
 #include "validationinterface.h"
 #include "validation.h"
-#include "mtpstate.h"
 
 #ifdef ENABLE_CLIENTAPI
 #include "zmqserver/zmqabstract.h"
@@ -701,7 +700,7 @@ std::string HelpMessage(HelpMessageMode mode) {
 
 std::string LicenseInfo() {
     const std::string URL_SOURCE_CODE = "<https://github.com/IndexChain/Index>";
-    const std::string URL_WEBSITE = "<https://index.io/>";
+    const std::string URL_WEBSITE = "<https://indexchain.org/>";
     // todo: remove urls from translations on next change
     return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2009, COPYRIGHT_YEAR) + " ") + "\n" +
            "\n" +
@@ -815,7 +814,6 @@ void ThreadImport(std::vector <boost::filesystem::path> vImportFiles) {
     CImportingNow imp;
     // -reindex
     if (fReindex) {
-        MTPState::GetMTPState()->Reset();
         int nFile = 0;
         while (true) {
             CDiskBlockPos pos(nFile, 0);

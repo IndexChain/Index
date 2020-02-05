@@ -2,7 +2,7 @@ Znode Build Instructions and Notes
 =============================
  - Version 0.1.6
  - Date: 14 December 2017
- - More detailed guide available here: https://index.io/index-znode-setup-guide/
+ - More detailed guide available here: https://indexchain.org/index-znode-setup-guide/
 
 Prerequisites
 -------------

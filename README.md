@@ -13,13 +13,13 @@ Index
 What is Index?
 --------------
 
-[Index](https://index.io) is a privacy focused cryptocurrency that utilizes zero-knowledge proofs which allows users to destroy coins and then redeem them later for brand new ones with no transaction history. Index uses the [Sigma protocol](https://index.io/what-is-sigma-and-why-is-it-replacing-zerocoin-in-index/) for privacy ,which has no trusted setup and small proof sizes. Index also utilises [Dandelion++](https://arxiv.org/abs/1805.11060) to obscure the originating IP of transactions without relying on any external services such as Tor/i2P.
+[Index](https://indexchain.org) is a privacy focused cryptocurrency that utilizes zero-knowledge proofs which allows users to destroy coins and then redeem them later for brand new ones with no transaction history. Index uses the [Sigma protocol](https://indexchain.org/what-is-sigma-and-why-is-it-replacing-zerocoin-in-index/) for privacy ,which has no trusted setup and small proof sizes. Index also utilises [Dandelion++](https://arxiv.org/abs/1805.11060) to obscure the originating IP of transactions without relying on any external services such as Tor/i2P.
 
 
 How Index’s Privacy Technology Compares to the Competition [Uses zcoin's comparison image and details]
 --------------
 ![A comparison chart of Index’s solutions with other leading privacy technologies can be found below](https://zcoin.io/wp-content/uploads/2019/04/zcoin_table_coloured5-01.png) 
-read more https://index.io/indexs-privacy-technology-compares-competition/
+read more https://indexchain.org/indexs-privacy-technology-compares-competition/
 
 Running with Docker [Not supported yet]
 ===================

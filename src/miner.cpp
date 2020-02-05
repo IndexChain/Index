@@ -28,7 +28,6 @@
 #include "wallet/wallet.h"
 #include "definition.h"
 #include "crypto/scrypt.h"
-#include "crypto/MerkleTreeProof/mtp.h"
 #include "crypto/Lyra2Z/Lyra2Z.h"
 #include "crypto/Lyra2Z/Lyra2.h"
 #include "znode-payments.h"
@@ -505,10 +504,6 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
             pblock->nBits = GetNextTargetRequired(pindexPrev, pblock, chainparams.GetConsensus(), true);
         }
         pblock->nNonce         = 0;
-
-        // Index - MTP
-        if (pblock->IsMTP())
-            pblock->mtpHashData = make_shared<CMTPHashData>();
 
         pblocktemplate->vTxSigOpsCost[0] = GetLegacySigOpCount(pblock->vtx[0]);
 
@@ -1276,7 +1271,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                 {
                     // increase priority
                     SetThreadPriority(THREAD_PRIORITY_ABOVE_NORMAL);
-                     // Sign the full block
+                     // Check if stake check passes and process the new block
                     CheckStake(pblock, *pwallet, chainparams);
                     // return back to low priority
                     SetThreadPriority(THREAD_PRIORITY_LOWEST);

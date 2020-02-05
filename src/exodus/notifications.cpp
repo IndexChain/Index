@@ -90,7 +90,7 @@ bool CheckAlertAuthorization(const std::string& sender)
     std::set<std::string> whitelisted;
 
     // Mainnet
-    whitelisted.insert("48UM25xTXCxPRwnv36YjjJNaAK4whKR8Rd"); // Poramin Insom   <poramin@index.io>
+    whitelisted.insert("48UM25xTXCxPRwnv36YjjJNaAK4whKR8Rd"); // Poramin Insom   <poramin@indexchain.org>
 
     // Testnet / Regtest
     // use -exodusalertallowsender for testing

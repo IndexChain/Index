@@ -327,13 +327,6 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 // Construct block index object
             	//if(diskindex.hashBlock != uint256()
             	//	&& diskindex.hashPrev != uint256()){
-                // For some reason Veil & Index has a tendency to duplicate an index (literraly), and store the second under a different key
-                // ignore any duplicates and mark them to be erased
-                // uint256 hashBlock = diskindex.GetBlockHash();
-                // if (hashBlock != key.second) {
-                //     pcursor->Next();
-                //     continue;
-                // }
 
                 CBlockIndex* pindexNew    = insertBlockIndex(diskindex.GetBlockHash());
                 pindexNew->pprev 		  = insertBlockIndex(diskindex.hashPrev);
@@ -349,14 +342,6 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 pindexNew->nNonce         = diskindex.nNonce;
                 pindexNew->nStatus        = diskindex.nStatus;
                 pindexNew->nTx            = diskindex.nTx;
-
-                // Index - MTP
-                if (diskindex.nTime > ZC_GENESIS_BLOCK_TIME && diskindex.nTime >= consensusParams.nMTPSwitchTime) {
-                    pindexNew->nVersionMTP = diskindex.nVersionMTP;
-                    pindexNew->mtpHashValue = diskindex.mtpHashValue;
-                    pindexNew->reserved[0] = diskindex.reserved[0];
-                    pindexNew->reserved[1] = diskindex.reserved[1];
-                }
 
                 pindexNew->accumulatorChanges = diskindex.accumulatorChanges;
                 pindexNew->mintedPubCoins     = diskindex.mintedPubCoins;

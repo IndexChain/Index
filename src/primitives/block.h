@@ -22,7 +22,6 @@ class CSigmaTxInfo;
 
 } // namespace sigma.
 
-unsigned char GetNfactor(int64_t nTimestamp);
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
@@ -138,22 +137,6 @@ public:
         READWRITE(fProofOfStake);
         if(fProofOfStake)
             READWRITE(vchBlockSig);
-        // Index - MTP
-        // On read: allocate and read. On write: write only if already allocated
-        if (IsMTP()) {
-            READWRITE(nVersionMTP);
-            READWRITE(mtpHashValue);
-            READWRITE(reserved[0]);
-            READWRITE(reserved[1]);
-            if (ser_action.ForRead()) {
-                mtpHashData = make_shared<CMTPHashData>();
-                READWRITE(*mtpHashData);
-            }
-            else {
-                if (mtpHashData && !(nType & SER_GETHASH))
-                    READWRITE(*mtpHashData);
-            }
-        }
     }
 
     template <typename Stream>
@@ -167,12 +150,6 @@ public:
         READWRITE(fProofOfStake);
         if(fProofOfStake)
             READWRITE(vchBlockSig);
-        if (IsMTP()) {
-            READWRITE(nVersionMTP);
-            READWRITE(mtpHashValue);
-            READWRITE(reserved[0]);
-            READWRITE(reserved[1]);
-        }
     }
 
     void SetNull()
@@ -225,8 +202,6 @@ public:
         return (int64_t)nTime;
     }
     void InvalidateCachedPoWHash(int nHeight) const;
-
-    bool IsMTP() const;
 };
 
 class CZerocoinTxInfo;
@@ -309,12 +284,6 @@ public:
         block.fProofOfStake = fProofOfStake || IsProofOfStake();
         if(block.fProofOfStake)
             block.vchBlockSig    = vchBlockSig;
-        if (block.IsMTP()) {
-            block.nVersionMTP = nVersionMTP;
-            block.mtpHashData = mtpHashData;
-            block.reserved[0] = reserved[0];
-            block.reserved[1] = reserved[1];
-        }
         return block;
     }
 

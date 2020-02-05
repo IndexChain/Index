@@ -128,7 +128,7 @@ bool IsBlockValueValid(const CBlock &block, int nBlockHeight, CAmount blockRewar
     return isBlockRewardValueMet;
 }
 
-bool IsBlockPayeeValid(const CTransaction &txNew, int nBlockHeight, CAmount blockReward, bool fMTP) {
+bool IsBlockPayeeValid(const CTransaction &txNew, int nBlockHeight, CAmount blockReward) {
     // we can only check znode payment /
     const Consensus::Params &consensusParams = Params().GetConsensus();
 
@@ -144,7 +144,7 @@ bool IsBlockPayeeValid(const CTransaction &txNew, int nBlockHeight, CAmount bloc
     }
 
     //check for znode payee
-    if (mnpayments.IsTransactionValid(txNew, nBlockHeight, fMTP)) {
+    if (mnpayments.IsTransactionValid(txNew, nBlockHeight, false)) {
         LogPrint("mnpayments", "IsBlockPayeeValid -- Valid znode payment at height %d: %s", nBlockHeight, txNew.ToString());
         return true;
     } else {

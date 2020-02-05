@@ -95,7 +95,7 @@ public:
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
-        consensus.nPowTargetTimespan = 1 * 60; // 1 minute between retargets
+        consensus.nPowTargetTimespan = 40 * 60; // 40 minutes between retargets 
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -162,8 +162,6 @@ public:
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
         strSporkPubKey = "024faf77b973d9c858991c6e1d6b5865f6221831467691718108ebbb907e7d5ccd";
-        //Ignore,not used anyways
-        strZnodePaymentsPubKey = "04549ac134f694c0243f503e8c8a9a986f5de6610049c40b07816809b0d1d06a21b07be27b9bb555931773f62ba6cf35a25fd52f694d4e1106ccd237a7bb899fdd";
         //Stake stuff
         consensus.nFirstPOSBlock = 52;//TODO akshaynexus :This needs to be decided
         consensus.nStakeTimestampMask = 0xf; // 15
@@ -260,7 +258,7 @@ public:
         fMineBlocksOnDemand = false;
         fTestnetToBeDeprecatedFieldRPC = false;
         nConsecutivePoWHeight = 1000;
-        nMaxPoWBlocks = 5;
+        nMaxPoWBlocks = 101;
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
                     (0, genesis.GetHash()),
@@ -432,7 +430,7 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         // index test seeds
-        // vSeeds.push_back(CDNSSeedData("beta1.index.io", "beta1.index.io", false));
+        // vSeeds.push_back(CDNSSeedData("beta1.indexchain.org", "beta1.indexchain.org", false));
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector < unsigned char > (1, 65);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector < unsigned char > (1, 178);

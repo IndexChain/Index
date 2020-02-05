@@ -81,7 +81,6 @@ public:
     int PoolMaxTransactions() const { return nPoolMaxTransactions; }
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     std::string SporkPubKey() const { return strSporkPubKey; }
-    std::string ZnodePaymentPubKey() const { return strZnodePaymentsPubKey; }
     /** Veil Consecutive POW Limit code **/
 	int MaxConsecutivePoWBlocks() const { return nMaxPoWBlocks; }
     int ConsecutivePoWHeight() const { return nConsecutivePoWHeight; }
