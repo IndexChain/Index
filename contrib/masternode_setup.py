@@ -133,13 +133,13 @@ def get_total_memory():
 def autostart_masternode(user):
     job = "@reboot /usr/local/bin/indexd\n"
     
-    p = Popen("crontab -l -u {} 2> /dev/null".format(user), stderr=STDOUT, stdout=PIPE, shell=True)
+    p = subprocess.Popen("crontab -l -u {} 2> /dev/null".format(user), stderr=STDOUT, stdout=PIPE, shell=True)
     p.wait()
     lines = p.stdout.readlines()
     if job not in lines:
         print_info("Cron job doesn't exist yet, adding it to crontab")
         lines.append(job)
-        p = Popen('echo "{}" | crontab -u {} -'.format(''.join(lines), user), stderr=STDOUT, stdout=PIPE, shell=True)
+        p = subprocess.Popen('echo "{}" | crontab -u {} -'.format(''.join(lines), user), stderr=STDOUT, stdout=PIPE, shell=True)
         p.wait()
 
 def setup_first_masternode():
@@ -165,9 +165,8 @@ listen=1
 daemon=1
 logtimestamps=1
 znode=1
-znodeaddr={}:7082
 znodeprivkey={}
-""".format(rpc_username, rpc_password, SERVER_IP, masternode_priv_key)
+""".format(rpc_username, rpc_password, masternode_priv_key)
 
     print_info("Saving config file...")
     f = open('/home/mn1/.IndexChain/index.conf', 'w')
@@ -214,9 +213,8 @@ listen=1
 daemon=1
 logtimestamps=1
 znode=1
-znodeaddr={}:{}
 znodeprivkey={}
-""".format(rpc_username, rpc_password, BASE_RPC_PORT + xth - 1, BASE_PORT + xth - 1, SERVER_IP, BASE_PORT + xth - 1, masternode_priv_key)
+""".format(rpc_username, rpc_password, BASE_RPC_PORT + xth - 1, BASE_PORT + xth - 1, masternode_priv_key)
     
     print_info("Saving config file...")
     f = open('/home/mn{}/.IndexChain/index.conf'.format(xth), 'w')
