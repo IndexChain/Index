@@ -7,7 +7,7 @@ import time
 import math
 import os
 from urllib.request import urlopen
-
+from subprocess import *
 SERVER_IP = urlopen('http://ip.42.pl/raw').read()
 # BOOTSTRAP_URL = "http://index.org/dprice.zip"
 
@@ -131,7 +131,7 @@ def get_total_memory():
     return (os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES'))/(1024*1024)
 
 def autostart_masternode(user):
-    job = "@reboot /usr/local/bin/indexd\n"
+    job = b"@reboot /usr/local/bin/indexd\n"
     
     p = subprocess.Popen("crontab -l -u {} 2> /dev/null".format(user), stderr=STDOUT, stdout=PIPE, shell=True)
     p.wait()
@@ -139,7 +139,7 @@ def autostart_masternode(user):
     if job not in lines:
         print_info("Cron job doesn't exist yet, adding it to crontab")
         lines.append(job)
-        p = subprocess.Popen('echo "{}" | crontab -u {} -'.format(''.join(lines), user), stderr=STDOUT, stdout=PIPE, shell=True)
+        p = subprocess.run("echo \"{}\" | crontab -u {} -".format(''.join(lines).decode("utf-8"), user).decode("utf-8"), shell=True)
         p.wait()
 
 def setup_first_masternode():
@@ -154,7 +154,7 @@ def setup_first_masternode():
     rpc_password = input("rpcpassword: ")
 
     print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: znode genkey")
-    masternode_priv_key = input("masternodeprivkey: ")
+    masternode_priv_key = input("znodeprivkey: ")
     PRIVATE_KEYS.append(masternode_priv_key)
     
     config = """rpcuser={}
@@ -182,6 +182,7 @@ znodeprivkey={}
 
     # run_command('rm /home/mn1/.IndexChain/peers.dat') 
     autostart_masternode('mn1')
+    run_command("runuser -l  mn1 -c 'killall indexd'")
     os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
     print_warning("Masternode started syncing in the background...")
 
@@ -197,7 +198,7 @@ def setup_xth_masternode(xth):
     run_command("rm /home/mn{}/.IndexChain/wallet.dat &> /dev/null".format(xth))
 
     print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: znode genkey")
-    masternode_priv_key = input("masternodeprivkey: ")
+    masternode_priv_key = input("znodeprivkey: ")
     PRIVATE_KEYS.append(masternode_priv_key)
 
     BASE_RPC_PORT = 8888
@@ -252,7 +253,7 @@ Transaction index: [5k deposit transaction index. 'znode outputs']
 
     mn_data = ""
     for idx, val in enumerate(PRIVATE_KEYS):
-        mn_data += mn_base_data.format(idx+1, SERVER_IP + ":" + str(7082 + idx), val)
+        mn_data += mn_base_data.format(idx+1, SERVER_IP +str.encode( ":" + str(7082 + idx)), val)
 
     imp = """"""
     print('')
@@ -265,7 +266,7 @@ Transaction index: [5k deposit transaction index. 'znode outputs']
 \tsyncronization is done add your masternodes to your desktop wallet.
 Datas:""" + mn_data)
 
-    print_warning(imp.decode('rot13').decode('unicode-escape'))
+    print_warning(imp)
 
 def main():
     print_welcome()
