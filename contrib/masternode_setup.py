@@ -229,16 +229,11 @@ znodeprivkey={}
 
 def setup_masternodes():
     memory = get_total_memory()
-    masternodes = int(math.floor(memory / 300))
-    print_info("This system is capable to run around {} masternodes. To support IndexChain network only use one masternode per ip.".format(masternodes))
-    print_info("How much masternodes do you want to setup?")
-    masternodes = int(input("Number of masternodes: "))
-   
-    if masternodes >= 1:
-        setup_first_masternode()
+    # masternodes = int(math.floor(memory / 300))
+    setup_first_masternode()
 
-    for i in range(masternodes-1):
-        setup_xth_masternode(i+2)
+    # for i in range(masternodes-1):
+    #     setup_xth_masternode(i+2)
 
 def porologe():
 
@@ -248,12 +243,14 @@ IP: {}
 Private key: {}
 Transaction ID: [5k deposit transaction id. 'znode outputs']
 Transaction index: [5k deposit transaction index. 'znode outputs']
+mnconf line :
+{} {} txhash txindex
 --------------------------------------------------
 """
 
     mn_data = ""
     for idx, val in enumerate(PRIVATE_KEYS):
-        mn_data += mn_base_data.format(idx+1, SERVER_IP +str.encode( ":" + str(7082 + idx)), val)
+        mn_data += mn_base_data.format(idx+1, SERVER_IP + ":" + str(7082)), val,"zn" + str(idx+1),SERVER_IP + ":" + str(7082)),val)
 
     imp = """"""
     print('')
