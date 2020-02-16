@@ -1937,7 +1937,7 @@ int CWalletTx::GetRequestCount() const {
     int nRequests = -1;
     {
         LOCK(pwallet->cs_wallet);
-        if (IsCoinBase() || IsCoinStake()) {
+        if (IsCoinBase()) {
             // Generated block
             if (!hashUnset()) {
                 map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
