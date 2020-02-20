@@ -21,8 +21,11 @@ Utilizing privacy protocols informed by industry experts to create cryptosystems
 Why Index?
 --------------
 INDEX CHAIN is designed for user privacy, shielding transactions with anonymous designations while deploying industry leading encryption methods. Index Chain is a complete solution, providing users with a fully private, secure, fast and decentralized solution. Protect your assets and remove banks from the equation. Avoid paying large sums with truly private transactions!
-You do not have to fear about the blockage of your financial capabilities based on the whims of some power-hungry managers. Index Chain will allow you to become your own bank. You can spend your money safely and privately without leaving a trail of documents marking every step in your life.
+You do not have to fear about the blockage of your financial capabilities based on the whims of some power-hungry managers. Index Chain will allow you to become your own bank. You can spend your money safely and privately without leaving a trail of documents marking every step in your life. 
 
+Who are we?
+-------------- 
+We are a community dedicated to privacy. Comprised of consummate professionals with a passion for privacy, our goal is eschewing the age of bank control over personal financial situation and to establish the power of choice. INDEX is the ultimate solution, providing financial freedom coupled with opportunity.
 
 ===================
 
