@@ -21,8 +21,9 @@ Utilizing privacy protocols informed by industry experts to create cryptosystems
 Why Index?
 --------------
 INDEX CHAIN is designed for user privacy, shielding transactions with anonymous designations while deploying industry leading encryption methods. Index Chain is a complete solution, providing users with a fully private, secure, fast and decentralized solution. Protect your assets and remove banks from the equation. Avoid paying large sums with truly private transactions!
-
 You do not have to fear about the blockage of your financial capabilities based on the whims of some power-hungry managers. Index Chain will allow you to become your own bank. You can spend your money safely and privately without leaving a trail of documents marking every step in your life.
+
+
 ===================
 
 If you are already familiar with Docker, then running Index with Docker might be the the easier method for you. To run Index using this method, first install [Docker](https://store.docker.com/search?type=edition&offering=community). After this you may
