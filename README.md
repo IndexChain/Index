@@ -10,20 +10,19 @@ Index
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/IndexChain/Index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/IndexChain/Index/alerts/)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/IndexChain/Index.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/IndexChain/Index/context:cpp)
 
-What is Index?
+What is Index Chain?
 --------------
 
-[Index](https://indexchain.org) is designed from the ground up with a singular focal point: Privacy.
+[Index Chain](https://indexchain.org) is designed from the ground up with a singular focal point: Privacy.
 
 Utilizing privacy protocols informed by industry experts to create cryptosystems specifically designed to facilitate anonymous transactions! It is powered by the Sigma privacy protocol, based on the academic paper One-Out-Of-Many-Proofs: Or How to Leak a Secret and Spend a Coin (Jens Groth and Markulf Kohlweiss). It replaces the RSA accumulators through Pedersen commitments and eliminates the need for a trusted setup.
 
 
-How Index’s Privacy Technology Compares to the Competition [Uses zcoin's comparison image and details]
+Why Index?
 --------------
-![A comparison chart of Index’s solutions with other leading privacy technologies can be found below](https://zcoin.io/wp-content/uploads/2019/04/zcoin_table_coloured5-01.png) 
-read more https://indexchain.org/indexs-privacy-technology-compares-competition/
+INDEX CHAIN is designed for user privacy, shielding transactions with anonymous designations while deploying industry leading encryption methods. Index Chain is a complete solution, providing users with a fully private, secure, fast and decentralized solution. Protect your assets and remove banks from the equation. Avoid paying large sums with truly private transactions!
 
-Running with Docker [Not supported yet]
+You do not have to fear about the blockage of your financial capabilities based on the whims of some power-hungry managers. Index Chain will allow you to become your own bank. You can spend your money safely and privately without leaving a trail of documents marking every step in your life.
 ===================
 
 If you are already familiar with Docker, then running Index with Docker might be the the easier method for you. To run Index using this method, first install [Docker](https://store.docker.com/search?type=edition&offering=community). After this you may
