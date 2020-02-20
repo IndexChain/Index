@@ -13,7 +13,9 @@ Index
 What is Index?
 --------------
 
-[Index](https://indexchain.org) is a privacy focused cryptocurrency that utilizes zero-knowledge proofs which allows users to destroy coins and then redeem them later for brand new ones with no transaction history. Index uses the [Sigma protocol](https://indexchain.org/what-is-sigma-and-why-is-it-replacing-zerocoin-in-index/) for privacy ,which has no trusted setup and small proof sizes. Index also utilises [Dandelion++](https://arxiv.org/abs/1805.11060) to obscure the originating IP of transactions without relying on any external services such as Tor/i2P.
+[Index](https://indexchain.org) is designed from the ground up with a singular focal point: Privacy.
+
+Utilizing privacy protocols informed by industry experts to create cryptosystems specifically designed to facilitate anonymous transactions! It is powered by the Sigma privacy protocol, based on the academic paper One-Out-Of-Many-Proofs: Or How to Leak a Secret and Spend a Coin (Jens Groth and Markulf Kohlweiss). It replaces the RSA accumulators through Pedersen commitments and eliminates the need for a trusted setup.
 
 
 How Index’s Privacy Technology Compares to the Competition [Uses zcoin's comparison image and details]
