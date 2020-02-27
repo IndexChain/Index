@@ -3015,11 +3015,11 @@ CAmount CWallet::GetStake() const
 {
     CAmount nTotal = 0;
     LOCK2(cs_main, cs_wallet);
-    for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+    for (const auto& entry : mapWallet)
     {
-        const CWalletTx* pcoin = &(*it).second;
-        if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() >= 1)
-            nTotal += pcoin->GetCredit(ISMINE_SPENDABLE);
+        const CWalletTx* pcoin = &entry.second;
+        if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0)
+            nTotal += entry.second.GetCredit(ISMINE_ALL);
     }
     return nTotal;
 }
