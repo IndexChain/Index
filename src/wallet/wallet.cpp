@@ -783,6 +783,9 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue, std::set<std::pair<co
 
         int64_t n = pcoin->vout[i].nValue;
 
+        if (n = ZNODE_COIN_REQUIRED * COIN)
+            continue;
+
         pair<int64_t,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
 
         if (n >= nTargetValue)
@@ -3014,15 +3017,20 @@ CAmount CWallet::GetImmatureBalance() const {
 CAmount CWallet::GetStake() const
 {
     CAmount nTotal = 0;
+    CAmount nDebitTotal = 0;
     LOCK2(cs_main, cs_wallet);
-    for (const auto& entry : mapWallet)
+    for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
     {
-        const CWalletTx* pcoin = &entry.second;
-        if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0)
-            nTotal += entry.second.GetCredit(ISMINE_ALL);
+        const CWalletTx* pcoin = &(*it).second;
+        if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0){
+            nTotal += CWallet::GetCredit(*pcoin, ISMINE_SPENDABLE);
+            nDebitTotal += CWallet::GetDebit(*pcoin, ISMINE_SPENDABLE);
+            LogPrintf("Debit : %d , Credit : %d Stake \n",nDebitTotal / COIN ,nTotal / COIN);
+        }
     }
     return nTotal;
 }
+
 
 CAmount CWallet::GetWatchOnlyBalance() const {
     CAmount nTotal = 0;
