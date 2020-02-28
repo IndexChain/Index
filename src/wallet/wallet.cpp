@@ -3017,15 +3017,12 @@ CAmount CWallet::GetImmatureBalance() const {
 CAmount CWallet::GetStake() const
 {
     CAmount nTotal = 0;
-    CAmount nDebitTotal = 0;
     LOCK2(cs_main, cs_wallet);
     for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
     {
         const CWalletTx* pcoin = &(*it).second;
         if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0){
-            nTotal += CWallet::GetCredit(*pcoin, ISMINE_SPENDABLE);
-            nDebitTotal += CWallet::GetDebit(*pcoin, ISMINE_SPENDABLE);
-            LogPrintf("Debit : %d , Credit : %d Stake \n",nDebitTotal / COIN ,nTotal / COIN);
+            nTotal += pcoin->GetImmatureStakeCredit(true);
         }
     }
     return nTotal;
