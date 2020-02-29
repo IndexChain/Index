@@ -1,5 +1,5 @@
 # This is a Dockerfile for indexd.
-FROM debian:stretch
+FROM debian:bionic
 
 # Install required system packages
 RUN apt-get update && apt-get install -y \
@@ -68,8 +68,8 @@ RUN apt-get remove -y \
 # Start Index Daemon
 USER indexd
 
-RUN mkdir /home/indexd/.index
-VOLUME [ "/home/indexd/.index" ]
+RUN mkdir /home/indexd/.IndexChain
+VOLUME [ "/home/indexd/.IndexChain" ]
 
 # Main network ports
 EXPOSE 7082
