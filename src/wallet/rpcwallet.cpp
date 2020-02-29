@@ -1436,6 +1436,9 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
             else if (wtx.IsZerocoinMint() || wtx.IsSigmaMint()) {
                 entry.push_back(Pair("category", "mint"));
             }
+            else if (wtx.IsCoinStake()) {
+                entry.push_back(Pair("category", "stake"));
+            }
             else {
                 entry.push_back(Pair("category", "send"));
             }
@@ -1481,6 +1484,8 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
                     }
                     else if (wtx.GetDepthInMainChain() < 1)
                         entry.push_back(Pair("category", "orphan"));
+                    else if (wtx.GetBlocksToMaturity() > 0 && wtx.IsCoinStake())
+                        entry.push_back(Pair("category", "immature-stake"));
                     else if (wtx.GetBlocksToMaturity() > 0)
                         entry.push_back(Pair("category", "immature"));
                     else

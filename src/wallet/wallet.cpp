@@ -783,6 +783,9 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue, std::set<std::pair<co
 
         int64_t n = pcoin->vout[i].nValue;
 
+        if (n = ZNODE_COIN_REQUIRED * COIN)
+            continue;
+
         pair<int64_t,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
 
         if (n >= nTargetValue)
@@ -1937,7 +1940,7 @@ int CWalletTx::GetRequestCount() const {
     int nRequests = -1;
     {
         LOCK(pwallet->cs_wallet);
-        if (IsCoinBase() || IsCoinStake()) {
+        if (IsCoinBase()) {
             // Generated block
             if (!hashUnset()) {
                 map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
@@ -3018,11 +3021,13 @@ CAmount CWallet::GetStake() const
     for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
     {
         const CWalletTx* pcoin = &(*it).second;
-        if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0)
-            nTotal += CWallet::GetCredit(*pcoin, ISMINE_SPENDABLE);
+        if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0){
+            nTotal += pcoin->GetImmatureStakeCredit(true);
+        }
     }
     return nTotal;
 }
+
 
 CAmount CWallet::GetWatchOnlyBalance() const {
     CAmount nTotal = 0;
