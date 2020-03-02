@@ -2855,7 +2855,8 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
          if(!CheckStakeBlockTimestamp(block.nTime))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake time check failed"),
                                  REJECT_INVALID, "bad-cs-timecheck");
-        if (!CheckProofOfStake(mapBlockIndex[block.hashPrevBlock], block.vtx[1], block.nTime, block.nBits, state))
+        //Bypass this check for lesser than 32k height blocks as some nodes were on old version without this check
+        if (pindex->nHeight > 32100 && !CheckProofOfStake(mapBlockIndex[block.hashPrevBlock], block.vtx[1], block.nTime, block.nBits, state))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake check failed"),
                                  REJECT_INVALID, "bad-cs-proofhash");
         
