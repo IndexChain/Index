@@ -783,7 +783,7 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue, std::set<std::pair<co
 
         int64_t n = pcoin->vout[i].nValue;
 
-        if (n = ZNODE_COIN_REQUIRED * COIN)
+        if (n == ZNODE_COIN_REQUIRED * COIN)
             continue;
 
         pair<int64_t,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
@@ -3022,7 +3022,7 @@ CAmount CWallet::GetStake() const
     {
         const CWalletTx* pcoin = &(*it).second;
         if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0){
-            nTotal += pcoin->GetImmatureStakeCredit(true);
+            nTotal += pcoin->GetImmatureStakeCredit();
         }
     }
     return nTotal;

@@ -281,7 +281,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        block.fProofOfStake = fProofOfStake || IsProofOfStake();
+        block.fProofOfStake = fProofOfStake;
         if(block.fProofOfStake)
             block.vchBlockSig    = vchBlockSig;
         return block;
