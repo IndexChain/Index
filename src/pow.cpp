@@ -36,45 +36,7 @@ double GetDifficultyHelper(unsigned int nBits) {
     return dDiff;
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, bool fProofOfStake)
-{
-    unsigned int nTargetLimit = UintToArith256(Params().GetConsensus().posLimit).GetCompact();
-
-    // Genesis block or first proof-of-stake block
-    if (pindexLast == NULL || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
-        return UintToArith256(params.posLimit).GetCompact();
-
-    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
-
-    if (pindexPrev->pprev == NULL)
-        return nTargetLimit; // first block
-    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
-    if (pindexPrevPrev->pprev == NULL)
-        return nTargetLimit; // second block
-
-    return CalculateNextTargetRequired(pindexPrev, pindexPrevPrev->GetBlockTime(), params, fProofOfStake);
-}
-
-unsigned int CalculateNextTargetRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params, bool fProofOfStake)
-{
-    int64_t nTargetSpacing = Params().GetConsensus().nPowTargetSpacing;
-    int64_t nActualSpacing = pindexLast->GetBlockTime() - nFirstBlockTime;
-
-    // retarget with exponential moving toward target spacing
-    const arith_uint256 bnTargetLimit = UintToArith256(Params().GetConsensus().posLimit);
-    arith_uint256 bnNew;
-    bnNew.SetCompact(pindexLast->nBits);
-    int64_t nInterval = params.nPowTargetTimespan / nTargetSpacing;
-    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-    bnNew /= ((nInterval + 1) * nTargetSpacing);
-
-    if (bnNew <= 0 || bnNew > bnTargetLimit)
-        bnNew = bnTargetLimit;
-
-    return bnNew.GetCompact();
-}
-
-unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params) {
+unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params,bool fProofOfStake = false ) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     int64_t nPastBlocks = 5;
@@ -101,7 +63,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
 
     const CBlockIndex *pindex = pindexLast;
     //Get last block of specific type,can be either PoW or PoS
-    pindex = GetLastBlockIndex(pindexLast,pblock->fProofOfStake);
+    pindex = GetLastBlockIndex(pindexLast,fProofOfStake);
 
     arith_uint256 bnPastTargetAvg;
 
@@ -138,6 +100,46 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     if (bnNew > bnPowLimit) {
         bnNew = bnPowLimit;
     }
+
+    return bnNew.GetCompact();
+}
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, bool fProofOfStake)
+{
+    unsigned int nTargetLimit = UintToArith256(Params().GetConsensus().posLimit).GetCompact();
+
+    // Genesis block or first proof-of-stake block
+    if (pindexLast == NULL || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
+        return UintToArith256(params.posLimit).GetCompact();
+
+    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+
+    if (pindexPrev->pprev == NULL)
+        return nTargetLimit; // first block
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+    if (pindexPrevPrev->pprev == NULL)
+        return nTargetLimit; // second block
+    
+    if (pindexPrev->nHeight + 1 > params.nDGWPoSHeight)// Use DGW after the nDGWPoS Height
+        return DarkGravityWave(pindexLast,pblock,params,fProofOfStake);
+
+    return CalculateNextTargetRequired(pindexPrev, pindexPrevPrev->GetBlockTime(), params, fProofOfStake);
+}
+
+unsigned int CalculateNextTargetRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params, bool fProofOfStake)
+{
+    int64_t nTargetSpacing = Params().GetConsensus().nPowTargetSpacing;
+    int64_t nActualSpacing = pindexLast->GetBlockTime() - nFirstBlockTime;
+
+    // retarget with exponential moving toward target spacing
+    const arith_uint256 bnTargetLimit = UintToArith256(Params().GetConsensus().posLimit);
+    arith_uint256 bnNew;
+    bnNew.SetCompact(pindexLast->nBits);
+    int64_t nInterval = params.nPowTargetTimespan / nTargetSpacing;
+    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+    if (bnNew <= 0 || bnNew > bnTargetLimit)
+        bnNew = bnTargetLimit;
 
     return bnNew.GetCompact();
 }
@@ -213,7 +215,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHead
     }
     
     if(USE_DGW3)
-       return DarkGravityWave(pindexLast, pblock, params);
+       return DarkGravityWave(pindexLast, pblock, params,false);
 
     return LwmaCalculateNextWorkRequired(pindexLast, pblock, params);
 

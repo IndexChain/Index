@@ -99,6 +99,7 @@ public:
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
+        consensus.nDGWPoSHeight = 37600;//Use DGW Difficulty adjustment for PoS blocks after this height
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
         consensus.nMinerConfirmationWindow = 10800; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
