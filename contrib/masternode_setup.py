@@ -244,13 +244,15 @@ Private key: {}
 Transaction ID: [5k deposit transaction id. 'znode outputs']
 Transaction index: [5k deposit transaction index. 'znode outputs']
 mnconf line :
-{} {} txhash txindex
+{} {} {} txhash txindex
 --------------------------------------------------
 """
 
     mn_data = ""
     for idx, val in enumerate(PRIVATE_KEYS):
-        mn_data += mn_base_data.format(idx+1, SERVER_IP + ":" + str(7082), val,"zn" + str(idx+1),SERVER_IP + ":" + str(7082),val)
+        SERVER_IP_STRING = SERVER_IP + ":".encode('utf-8') + str(7082).encode('utf-8')
+        MN_STRING = "zn".encode('ascii') + str(idx+1).encode('ascii')
+        mn_data += mn_base_data.format(idx+1, SERVER_IP_STRING.decode(), val, MN_STRING.decode(), SERVER_IP_STRING.decode(), val)
 
     imp = """"""
     print('')
