@@ -250,7 +250,7 @@ mnconf line :
 
     mn_data = ""
     for idx, val in enumerate(PRIVATE_KEYS):
-        mn_data += mn_base_data.format(idx+1, SERVER_IP + ":" + str(7082)), val,"zn" + str(idx+1),SERVER_IP + ":" + str(7082)),val)
+        mn_data += mn_base_data.format(idx+1, SERVER_IP + ":" + str(7082), val,"zn" + str(idx+1),SERVER_IP + ":" + str(7082),val)
 
     imp = """"""
     print('')
