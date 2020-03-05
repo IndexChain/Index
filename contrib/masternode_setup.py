@@ -110,8 +110,7 @@ def autostart_masternode(user):
     if job not in lines:
         print_info("Cron job doesn't exist yet, adding it to crontab")
         lines.append(job)
-        p = subprocess.run("echo \"{}\" | crontab -u {} -".format(''.join(lines).decode("utf-8"), user).decode("utf-8"), shell=True)
-        p.wait()
+        p = subprocess.run("echo \"{}\" | crontab -u {} -".format(lines, user), shell=True)
 
 def setup_first_masternode():
     print_info("Setting up first masternode")
@@ -138,7 +137,11 @@ znodeprivkey={}
 """.format(rpc_username, rpc_password, masternode_priv_key)
 
     print_info("Saving config file...")
+    #make inital dirs and logs required
+    run_command("mkdir /home/mn1/.IndexChain")
     run_command("touch /home/mn1/.IndexChain/index.conf")
+    run_command("touch /home/mn1/.IndexChain/exodus.log")
+    run_command("touch /home/mn1/.IndexChain/debug.log")
     f = open('/home/mn1/.IndexChain/index.conf', 'w')
     f.write(config)
     f.close()
