@@ -259,8 +259,7 @@ void CActiveZnode::ManageStateRemote() {
     znode_info_t infoMn = mnodeman.GetZnodeInfo(pubKeyZnode);
 
     if (infoMn.fInfoValid) {
-        if (infoMn.nProtocolVersion < MIN_ZNODE_PAYMENT_PROTO_VERSION_1
-                || infoMn.nProtocolVersion > MIN_ZNODE_PAYMENT_PROTO_VERSION_2) {
+        if (infoMn.nProtocolVersion < MIN_ZNODE_PAYMENT_PROTO_VERSION_1 || infoMn.nProtocolVersion > MIN_ZNODE_PAYMENT_PROTO_VERSION_2) {
             ChangeState(ACTIVE_ZNODE_NOT_CAPABLE);
             strNotCapableReason = "Invalid protocol version";
             LogPrintf("CActiveZnode::ManageStateRemote -- %s: %s\n", GetStateString(), strNotCapableReason);

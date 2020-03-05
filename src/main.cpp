@@ -6644,7 +6644,8 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             LOCK(cs_main);
             nHeight = chainActive.Height();
         }
-        int minPeerVersion = (nHeight + 1 < chainparams.GetConsensus().nDGWPoSHeight) ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DGWPOS_HF;
+        //New update for masternode protocol change
+        int minPeerVersion = GetAdjustedTime() < 1583427032 ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DGWPOS_HF;
         if (pfrom->nVersion < minPeerVersion) {
             // disconnect from peers older than this proto version
             // LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);
