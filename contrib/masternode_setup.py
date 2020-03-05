@@ -138,10 +138,10 @@ znodeprivkey={}
 
     print_info("Saving config file...")
     #make inital dirs and logs required
-    run_command("mkdir /home/mn1/.IndexChain")
-    run_command("touch /home/mn1/.IndexChain/index.conf")
-    run_command("touch /home/mn1/.IndexChain/exodus.log")
-    run_command("touch /home/mn1/.IndexChain/debug.log")
+    run_command("su - mn1 -c mkdir /home/mn1/.IndexChain")
+    run_command("su - mn1 -c touch /home/mn1/.IndexChain/index.conf")
+    run_command("su - mn1 -c touch /home/mn1/.IndexChain/exodus.log")
+    run_command("su - mn1 -c touch /home/mn1/.IndexChain/debug.log")
     f = open('/home/mn1/.IndexChain/index.conf', 'w')
     f.write(config)
     f.close()
