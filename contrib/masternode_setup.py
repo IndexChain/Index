@@ -8,6 +8,7 @@ import math
 import os
 from urllib.request import urlopen
 from subprocess import *
+from crontab import CronTab
 SERVER_IP = urlopen('http://ip.42.pl/raw').read()
 # BOOTSTRAP_URL = "http://index.org/dprice.zip"
 
@@ -102,15 +103,17 @@ def get_total_memory():
     return (os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES'))/(1024*1024)
 
 def autostart_masternode(user):
-    job = b"@reboot /usr/local/bin/indexd\n"
-    
+    job = "/usr/local/bin/indexd"
     p = subprocess.Popen("crontab -l -u {} 2> /dev/null".format(user), stderr=STDOUT, stdout=PIPE, shell=True)
     p.wait()
     lines = p.stdout.readlines()
     if job not in lines:
         print_info("Cron job doesn't exist yet, adding it to crontab")
         lines.append(job)
-        p = subprocess.run("echo \"{}\" | crontab -u {} -".format(lines, user), shell=True)
+        tab = CronTab(user=user)
+        cron = tab.new(command=job)
+        cron.every_reboot()
+        tab.write()
 
 def setup_first_masternode():
     print_info("Setting up first masternode")
@@ -138,10 +141,10 @@ znodeprivkey={}
 
     print_info("Saving config file...")
     #make inital dirs and logs required
-    run_command("su - mn1 -c mkdir /home/mn1/.IndexChain")
-    run_command("su - mn1 -c touch /home/mn1/.IndexChain/index.conf")
-    run_command("su - mn1 -c touch /home/mn1/.IndexChain/exodus.log")
-    run_command("su - mn1 -c touch /home/mn1/.IndexChain/debug.log")
+    run_command('su - mn1 -c "mkdir /home/mn1/.IndexChain"')
+    run_command('su - mn1 -c "touch /home/mn1/.IndexChain/index.conf"')
+    run_command('su - mn1 -c "touch /home/mn1/.IndexChain/exodus.log"')
+    run_command('su - mn1 -c "touch /home/mn1/.IndexChain/debug.log"')
     f = open('/home/mn1/.IndexChain/index.conf', 'w')
     f.write(config)
     f.close()
@@ -198,7 +201,7 @@ def setup_masternodes():
 def porologe():
 
     mn_base_data = """
-Alias: Masternode{}
+Alias: zn{}
 IP: {}
 Private key: {}
 Transaction ID: [5k IDX deposit transaction id. 'znode outputs']
