@@ -138,6 +138,7 @@ znodeprivkey={}
 """.format(rpc_username, rpc_password, masternode_priv_key)
 
     print_info("Saving config file...")
+    run_command("touch /home/mn1/.IndexChain/index.conf")
     f = open('/home/mn1/.IndexChain/index.conf', 'w')
     f.write(config)
     f.close()
