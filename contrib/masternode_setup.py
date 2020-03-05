@@ -15,7 +15,7 @@ DEFAULT_COLOR = "\x1b[0m"
 PRIVATE_KEYS = []
 
 def print_info(message):
-    BLUE = '\033[94m'
+    BLUE = '\033[36m'
     print(BLUE + "[*] " + str(message) + DEFAULT_COLOR)
     time.sleep(1)
 
@@ -54,7 +54,7 @@ def print_welcome():
     print("")
     print("")
     print("")
-    print_info("IndexChain masternode(s) installer v1.0")
+    print_info("IndexChain masternode installer v1.0")
     print("")
     print("")
     print("")
@@ -83,48 +83,19 @@ def secure_server():
     run_command("ufw --force enable")
 
 def compile_wallet():
-    # print_info("Allocating swap...")
-    # run_command("fallocate -l 3G /swapfile")
-    # run_command("chmod 600 /swapfile")
-    # run_command("mkswap /swapfile")
-    # run_command("swapon /swapfile")
-    # f = open('/etc/fstab','r+b')
-    # line = '/swapfile   none    swap    sw    0   0 \n'
-    # lines = f.readlines()
-    # if (lines[-1] != line):
-    #     f.write(b +line)
-    #     f.close()
-
-    print_info("Installing wallet build dependencies...")
-    run_command("apt-get --assume-yes install git unzip build-essential libssl-dev libdb++-dev libboost-all-dev libcrypto++-dev libqrencode-dev libminiupnpc-dev libgmp-dev libgmp3-dev autoconf autogen automake libtool")
-
     is_compile = False
     is_download_from_release = True
     if os.path.isfile('/usr/local/bin/indexd'):
         print_warning('Wallet already installed on the system')
         is_download_from_release = False
 
-
-    if is_compile:
-        print_info("Downloading wallet...")
-        run_command("rm -rf /opt/IndexChain")
-        run_command("git clone https://github.com/IndexChain/Index /opt/IndexChain")
-        
-        print_info("Compiling wallet...")
-        run_command("chmod +x /opt/IndexChain/src/leveldb/build_detect_platform")
-        run_command("chmod +x /opt/IndexChain/src/secp256k1/autogen.sh")
-        run_command("cd  /opt/IndexChain/src/ && make -f makefile.unix USE_UPNP=-")
-        run_command("strip /opt/IndexChain/src/indexd")
-        run_command("cp /opt/IndexChain/src/indexd /usr/local/bin")
-        run_command("cd /opt/IndexChain/src/ &&  make -f makefile.unix clean")
-        run_command("indexd")
     if is_download_from_release:
         print_info("Downloading daemon files...")
         run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.9.1/index-0.13.9-x86_64-linux-gnu.tar.gz")
         #Assuming the command went well,extract the targz
         run_command("tar xzf index-0.13.9-x86_64-linux-gnu.tar.gz")
         run_command("cd index-0.13.9 && cp bin/* /usr/local/bin/ && cd ~")
-        print_info("Finished downloading and installing daemon/wallet")
+        print_info("Finished downloading and installing daemon")
 
 
 def get_total_memory():
@@ -145,8 +116,6 @@ def autostart_masternode(user):
 def setup_first_masternode():
     print_info("Setting up first masternode")
     run_command("useradd --create-home -G sudo mn1")
-    os.system('su - mn1 -c "{}" '.format("indexd -daemon &> /dev/null"))
-
     print_info("Open your desktop wallet config file (%appdata%/IndexChain/index.conf) and copy your rpc username and password! If it is not there create one! E.g.:\n\trpcuser=[SomeUserName]\n\trpcpassword=[DifficultAndLongPassword]")
     global rpc_username
     global rpc_password
@@ -173,16 +142,7 @@ znodeprivkey={}
     f.write(config)
     f.close()
 
-    # print_info("Downloading blockchain bootstrap file...")
-    # run_command('su - mn1 -c "{}" '.format("cd && wget --continue " + BOOTSTRAP_URL))
-    
-    # print_info("Unzipping the file...")
-    # filename = BOOTSTRAP_URL[BOOTSTRAP_URL.rfind('/')+1:]
-    # run_command('su - mn1 -c "{}" '.format("cd && unzip -d .IndexChain -o " + filename))
-
-    # run_command('rm /home/mn1/.IndexChain/peers.dat') 
     autostart_masternode('mn1')
-    run_command("runuser -l  mn1 -c 'killall indexd'")
     os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
     print_warning("Masternode started syncing in the background...")
 
@@ -229,11 +189,7 @@ znodeprivkey={}
 
 def setup_masternodes():
     memory = get_total_memory()
-    # masternodes = int(math.floor(memory / 300))
     setup_first_masternode()
-
-    # for i in range(masternodes-1):
-    #     setup_xth_masternode(i+2)
 
 def porologe():
 
@@ -241,8 +197,8 @@ def porologe():
 Alias: Masternode{}
 IP: {}
 Private key: {}
-Transaction ID: [5k deposit transaction id. 'znode outputs']
-Transaction index: [5k deposit transaction index. 'znode outputs']
+Transaction ID: [5k IDX deposit transaction id. 'znode outputs']
+Transaction index: [5k IDX deposit transaction index. 'znode outputs']
 mnconf line :
 {} {} {} txhash txindex
 --------------------------------------------------
@@ -257,10 +213,10 @@ mnconf line :
     imp = """"""
     print('')
     print_info(
-"""Masternodes setup finished!
-\tWait until all masternodes are fully synced. To check the progress login the 
-\tmasternode account (su mnX, where X is the number of the masternode) and run
-\tthe 'indexd getinfo' to get actual block number. Go to
+"""Masternode setup finished!
+\tWait until masternode is fully synced. To check the progress login the 
+\tmasternode account (su mn1, where 1 is the number of the masternode) and run
+\tthe 'index-cli getinfo' to get actual block number. Go to
 \t the explorer website to check the latest block number. After the
 \tsyncronization is done add your masternodes to your desktop wallet.
 Datas:""" + mn_data)
