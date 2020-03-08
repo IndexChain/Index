@@ -9,7 +9,7 @@
  * network protocol versioning
  */
 
-static const int PROTOCOL_VERSION = 90028;
+static const int PROTOCOL_VERSION = 90029;
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 90013;
@@ -18,7 +18,7 @@ static const int INIT_PROTO_VERSION = 90013;
 static const int GETHEADERS_VERSION = 90020;
 
 //! disconnect from peers older than this proto version
-static const int MIN_PEER_PROTO_VERSION = 90027;
+static const int MIN_PEER_PROTO_VERSION = 90028;
 
 //! disconnect from all older peers after Znode payment HF
 static const int MIN_PEER_PROTO_VERSION_AFTER_DGWPOS_HF = PROTOCOL_VERSION;
