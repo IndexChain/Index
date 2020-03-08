@@ -154,11 +154,11 @@ void WalletFrame::gotoToolboxPage()
 }
 #endif
 
-void WalletFrame::gotoZnodePage()
+void WalletFrame::gotoIndexnodePage()
 {
     QMap<QString, WalletView*>::const_iterator i;
     for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
-        i.value()->gotoZnodePage();
+        i.value()->gotoIndexnodePage();
 }
 
 void WalletFrame::gotoReceiveCoinsPage()

@@ -3,7 +3,7 @@ path_classifiers:
     - "exclude: /"
     - "contrib"
     - "share"
-    - "ZNODE.md"
+    - "INDEXNODE.md"
   generated:
     - "exclude: /"
     - "src/obj"

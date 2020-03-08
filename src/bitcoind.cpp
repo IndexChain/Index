@@ -17,7 +17,7 @@
 #include "httpserver.h"
 #include "httprpc.h"
 #include "utilstrencodings.h"
-#include "znodeconfig.h"
+#include "indexnodeconfig.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
@@ -132,10 +132,10 @@ bool AppInit(int argc, char* argv[])
         }
 #endif
 
-        // parse znode.conf
+        // parse indexnode.conf
         std::string strErr;
-        if(!znodeConfig.read(strErr)) {
-            fprintf(stderr,"Error reading znode configuration file: %s\n", strErr.c_str());
+        if(!indexnodeConfig.read(strErr)) {
+            fprintf(stderr,"Error reading indexnode configuration file: %s\n", strErr.c_str());
             return false;
         }
 

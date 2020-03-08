@@ -81,7 +81,7 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
 #ifdef ENABLE_EXODUS
     toolboxPage = new QWidget(this);
 #endif
-    znodeListPage = new ZnodeList(platformStyle);
+    indexnodeListPage = new IndexnodeList(platformStyle);
 
     setupTransactionPage();
     setupSendCoinPage();
@@ -103,7 +103,7 @@ WalletView::WalletView(const PlatformStyle *platformStyle, QWidget *parent):
 #ifdef ENABLE_EXODUS
     addWidget(toolboxPage);
 #endif
-    addWidget(znodeListPage);
+    addWidget(indexnodeListPage);
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(focusBitcoinHistoryTab(QModelIndex)));
@@ -263,7 +263,7 @@ void WalletView::setClientModel(ClientModel *clientModel)
 
     overviewPage->setClientModel(clientModel);
     sendZcoinView->setClientModel(clientModel);
-    znodeListPage->setClientModel(clientModel);
+    indexnodeListPage->setClientModel(clientModel);
 #ifdef ENABLE_EXODUS
     exoAssetsPage->setClientModel(clientModel);
 #endif
@@ -298,7 +298,7 @@ void WalletView::setWalletModel(WalletModel *walletModel)
     zc2SigmaPage->createModel();
     usedReceivingAddressesPage->setModel(walletModel->getAddressTableModel());
     usedSendingAddressesPage->setModel(walletModel->getAddressTableModel());
-    znodeListPage->setWalletModel(walletModel);
+    indexnodeListPage->setWalletModel(walletModel);
     sendZcoinView->setModel(walletModel);
     zc2SigmaPage->setWalletModel(walletModel);
 #ifdef ENABLE_EXODUS
@@ -412,9 +412,9 @@ void WalletView::focusBitcoinHistoryTab(const QModelIndex &idx)
     indexTransactionList->focusTransaction(idx);
 }
 
-void WalletView::gotoZnodePage()
+void WalletView::gotoIndexnodePage()
 {
-    setCurrentWidget(znodeListPage);
+    setCurrentWidget(indexnodeListPage);
 }
 
 void WalletView::gotoReceiveCoinsPage()

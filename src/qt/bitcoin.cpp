@@ -21,7 +21,7 @@
 #include "splashscreen.h"
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
-#include "znodeconfig.h"
+#include "indexnodeconfig.h"
 
 #ifdef ENABLE_WALLET
 #include "paymentserver.h"
@@ -641,11 +641,11 @@ int main(int argc, char *argv[])
     initTranslations(qtTranslatorBase, qtTranslator, translatorBase, translator);
 
 #ifdef ENABLE_WALLET
-    /// 7a. parse znode.conf
+    /// 7a. parse indexnode.conf
     std::string strErr;
-    if(!znodeConfig.read(strErr)) {
+    if(!indexnodeConfig.read(strErr)) {
         QMessageBox::critical(0, QObject::tr("Index Core"),
-                              QObject::tr("Error reading znode configuration file: %1").arg(strErr.c_str()));
+                              QObject::tr("Error reading indexnode configuration file: %1").arg(strErr.c_str()));
         return EXIT_FAILURE;
     }
 

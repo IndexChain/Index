@@ -25,14 +25,14 @@
 #include "main.h"
 #include "consensus/validation.h"
 #include "core_io.h"
-#include "znode-sync.h"
-#include "znodeconfig.h"
+#include "indexnode-sync.h"
+#include "indexnodeconfig.h"
 
 #include "zmqserver/zmqinterface.h"
 #include "zmqserver/zmqabstract.h"
 
-#include "znodeman.h"
-#include "znode.h"
+#include "indexnodeman.h"
+#include "indexnode.h"
 
 #include "validationinterface.h"
 
@@ -271,9 +271,9 @@ struct ZmqServerTestingSetup : public TestingSetup {
     }
 
     CBlock CreateBlock(const std::vector<CMutableTransaction>& txns,
-                       const CScript& scriptPubKeyZnode, bool mtp = false) {
+                       const CScript& scriptPubKeyIndexnode, bool mtp = false) {
         const CChainParams& chainparams = Params();
-        CBlockTemplate *pblocktemplate = BlockAssembler(chainparams).CreateNewBlock(scriptPubKeyZnode);
+        CBlockTemplate *pblocktemplate = BlockAssembler(chainparams).CreateNewBlock(scriptPubKeyIndexnode);
         CBlock& block = pblocktemplate->block;
 
         // Replace mempool-selected txns with just coinbase plus passed-in txns:
@@ -311,11 +311,11 @@ struct ZmqServerTestingSetup : public TestingSetup {
     }
 
     // Create a new block with just given transactions, coinbase paying to
-    // scriptPubKeyZnode, and try to add it to the current chain.
+    // scriptPubKeyIndexnode, and try to add it to the current chain.
     CBlock CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns,
-                                 const CScript& scriptPubKeyZnode, bool mtp = false){
+                                 const CScript& scriptPubKeyIndexnode, bool mtp = false){
 
-        CBlock block = CreateBlock(txns, scriptPubKeyZnode, mtp);
+        CBlock block = CreateBlock(txns, scriptPubKeyIndexnode, mtp);
         BOOST_CHECK_MESSAGE(ProcessBlock(block), "Processing block failed");
         return block;
     }

@@ -1,8 +1,8 @@
-Znode Build Instructions and Notes
+Indexnode Build Instructions and Notes
 =============================
  - Version 0.1.6
  - Date: 14 December 2017
- - More detailed guide available here: https://indexchain.org/index-znode-setup-guide/
+ - More detailed guide available here: https://indexchain.org/index-indexnode-setup-guide/
 
 Prerequisites
 -------------
@@ -36,9 +36,9 @@ Step 3. First run on your Local Wallet
 
     ./src/indexd -daemon -server -testnet
 
-**3.2.**  Generate znodeprivkey:
+**3.2.**  Generate indexnodeprivkey:
 
-    ./src/index-cli znode genkey
+    ./src/index-cli indexnode genkey
 
 (Store this key)
 
@@ -52,7 +52,7 @@ Step 3. First run on your Local Wallet
 
     ./src/index-cli stop
 
-Step 4. In your VPS where you are hosting your Znode. Update config files
+Step 4. In your VPS where you are hosting your Indexnode. Update config files
 ----------------------
 **4.1.**  Create file **index.conf** (in folder **~/.index**)
 
@@ -65,41 +65,41 @@ Step 4. In your VPS where you are hosting your Znode. Update config files
     server=1
     listen=1
     maxconnections=24
-    znode=1
-    znodeprivkey=XXXXXXXXXXXXXXXXX  ## Replace with your znode private key
+    indexnode=1
+    indexnodeprivkey=XXXXXXXXXXXXXXXXX  ## Replace with your indexnode private key
     externalip=XXX.XXX.XXX.XXX:7082 ## Replace with your node external IP
 
-**4.2.**  Create file **znode.conf** (in 2 folders **~/.index** and **~/.index/testnet3**) contains the following info:
+**4.2.**  Create file **indexnode.conf** (in 2 folders **~/.index** and **~/.index/testnet3**) contains the following info:
  - LABEL: A one word name you make up to call your node (ex. ZN1)
- - IP:PORT: Your znode VPS's IP, and the port is always 18168.
- - ZNODEPRIVKEY: This is the result of your "znode genkey" from earlier.
+ - IP:PORT: Your indexnode VPS's IP, and the port is always 18168.
+ - INDEXNODEPRIVKEY: This is the result of your "indexnode genkey" from earlier.
  - TRANSACTION HASH: The collateral tx. hash from the 1000 IDX deposit.
  - INDEX: The Index is always 0 or 1.
 
 To get TRANSACTION HASH, run:
 
-    ./src/index-cli znode outputs
+    ./src/index-cli indexnode outputs
 
 The output will look like:
 
     { "d6fd38868bb8f9958e34d5155437d009b72dfd33fc28874c87fd42e51c0f74fdb" : "0", }
 
-Sample of znode.conf:
+Sample of indexnode.conf:
 
     ZN1 51.52.53.54:18168 XrxSr3fXpX3dZcU7CoiFuFWqeHYw83r28btCFfIHqf6zkMp1PZ4 d6fd38868bb8f9958e34d5155437d009b72dfd33fc28874c87fd42e51c0f74fdb 0
 
-Step 5. Run a znode
+Step 5. Run a indexnode
 ----------------------
-**5.1.**  Start znode:
+**5.1.**  Start indexnode:
 
-    ./src/index-cli znode start-alias <LABEL>
+    ./src/index-cli indexnode start-alias <LABEL>
 
 For example:
 
-    ./src/index-cli znode start-alias ZN1
+    ./src/index-cli indexnode start-alias ZN1
 
 **5.2.**  To check node status:
 
-    ./src/index-cli znode debug
+    ./src/index-cli indexnode debug
 
 If not successfully started, just repeat start command

@@ -8,8 +8,8 @@
 #include "definition.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
-#include "znode-payments.h"
-#include "znode-sync.h"
+#include "indexnode-payments.h"
+#include "indexnode-sync.h"
 #include "sigma/remint.h"
 
 #include <atomic>
@@ -565,29 +565,29 @@ bool CheckZerocoinFoundersInputs(const CTransaction &tx, CValidationState &state
         }
 
         int total_payment_tx = 0; // no more than 1 output for payment
-        if (nHeight >= params.nZnodePaymentsStartBlock) {
-            CAmount znodePayment = GetZnodePayment(params, fMTP,nHeight);
+        if (nHeight >= params.nIndexnodePaymentsStartBlock) {
+            CAmount indexnodePayment = GetIndexnodePayment(params, fMTP,nHeight);
             BOOST_FOREACH(const CTxOut &output, tx.vout) {
-                if (znodePayment == output.nValue) {
+                if (indexnodePayment == output.nValue) {
                     total_payment_tx = total_payment_tx + 1;
                 }
             }
 
-            bool validZnodePayment;
+            bool validIndexnodePayment;
 
-            if (nHeight > params.nZnodePaymentsBugFixedAtBlock) {
-                if (!znodeSync.IsSynced()) {
-                    validZnodePayment = true;
+            if (nHeight > params.nIndexnodePaymentsBugFixedAtBlock) {
+                if (!indexnodeSync.IsSynced()) {
+                    validIndexnodePayment = true;
                 } else {
-                    validZnodePayment = mnpayments.IsTransactionValid(tx, nHeight, fMTP);
+                    validIndexnodePayment = mnpayments.IsTransactionValid(tx, nHeight, fMTP);
                 }
             } else {
-                validZnodePayment = total_payment_tx <= 1;
+                validIndexnodePayment = total_payment_tx <= 1;
             }
 
-            if (!validZnodePayment) {
-                return state.DoS(100, false, REJECT_INVALID_ZNODE_PAYMENT,
-                                 "CTransaction::CheckTransaction() : invalid znode payment");
+            if (!validIndexnodePayment) {
+                return state.DoS(100, false, REJECT_INVALID_INDEXNODE_PAYMENT,
+                                 "CTransaction::CheckTransaction() : invalid indexnode payment");
             }
         
     }

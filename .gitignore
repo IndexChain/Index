@@ -13,7 +13,7 @@ src/index-tx
 src/test/test_index
 src/test/test_index_fuzzy
 src/qt/test/test_index-qt
-
+indexnap/*
 # autoreconf
 Makefile.in
 aclocal.m4

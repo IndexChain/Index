@@ -18,7 +18,7 @@ class CTransaction;
 class CValidationInterface;
 class CValidationState;
 class uint256;
-class CZnode;
+class CIndexnode;
 
 // These functions dispatch to one or all registered wallets
 
@@ -45,11 +45,11 @@ protected:
     virtual void ResetRequestCount(const uint256 &hash) {};
     virtual void NumConnectionsChanged() {}
     virtual void UpdateSyncStatus() {}
-    virtual void UpdatedZnode(CZnode &znode) {}
+    virtual void UpdatedIndexnode(CIndexnode &indexnode) {}
     virtual void UpdatedMintStatus(std::string update) {};
     virtual void UpdatedSettings(std::string update) {};
     virtual void NotifyAPIStatus() {}
-    virtual void NotifyZnodeList() {}
+    virtual void NotifyIndexnodeList() {}
     virtual void UpdatedBalance() {}
     friend void ::RegisterValidationInterface(CValidationInterface*);
     friend void ::UnregisterValidationInterface(CValidationInterface*);
@@ -81,16 +81,16 @@ struct CMainSignals {
     boost::signals2::signal<void ()> NumConnectionsChanged;
     /** Notifies listeners of change of blockchain syncing state */
     boost::signals2::signal<void ()> UpdateSyncStatus;
-    /** Notifies listeners of change to a Znode entry */
-    boost::signals2::signal<void (CZnode &)> UpdatedZnode;
+    /** Notifies listeners of change to a Indexnode entry */
+    boost::signals2::signal<void (CIndexnode &)> UpdatedIndexnode;
     /** Notifies listeners of an updated mint status */
     boost::signals2::signal<void (std::string)> UpdatedMintStatus;
     /** Notifies listeners of settings following an update */
     boost::signals2::signal<void (std::string)> UpdatedSettings;
     /** Notifies listeners of API status */
     boost::signals2::signal<void ()> NotifyAPIStatus;
-    /** Notifies listeners of Znode list */
-    boost::signals2::signal<void ()> NotifyZnodeList;
+    /** Notifies listeners of Indexnode list */
+    boost::signals2::signal<void ()> NotifyIndexnodeList;
     /** Notifies listeners of balance */
     boost::signals2::signal<void ()> UpdatedBalance;
 };

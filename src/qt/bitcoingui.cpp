@@ -35,8 +35,8 @@
 #include "ui_interface.h"
 #include "util.h"
 
-#include "znode-sync.h"
-#include "znodelist.h"
+#include "indexnode-sync.h"
+#include "indexnodelist.h"
 #include "exodus_qtutils.h"
 #include "zc2sigmapage.h"
 
@@ -130,7 +130,7 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *platformStyle, const NetworkStyle *n
     openAction(0),
     showHelpMessageAction(0),
     zc2SigmaAction(0),
-    znodeAction(0),
+    indexnodeAction(0),
     trayIcon(0),
     trayIconMenu(0),
     notificator(0),
@@ -356,16 +356,16 @@ void BitcoinGUI::createActions()
 #ifdef ENABLE_WALLET
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
-    znodeAction = new QAction(platformStyle->SingleColorIcon(":/icons/znodes"), tr("&Znodes"), this);
-    znodeAction->setStatusTip(tr("Browse znodes"));
-    znodeAction->setToolTip(znodeAction->statusTip());
-    znodeAction->setCheckable(true);
+    indexnodeAction = new QAction(platformStyle->SingleColorIcon(":/icons/indexnodes"), tr("&Indexnodes"), this);
+    indexnodeAction->setStatusTip(tr("Browse indexnodes"));
+    indexnodeAction->setToolTip(indexnodeAction->statusTip());
+    indexnodeAction->setCheckable(true);
 #ifdef Q_OS_MAC
-    znodeAction->setShortcut(QKeySequence(Qt::CTRL + key++));
+    indexnodeAction->setShortcut(QKeySequence(Qt::CTRL + key++));
 #else
-    znodeAction->setShortcut(QKeySequence(Qt::ALT +  key++));
+    indexnodeAction->setShortcut(QKeySequence(Qt::ALT +  key++));
 #endif
-    tabGroup->addAction(znodeAction);
+    tabGroup->addAction(indexnodeAction);
 #endif
 
 #ifdef ENABLE_EXODUS
@@ -389,8 +389,8 @@ void BitcoinGUI::createActions()
 #endif
 
 #ifdef ENABLE_WALLET
-    connect(znodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(znodeAction, SIGNAL(triggered()), this, SLOT(gotoZnodePage()));
+    connect(indexnodeAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(indexnodeAction, SIGNAL(triggered()), this, SLOT(gotoIndexnodePage()));
 	connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
 	connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
 	connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -560,7 +560,7 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(historyAction);
         toolbar->addAction(sigmaAction);
         toolbar->addAction(zc2SigmaAction);
-        toolbar->addAction(znodeAction);
+        toolbar->addAction(indexnodeAction);
 
 #ifdef ENABLE_EXODUS
         if (isExodusEnabled()) {
@@ -673,7 +673,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
     sigmaAction->setEnabled(enabled);
-    znodeAction->setEnabled(enabled);
+    indexnodeAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     unlockWalletForStakingAction->setEnabled(enabled);
     lockWalletAction->setEnabled(enabled);
@@ -843,11 +843,11 @@ void BitcoinGUI::gotoToolboxPage()
 }
 #endif
 
-void BitcoinGUI::gotoZnodePage()
+void BitcoinGUI::gotoIndexnodePage()
 {
     QSettings settings;
-    znodeAction->setChecked(true);
-    if (walletFrame) walletFrame->gotoZnodePage();
+    indexnodeAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoIndexnodePage();
 }
 
 void BitcoinGUI::gotoReceiveCoinsPage()
@@ -941,7 +941,7 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
 
     tooltip = tr("Processed %n block(s) of transaction history.", "", count);
 
-    if(!znodeSync.GetBlockchainSynced())
+    if(!indexnodeSync.GetBlockchainSynced())
     {
         // Represent time from last generated block in human readable text
         QString timeBehindText;
@@ -1019,12 +1019,12 @@ void BitcoinGUI::setAdditionalDataSyncProgress(int count, double nSyncProgress)
 
     // Set icon state: spinning if catching up, tick otherwise
 
-    if(znodeSync.GetBlockchainSynced())
+    if(indexnodeSync.GetBlockchainSynced())
     {
         QString strSyncStatus;
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;
 
-        if(znodeSync.IsSynced()) {
+        if(indexnodeSync.IsSynced()) {
             progressBarLabel->setVisible(false);
             progressBar->setVisible(false);
             labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
@@ -1045,7 +1045,7 @@ void BitcoinGUI::setAdditionalDataSyncProgress(int count, double nSyncProgress)
             progressBar->setValue(nSyncProgress * 1000000000.0 + 0.5);
         }
 
-        strSyncStatus = QString(znodeSync.GetSyncStatus().c_str());
+        strSyncStatus = QString(indexnodeSync.GetSyncStatus().c_str());
         progressBarLabel->setText(strSyncStatus);
         tooltip = strSyncStatus + QString("<br>") + tooltip;
     }

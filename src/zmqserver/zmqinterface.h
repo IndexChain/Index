@@ -39,9 +39,9 @@ protected:
     void UpdatedBlockTip(const CBlockIndex *pindex);
     void NumConnectionsChanged();
     void UpdateSyncStatus();
-    void NotifyZnodeList();
+    void NotifyIndexnodeList();
     void NotifyAPIStatus();
-    void UpdatedZnode(CZnode &znode);
+    void UpdatedIndexnode(CIndexnode &indexnode);
     void UpdatedMintStatus(std::string update);
     void UpdatedSettings(std::string update);
     void UpdatedBalance();

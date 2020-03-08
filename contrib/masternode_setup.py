@@ -124,8 +124,8 @@ def setup_first_masternode():
     rpc_username = input("rpcuser: ")
     rpc_password = input("rpcpassword: ")
 
-    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: znode genkey")
-    masternode_priv_key = input("znodeprivkey: ")
+    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: indexnode genkey")
+    masternode_priv_key = input("indexnodeprivkey: ")
     PRIVATE_KEYS.append(masternode_priv_key)
     
     config = """rpcuser={}
@@ -135,8 +135,8 @@ server=1
 listen=1
 daemon=1
 logtimestamps=1
-znode=1
-znodeprivkey={}
+indexnode=1
+indexnodeprivkey={}
 """.format(rpc_username, rpc_password, masternode_priv_key)
 
     print_info("Saving config file...")
@@ -164,8 +164,8 @@ def setup_xth_masternode(xth):
     run_command("rm /home/mn{}/.IndexChain/peers.dat &> /dev/null".format(xth))
     run_command("rm /home/mn{}/.IndexChain/wallet.dat &> /dev/null".format(xth))
 
-    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: znode genkey")
-    masternode_priv_key = input("znodeprivkey: ")
+    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: indexnode genkey")
+    masternode_priv_key = input("indexnodeprivkey: ")
     PRIVATE_KEYS.append(masternode_priv_key)
 
     BASE_RPC_PORT = 8888
@@ -180,8 +180,8 @@ server=1
 listen=1
 daemon=1
 logtimestamps=1
-znode=1
-znodeprivkey={}
+indexnode=1
+indexnodeprivkey={}
 """.format(rpc_username, rpc_password, BASE_RPC_PORT + xth - 1, BASE_PORT + xth - 1, masternode_priv_key)
     
     print_info("Saving config file...")
@@ -204,8 +204,8 @@ def porologe():
 Alias: zn{}
 IP: {}
 Private key: {}
-Transaction ID: [5k IDX deposit transaction id. 'znode outputs']
-Transaction index: [5k IDX deposit transaction index. 'znode outputs']
+Transaction ID: [5k IDX deposit transaction id. 'indexnode outputs']
+Transaction index: [5k IDX deposit transaction index. 'indexnode outputs']
 mnconf line :
 {} {} {} txhash txindex
 --------------------------------------------------

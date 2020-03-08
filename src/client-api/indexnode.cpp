@@ -2,12 +2,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "activeznode.h"
+#include "activeindexnode.h"
 #include "validationinterface.h"
-#include "znodeman.h"
+#include "indexnodeman.h"
 #include "univalue.h"
-#include "znode-sync.h"
-#include "znodeconfig.h"
+#include "indexnode-sync.h"
+#include "indexnodeconfig.h"
 #include "client-api/server.h"
 #include "client-api/protocol.h"
 #include <client-api/wallet.h>
@@ -15,7 +15,7 @@
 
 using namespace std;
 
-bool GetZnodePayeeAddress(const std::string& txHash, const std::string& n, CBitcoinAddress& address){
+bool GetIndexnodePayeeAddress(const std::string& txHash, const std::string& n, CBitcoinAddress& address){
 
     const CWalletTx* wtx = pwalletMain->GetWalletTx(uint256S(txHash));
     if(wtx==NULL)
@@ -31,7 +31,7 @@ bool GetZnodePayeeAddress(const std::string& txHash, const std::string& n, CBitc
     return true;
 }
 
-UniValue znodekey(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
+UniValue indexnodekey(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
 
     switch(type){
         case Update: {
@@ -51,7 +51,7 @@ UniValue znodekey(Type type, const UniValue& data, const UniValue& auth, bool fH
     return true;
 }
 
-UniValue znodecontrol(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
+UniValue indexnodecontrol(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
 
     switch(type){
         case Update: {
@@ -83,24 +83,24 @@ UniValue znodecontrol(Type type, const UniValue& data, const UniValue& auth, boo
                 UniValue status(UniValue::VOBJ);
                 status.push_back(Pair("alias", alias));
 
-                BOOST_FOREACH(CZnodeConfig::CZnodeEntry mne, znodeConfig.getEntries()) {
+                BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
                     if (mne.getAlias() == alias) {
                         fFound = true;
                         std::string strError;
-                        CZnodeBroadcast mnb;
+                        CIndexnodeBroadcast mnb;
 
-                        bool fResult = CZnodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(),
+                        bool fResult = CIndexnodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(),
                                                                     mne.getOutputIndex(), strError, mnb);
                         status.push_back(Pair("success", fResult));
                         if (fResult) {
                             nSuccessful++;
-                            mnodeman.UpdateZnodeList(mnb);
-                            mnb.RelayZNode();
+                            mnodeman.UpdateIndexnodeList(mnb);
+                            mnb.RelayIndexNode();
                         } else {
                             nFailed++;
                             status.push_back(Pair("info", strError));
                         }
-                        mnodeman.NotifyZnodeUpdates();
+                        mnodeman.NotifyIndexnodeUpdates();
                         break;
                     }
                 }
@@ -120,21 +120,21 @@ UniValue znodecontrol(Type type, const UniValue& data, const UniValue& auth, boo
                     EnsureWalletIsUnlocked();
                 }
 
-                if ((method == "start-missing") && !znodeSync.IsZnodeListSynced()) {
+                if ((method == "start-missing") && !indexnodeSync.IsIndexnodeListSynced()) {
                     throw JSONAPIError(API_CLIENT_IN_INITIAL_DOWNLOAD,
-                                       "You can't use this command until znode list is synced");
+                                       "You can't use this command until indexnode list is synced");
                 }
 
-                BOOST_FOREACH(CZnodeConfig::CZnodeEntry mne, znodeConfig.getEntries()) {
+                BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
                     std::string strError;
 
                     CTxIn vin = CTxIn(uint256S(mne.getTxHash()), uint32_t(atoi(mne.getOutputIndex().c_str())));
-                    CZnode *pmn = mnodeman.Find(vin);
-                    CZnodeBroadcast mnb;
+                    CIndexnode *pmn = mnodeman.Find(vin);
+                    CIndexnodeBroadcast mnb;
 
                     if (method == "start-missing" && pmn) continue;
 
-                    bool fResult = CZnodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(),
+                    bool fResult = CIndexnodeBroadcast::Create(mne.getIp(), mne.getPrivKey(), mne.getTxHash(),
                                                                 mne.getOutputIndex(), strError, mnb);
 
                     UniValue status(UniValue::VOBJ);
@@ -143,8 +143,8 @@ UniValue znodecontrol(Type type, const UniValue& data, const UniValue& auth, boo
 
                     if (fResult) {
                         nSuccessful++;
-                        mnodeman.UpdateZnodeList(mnb);
-                        mnb.RelayZNode();
+                        mnodeman.UpdateIndexnodeList(mnb);
+                        mnb.RelayIndexNode();
                     } else {
                         nFailed++;
                         status.push_back(Pair("info", strError));
@@ -152,7 +152,7 @@ UniValue znodecontrol(Type type, const UniValue& data, const UniValue& auth, boo
 
                     detail.push_back(Pair("status", status));
                 }
-                mnodeman.NotifyZnodeUpdates();
+                mnodeman.NotifyIndexnodeUpdates();
 
             }
 
@@ -180,7 +180,7 @@ UniValue znodecontrol(Type type, const UniValue& data, const UniValue& auth, boo
     return true;
 }
 
-UniValue znodelist(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
+UniValue indexnodelist(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
 
     switch(type){
         case Initial: {
@@ -188,18 +188,18 @@ UniValue znodelist(Type type, const UniValue& data, const UniValue& auth, bool f
             UniValue nodes(UniValue::VOBJ);
 
             int fIndex = 0;
-            BOOST_FOREACH(CZnodeConfig::CZnodeEntry mne, znodeConfig.getEntries()) {
+            BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
                 const std::string& txHash = mne.getTxHash();
                 const std::string& outputIndex = mne.getOutputIndex();
                 CBitcoinAddress address;
                 std::string key = txHash + outputIndex;
-                CZnode* mn = mnodeman.Find(txHash, outputIndex);
+                CIndexnode* mn = mnodeman.Find(txHash, outputIndex);
 
                 UniValue node(UniValue::VOBJ);
                 if(mn==NULL){
                     node = mne.ToJSON();
                     node.push_back(Pair("position", fIndex++));
-                    if(GetZnodePayeeAddress(txHash, outputIndex, address))
+                    if(GetIndexnodePayeeAddress(txHash, outputIndex, address))
                         node.push_back(Pair("payeeAddress", address.ToString()));
                 }else{
                     node = mn->ToJSON();
@@ -208,29 +208,29 @@ UniValue znodelist(Type type, const UniValue& data, const UniValue& auth, bool f
             }
 
             /*
-             * If the Znode list is not yet synced, return the wallet Znodes, as described in znode.conf
-             * if it is, process all Znodes, and return along with wallet Znodes.
-             * (if the wallet Znode has started, it will be replaced in the synced list).
+             * If the Indexnode list is not yet synced, return the wallet Indexnodes, as described in indexnode.conf
+             * if it is, process all Indexnodes, and return along with wallet Indexnodes.
+             * (if the wallet Indexnode has started, it will be replaced in the synced list).
              */
-            if(!znodeSync.IsSynced()){
+            if(!indexnodeSync.IsSynced()){
                 data.push_back(Pair("nodes", nodes));
-                data.push_back(Pair("total", mnodeman.CountZnodes()));
+                data.push_back(Pair("total", mnodeman.CountIndexnodes()));
                 return data;
             }
 
-            std::vector <CZnode> vZnodes = mnodeman.GetFullZnodeVector();
-            BOOST_FOREACH(CZnode & mn, vZnodes) {
+            std::vector <CIndexnode> vIndexnodes = mnodeman.GetFullIndexnodeVector();
+            BOOST_FOREACH(CIndexnode & mn, vIndexnodes) {
                 std::string txHash = mn.vin.prevout.hash.ToString().substr(0,64);
                 std::string outputIndex = to_string(mn.vin.prevout.n);
                 std::string key = txHash + outputIndex;
 
-                // only process wallet Znodes - they are already in "nodes", so if we find it, replace with update
+                // only process wallet Indexnodes - they are already in "nodes", so if we find it, replace with update
                 if(!find_value(nodes, key).isNull())
                     nodes.replace(key, mn.ToJSON());
             }
 
             data.push_back(Pair("nodes", nodes));
-            data.push_back(Pair("total", mnodeman.CountZnodes()));
+            data.push_back(Pair("total", mnodeman.CountIndexnodes()));
             return data;
             break;
         }
@@ -242,7 +242,7 @@ UniValue znodelist(Type type, const UniValue& data, const UniValue& auth, bool f
     return true;
 }
 
-UniValue znodeupdate(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
+UniValue indexnodeupdate(Type type, const UniValue& data, const UniValue& auth, bool fHelp){
     UniValue ret(UniValue::VOBJ);
     UniValue outpoint(UniValue::VOBJ);
     string key;
@@ -260,12 +260,12 @@ UniValue znodeupdate(Type type, const UniValue& data, const UniValue& auth, bool
 static const CAPICommand commands[] =
 { //  category              collection         actor (function)          authPort   authPassphrase   warmupOk
   //  --------------------- ------------       ----------------          -------- --------------   --------
-    { "znode",              "znodeControl",    &znodecontrol,            true,      true,            false  },
-    { "znode",              "znodeKey",        &znodekey,                true,      false,           false  },
-    { "znode",              "znodeList",       &znodelist,               true,      false,           false  },
-    { "znode",              "znodeUpdate",     &znodeupdate,             true,      false,           false  }
+    { "indexnode",              "indexnodeControl",    &indexnodecontrol,            true,      true,            false  },
+    { "indexnode",              "indexnodeKey",        &indexnodekey,                true,      false,           false  },
+    { "indexnode",              "indexnodeList",       &indexnodelist,               true,      false,           false  },
+    { "indexnode",              "indexnodeUpdate",     &indexnodeupdate,             true,      false,           false  }
 };
-void RegisterZnodeAPICommands(CAPITable &tableAPI)
+void RegisterIndexnodeAPICommands(CAPITable &tableAPI)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         tableAPI.appendCommand(commands[vcidx].collection, &commands[vcidx]);

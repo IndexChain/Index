@@ -15,7 +15,7 @@
 #define MASTERNODELIST_FILTER_COOLDOWN_SECONDS            3
 
 namespace Ui {
-    class ZnodeList;
+    class IndexnodeList;
 }
 
 class ClientModel;
@@ -25,14 +25,14 @@ QT_BEGIN_NAMESPACE
 class QModelIndex;
 QT_END_NAMESPACE
 
-/** Znode Manager page widget */
-class ZnodeList : public QWidget
+/** Indexnode Manager page widget */
+class IndexnodeList : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ZnodeList(const PlatformStyle *platformStyle, QWidget *parent = 0);
-    ~ZnodeList();
+    explicit IndexnodeList(const PlatformStyle *platformStyle, QWidget *parent = 0);
+    ~IndexnodeList();
 
     void setClientModel(ClientModel *clientModel);
     void setWalletModel(WalletModel *walletModel);
@@ -45,7 +45,7 @@ private:
     bool fFilterUpdated;
 
 public Q_SLOTS:
-    void updateMyZnodeInfo(QString strAlias, QString strAddr, const COutPoint& outpoint);
+    void updateMyIndexnodeInfo(QString strAlias, QString strAddr, const COutPoint& outpoint);
     void updateMyNodeList(bool fForce = false);
     void updateNodeList();
 
@@ -53,14 +53,14 @@ Q_SIGNALS:
 
 private:
     QTimer *timer;
-    Ui::ZnodeList *ui;
+    Ui::IndexnodeList *ui;
     ClientModel *clientModel;
     WalletModel *walletModel;
 
-    // Protects tableWidgetZnodes
+    // Protects tableWidgetIndexnodes
     CCriticalSection cs_mnlist;
 
-    // Protects tableWidgetMyZnodes
+    // Protects tableWidgetMyIndexnodes
     CCriticalSection cs_mymnlist;
 
     QString strCurrentFilter;
@@ -71,7 +71,7 @@ private Q_SLOTS:
     void on_startButton_clicked();
     void on_startAllButton_clicked();
     void on_startMissingButton_clicked();
-    void on_tableWidgetMyZnodes_itemSelectionChanged();
+    void on_tableWidgetMyIndexnodes_itemSelectionChanged();
     void on_UpdateButton_clicked();
 };
 #endif // MASTERNODELIST_H

@@ -38,10 +38,10 @@
 #include "validation.h"
 #include "darksend.h"
 #include "instantx.h"
-#include "znode.h"
-#include "znode-payments.h"
-#include "znode-sync.h"
-#include "znodeconfig.h"
+#include "indexnode.h"
+#include "indexnode-payments.h"
+#include "indexnode-sync.h"
+#include "indexnodeconfig.h"
 #include "random.h"
 #include "init.h"
 #include "hdmint/wallet.h"
@@ -783,7 +783,7 @@ bool CWallet::SelectCoinsForStaking(CAmount& nTargetValue, std::set<std::pair<co
 
         int64_t n = pcoin->vout[i].nValue;
 
-        if (n == ZNODE_COIN_REQUIRED * COIN)
+        if (n == INDEXNODE_COIN_REQUIRED * COIN)
             continue;
 
         pair<int64_t,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
@@ -970,14 +970,14 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
         CBlock *pblock = &pblocktemplate->block;
 
-        // znode payments
-        if (nHeight >= Params().GetConsensus().nZnodePaymentsStartBlock) {
-            const CChainParams &chainparams = Params();
-            const Consensus::Params &params = chainparams.GetConsensus();
-            CAmount znodePayment = GetZnodePayment(chainparams.GetConsensus(),false,nHeight);
-            nReward -= znodePayment;
-            FillBlockPayments(txNew, nHeight, znodePayment, pblock->txoutZnode, pblock->voutSuperblock);
-        }
+        // indexnode payments
+        // if (nHeight >= Params().GetConsensus().nIndexnodePaymentsStartBlock) {
+        //     const CChainParams &chainparams = Params();
+        //     const Consensus::Params &params = chainparams.GetConsensus();
+        //     CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
+        //     nReward -= indexnodePayment;
+        //     FillBlockPayments(txNew, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
+        // }
 
         nCredit += nReward;
     }
@@ -1304,18 +1304,18 @@ bool CWallet::AddToWallet(const CWalletTx &wtxIn, bool fFromLoadWallet, CWalletD
         }
 
     }
-    // If Znode payment, lock corresponding outpoint
-    if (GetBoolArg("-znconflock", true) && (znodeConfig.getCount() > 0)) {
-        BOOST_FOREACH(CZnodeConfig::CZnodeEntry mne, znodeConfig.getEntries()) {
+    // If Indexnode payment, lock corresponding outpoint
+    if (GetBoolArg("-znconflock", true) && (indexnodeConfig.getCount() > 0)) {
+        BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
             uint256 mnTxHash(uint256S(mne.getTxHash()));
             int outputIndex = boost::lexical_cast<unsigned int>(mne.getOutputIndex());
 
             COutPoint outpoint = COutPoint(mnTxHash, outputIndex);
 
             if(IsMine(CTxIn(outpoint)) == ISMINE_SPENDABLE && !IsSpent(mnTxHash, outputIndex)){
-                LockCoin(outpoint); //Lock if this transaction is an available znode colleteral payment  
+                LockCoin(outpoint); //Lock if this transaction is an available indexnode colleteral payment  
             }else {
-                UnlockCoin(outpoint); // Unlock any spent Znode collateral
+                UnlockCoin(outpoint); // Unlock any spent Indexnode collateral
             }
         }
     }
@@ -3261,13 +3261,13 @@ void CWallet::AvailableCoins(vector <COutput> &vCoins, bool fOnlyConfirmed, cons
                 } else if (nCoinType == ONLY_DENOMINATED) {
                     found = IsDenominatedAmount(pcoin->vout[i].nValue);
                 } else if (nCoinType == ONLY_NOT1000IFMN) {
-                    found = !(fZNode && pcoin->vout[i].nValue == ZNODE_COIN_REQUIRED * COIN);
+                    found = !(fIndexNode && pcoin->vout[i].nValue == INDEXNODE_COIN_REQUIRED * COIN);
                 } else if (nCoinType == ONLY_NONDENOMINATED_NOT1000IFMN) {
                     if (IsCollateralAmount(pcoin->vout[i].nValue)) continue; // do not use collateral amounts
                     found = !IsDenominatedAmount(pcoin->vout[i].nValue);
-                    if (found && fZNode) found = pcoin->vout[i].nValue != ZNODE_COIN_REQUIRED * COIN; // do not use Hot MN funds
+                    if (found && fIndexNode) found = pcoin->vout[i].nValue != INDEXNODE_COIN_REQUIRED * COIN; // do not use Hot MN funds
                 } else if (nCoinType == ONLY_1000) {
-                    found = pcoin->vout[i].nValue == ZNODE_COIN_REQUIRED * COIN;
+                    found = pcoin->vout[i].nValue == INDEXNODE_COIN_REQUIRED * COIN;
                 } else if (nCoinType == ONLY_PRIVATESEND_COLLATERAL) {
                     found = IsCollateralAmount(pcoin->vout[i].nValue);
                 } else {
@@ -3318,7 +3318,7 @@ bool CWallet::SelectCoinsDark(CAmount nValueMin, CAmount nValueMax, std::vector 
         if (out.tx->vout[out.i].nValue < nValueMin / 10) continue;
         //do not allow collaterals to be selected
         if (IsCollateralAmount(out.tx->vout[out.i].nValue)) continue;
-        if (fZNode && out.tx->vout[out.i].nValue == ZNODE_COIN_REQUIRED * COIN) continue; //znode input
+        if (fIndexNode && out.tx->vout[out.i].nValue == INDEXNODE_COIN_REQUIRED * COIN) continue; //indexnode input
 
         if (nValueRet + out.tx->vout[out.i].nValue <= nValueMax) {
             CTxIn txin = CTxIn(out.tx->GetHash(), out.i);
@@ -3336,7 +3336,7 @@ bool CWallet::SelectCoinsDark(CAmount nValueMin, CAmount nValueMax, std::vector 
     return nValueRet >= nValueMin;
 }
 
-// znode
+// indexnode
 bool CWallet::GetCollateralTxIn(CTxIn& txinRet, CAmount& nValueRet) const
 {
     vector<COutput> vCoins;
@@ -3357,7 +3357,7 @@ bool CWallet::GetCollateralTxIn(CTxIn& txinRet, CAmount& nValueRet) const
     return false;
 }
 
-bool CWallet::GetZnodeVinAndKeys(CTxIn &txinRet, CPubKey &pubKeyRet, CKey &keyRet, std::string strTxHash,
+bool CWallet::GetIndexnodeVinAndKeys(CTxIn &txinRet, CPubKey &pubKeyRet, CKey &keyRet, std::string strTxHash,
                                  std::string strOutputIndex) {
     // wait for reindex and/or import to finish
     if (fImporting || fReindex) return false;
@@ -3366,7 +3366,7 @@ bool CWallet::GetZnodeVinAndKeys(CTxIn &txinRet, CPubKey &pubKeyRet, CKey &keyRe
     std::vector <COutput> vPossibleCoins;
     AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000);
     if (vPossibleCoins.empty()) {
-        LogPrintf("CWallet::GetZnodeVinAndKeys -- Could not locate any valid znode vin\n");
+        LogPrintf("CWallet::GetIndexnodeVinAndKeys -- Could not locate any valid indexnode vin\n");
         return false;
     }
 
@@ -3381,7 +3381,7 @@ bool CWallet::GetZnodeVinAndKeys(CTxIn &txinRet, CPubKey &pubKeyRet, CKey &keyRe
     if (out.tx->GetHash() == txHash && out.i == nOutputIndex) // found it!
         return GetVinAndKeysFromOutput(out, txinRet, pubKeyRet, keyRet);
 
-    LogPrintf("CWallet::GetZnodeVinAndKeys -- Could not locate specified znode vin\n");
+    LogPrintf("CWallet::GetIndexnodeVinAndKeys -- Could not locate specified indexnode vin\n");
     return false;
 }
 
@@ -3936,7 +3936,7 @@ bool CWallet::SelectCoinsByDenominations(int nDenom, CAmount nValueMin, CAmount 
     InsecureRand insecureRand;
     BOOST_FOREACH(const COutput &out, vCoins)
     {
-        // znode-like input should not be selected by AvailableCoins now anyway
+        // indexnode-like input should not be selected by AvailableCoins now anyway
         //if(out.tx->vout[out.i].nValue == 1000*COIN) continue;
         if (nValueRet + out.tx->vout[out.i].nValue <= nValueMax) {
 
@@ -4044,7 +4044,7 @@ bool CWallet::SelectCoinsGrouppedByAddresses(std::vector <CompactTallyItem> &vec
             if (fAnonymizable) {
                 // ignore collaterals
                 if (IsCollateralAmount(wtx.vout[i].nValue)) continue;
-                if (fZNode && wtx.vout[i].nValue == ZNODE_COIN_REQUIRED * COIN) continue;
+                if (fIndexNode && wtx.vout[i].nValue == INDEXNODE_COIN_REQUIRED * COIN) continue;
                 // ignore outputs that are 10 times smaller then the smallest denomination
                 // otherwise they will just lead to higher fee / lower priority
                 if (wtx.vout[i].nValue <= vecPrivateSendDenominations.back() / 10) continue;
@@ -5041,7 +5041,7 @@ bool CWallet::CreateZerocoinToSigmaRemintModel(string &stringError, int version,
         return false;
     }
 
-    if (!params.IsRegtest() && !znodeSync.IsBlockchainSynced()) {
+    if (!params.IsRegtest() && !indexnodeSync.IsBlockchainSynced()) {
         stringError = "Blockchain is not synced";
         return false;
     }

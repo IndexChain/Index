@@ -140,7 +140,7 @@ endif
 .PHONY: FORCE check-symbols check-security
 # bitcoin core #
 BITCOIN_CORE_H = \
-  activeznode.h \
+  activeindexnode.h \
   addressindex.h \
   spentindex.h \
   addrman.h \
@@ -177,11 +177,11 @@ BITCOIN_CORE_H = \
   limitedmap.h \
   threadinterrupt.h \
   main.h \
-  znode.h \
-  znode-payments.h \
-  znode-sync.h \
-  znodeman.h \
-  znodeconfig.h \
+  indexnode.h \
+  indexnode-payments.h \
+  indexnode-sync.h \
+  indexnodeman.h \
+  indexnodeconfig.h \
   mbstring.h \
   memusage.h \
   merkleblock.h \
@@ -290,7 +290,7 @@ libbitcoin_server_a_SOURCES = \
   rpc/misc.cpp \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
-  rpc/rpcznode.cpp \
+  rpc/rpcindexnode.cpp \
   rpc/server.cpp \
   script/sigcache.cpp \
   script/ismine.cpp \
@@ -320,15 +320,15 @@ endif
 libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_wallet_a_SOURCES = \
-  activeznode.cpp \
+  activeindexnode.cpp \
   darksend.cpp \
   hdmint/hdmint.cpp \
-  znode.cpp \
+  indexnode.cpp \
   instantx.cpp \
-  znode-payments.cpp \
-  znode-sync.cpp \
-  znodeconfig.cpp \
-  znodeman.cpp \
+  indexnode-payments.cpp \
+  indexnode-sync.cpp \
+  indexnodeconfig.cpp \
+  indexnodeman.cpp \
   hdmint/mintpool.cpp \
   hdmint/wallet.cpp \
   sigma.cpp \

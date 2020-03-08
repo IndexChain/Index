@@ -30,9 +30,9 @@
 #include "crypto/scrypt.h"
 #include "crypto/Lyra2Z/Lyra2Z.h"
 #include "crypto/Lyra2Z/Lyra2.h"
-#include "znode-payments.h"
-#include "znode-sync.h"
-#include "znodeman.h"
+#include "indexnode-payments.h"
+#include "indexnode-sync.h"
+#include "indexnodeman.h"
 #include "zerocoin.h"
 #include "sigma.h"
 #include "sigma/remint.h"
@@ -179,7 +179,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         }
         if ((nHeight > 0) && (nHeight <= 51)) {
         CScript PREMINE_DEST_SCRIPT;
-        if (nHeight < params.nZnodePaymentsStartBlock) {
+        if (nHeight < params.nIndexnodePaymentsStartBlock) {
             // Take some reward away from us
             coinbaseTx.vout[0].nValue = -6000000 * coin;
             PREMINE_DEST_SCRIPT = GetScriptForDestination(CBitcoinAddress("i4gnB9PemtPbfCZMLeAGZ7mVKMcUGztSr6").Get());
@@ -474,14 +474,14 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
             }
         }
         CAmount blockReward = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus(), nBlockTime);
-        // Update coinbase transaction with additional info about znode and governance payments,
+        // Update coinbase transaction with additional info about indexnode and governance payments,
         // get some info back to pass to getblocktemplate
-        if (nHeight >= chainparams.GetConsensus().nZnodePaymentsStartBlock && !fProofOfStake) {
-            const Consensus::Params &params = chainparams.GetConsensus();
-            CAmount znodePayment = GetZnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime,nHeight);
-            coinbaseTx.vout[0].nValue -= znodePayment;
-            FillBlockPayments(coinbaseTx, nHeight, znodePayment, pblock->txoutZnode, pblock->voutSuperblock);
-        }
+        // if (nHeight >= chainparams.GetConsensus().nIndexnodePaymentsStartBlock && !fProofOfStake) {
+        //     const Consensus::Params &params = chainparams.GetConsensus();
+        //     CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime,nHeight);
+        //     coinbaseTx.vout[0].nValue -= indexnodePayment;
+        //     FillBlockPayments(coinbaseTx, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
+        // }
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
@@ -1069,10 +1069,10 @@ void static ZcoinMiner(const CChainParams &chainparams) {
                 // Busy-wait for the network to come online so we don't waste time mining
                 // on an obsolete chain. In regtest mode we expect to fly solo.
 
-                // Also try to wait for znode winners unless we're on regtest chain
+                // Also try to wait for indexnode winners unless we're on regtest chain
                 do {
                     bool fvNodesEmpty;
-                    bool fHasZnodesWinnerForNextBlock;
+                    bool fHasIndexnodesWinnerForNextBlock;
                     const Consensus::Params &params = chainparams.GetConsensus();
                     {
                         LOCK(cs_vNodes);
@@ -1081,12 +1081,12 @@ void static ZcoinMiner(const CChainParams &chainparams) {
                     {
                         LOCK2(cs_main, mempool.cs);
                         int nCount = 0;
-                        fHasZnodesWinnerForNextBlock =
+                        fHasIndexnodesWinnerForNextBlock =
                                 params.IsRegtest() ||
-                                chainActive.Height() < params.nZnodePaymentsStartBlock ||
-                                mnodeman.GetNextZnodeInQueueForPayment(chainActive.Height(), true, nCount);
+                                chainActive.Height() < params.nIndexnodePaymentsStartBlock ||
+                                mnodeman.GetNextIndexnodeInQueueForPayment(chainActive.Height(), true, nCount);
                     }
-                    if (!fvNodesEmpty && fHasZnodesWinnerForNextBlock && !IsInitialBlockDownload()) {
+                    if (!fvNodesEmpty && fHasIndexnodesWinnerForNextBlock && !IsInitialBlockDownload()) {
                         break;
                     }
                     MilliSleep(1000);

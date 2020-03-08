@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 // HF constants
-static const int HF_ZNODE_HEIGHT = 4999;
-static const int HF_ZNODE_PAYMENT_START = HF_ZNODE_HEIGHT + 1; // after 5000 it starts
+static const int HF_INDEXNODE_HEIGHT = 4999;
+static const int HF_INDEXNODE_PAYMENT_START = HF_INDEXNODE_HEIGHT + 1; // after 5000 it starts
 
 
 /** The maximum allowed size for a serialized block, in bytes (only for buffer size limits) */

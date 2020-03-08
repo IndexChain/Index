@@ -58,8 +58,8 @@ public:
     virtual bool NotifyConnections();
     virtual bool NotifyStatus();
     virtual bool NotifyAPIStatus();
-    virtual bool NotifyZnodeList();
-    virtual bool NotifyZnodeUpdate(CZnode &znode);
+    virtual bool NotifyIndexnodeList();
+    virtual bool NotifyIndexnodeUpdate(CIndexnode &indexnode);
     virtual bool NotifyMintStatusUpdate(std::string update);
     virtual bool NotifySettingsUpdate(std::string update);
     virtual bool NotifyBalance();

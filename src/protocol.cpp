@@ -42,13 +42,13 @@ namespace NetMsgType {
     const char *GETBLOCKTXN = "getblocktxn";
     const char *BLOCKTXN = "blocktxn";
     const char *DANDELIONTX="dandeliontx";
-//znode
+//indexnode
     const char *TXLOCKVOTE="txlvote";
     const char *SPORK = "spork";
     const char *GETSPORKS = "getsporks";
-    const char *ZNODEPAYMENTVOTE = "mnw";
-    const char *ZNODEPAYMENTBLOCK = "mnwb";
-    const char *ZNODEPAYMENTSYNC = "mnget";
+    const char *INDEXNODEPAYMENTVOTE = "mnw";
+    const char *INDEXNODEPAYMENTBLOCK = "mnwb";
+    const char *INDEXNODEPAYMENTSYNC = "mnget";
     const char *MNANNOUNCE = "mnb";
     const char *MNPING = "mnp";
     const char *DSACCEPT = "dsa";
@@ -97,11 +97,11 @@ const static std::string allNetMessageTypes[] = {
         NetMsgType::GETBLOCKTXN,
         NetMsgType::BLOCKTXN,
 		NetMsgType::DANDELIONTX,
-        //znode
+        //indexnode
         NetMsgType::TXLOCKREQUEST,
-        NetMsgType::ZNODEPAYMENTVOTE,
-        NetMsgType::ZNODEPAYMENTBLOCK,
-        NetMsgType::ZNODEPAYMENTSYNC,
+        NetMsgType::INDEXNODEPAYMENTVOTE,
+        NetMsgType::INDEXNODEPAYMENTBLOCK,
+        NetMsgType::INDEXNODEPAYMENTSYNC,
         NetMsgType::SPORK,
         NetMsgType::GETSPORKS,
         NetMsgType::MNANNOUNCE,
@@ -209,12 +209,12 @@ const char* CInv::GetCommand() const
         case MSG_TXLOCK_REQUEST:        return NetMsgType::TXLOCKREQUEST;
         case MSG_TXLOCK_VOTE:           return NetMsgType::TXLOCKVOTE;
         case MSG_SPORK:                 return NetMsgType::SPORK;
-        case MSG_ZNODE_PAYMENT_VOTE:    return NetMsgType::ZNODEPAYMENTVOTE;
-        case MSG_ZNODE_PAYMENT_BLOCK:   return NetMsgType::ZNODEPAYMENTBLOCK;
-        case MSG_ZNODE_ANNOUNCE:        return NetMsgType::MNANNOUNCE;
-        case MSG_ZNODE_PING:            return NetMsgType::MNPING;
+        case MSG_INDEXNODE_PAYMENT_VOTE:    return NetMsgType::INDEXNODEPAYMENTVOTE;
+        case MSG_INDEXNODE_PAYMENT_BLOCK:   return NetMsgType::INDEXNODEPAYMENTBLOCK;
+        case MSG_INDEXNODE_ANNOUNCE:        return NetMsgType::MNANNOUNCE;
+        case MSG_INDEXNODE_PING:            return NetMsgType::MNPING;
         case MSG_DSTX:                  return NetMsgType::DSTX;
-        case MSG_ZNODE_VERIFY:          return NetMsgType::MNVERIFY;
+        case MSG_INDEXNODE_VERIFY:          return NetMsgType::MNVERIFY;
         default: {
             return "error";
         }

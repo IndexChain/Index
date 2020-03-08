@@ -7,7 +7,7 @@
 
 #include "zmqabstract.h"
 #include "univalue.h"
-#include "znode.h"
+#include "indexnode.h"
 #include "client-api/server.h"
 #include <boost/thread/thread.hpp>
 #include <boost/chrono.hpp>
@@ -92,12 +92,12 @@ public:
     bool NotifyAPIStatus();
 };
 
-class CZMQZnodeListEvent : virtual public CZMQAbstractPublisher
+class CZMQIndexnodeListEvent : virtual public CZMQAbstractPublisher
 {
-    /* Znode List notification
+    /* Indexnode List notification
     */
 public:
-    bool NotifyZnodeList();
+    bool NotifyIndexnodeList();
 };
 
 class CZMQSettingsEvent : virtual public CZMQAbstractPublisher
@@ -108,17 +108,17 @@ public:
     bool NotifySettingsUpdate(std::string update);
 };
 
-class CZMQZnodeEvent : virtual public CZMQAbstractPublisher
+class CZMQIndexnodeEvent : virtual public CZMQAbstractPublisher
 {
-    /* Data related to an updated Znode
+    /* Data related to an updated Indexnode
     */
 public:
-    bool NotifyZnodeUpdate(CZnode &znode);
+    bool NotifyIndexnodeUpdate(CIndexnode &indexnode);
 };
 
 class CZMQMintStatusEvent : virtual public CZMQAbstractPublisher
 {
-    /* Data related to an updated Znode
+    /* Data related to an updated Indexnode
     */
 public:
     bool NotifyMintStatusUpdate(std::string update);
@@ -182,18 +182,18 @@ public:
     void SetMethod(){ method= "apiStatus";}
 };
 
-class CZMQZnodeListTopic : public CZMQZnodeListEvent
+class CZMQIndexnodeListTopic : public CZMQIndexnodeListEvent
 {
 public:
-    void SetTopic(){ topic = "znodeList";}
-    void SetMethod(){ method= "znodeList";}
+    void SetTopic(){ topic = "indexnodeList";}
+    void SetMethod(){ method= "indexnodeList";}
 };
 
-class CZMQZnodeTopic : public CZMQZnodeEvent
+class CZMQIndexnodeTopic : public CZMQIndexnodeEvent
 {
 public:
-    void SetTopic(){ topic = "znode";}
-    void SetMethod(){ method= "znodeUpdate";}
+    void SetTopic(){ topic = "indexnode";}
+    void SetMethod(){ method= "indexnodeUpdate";}
 };
 
 class CZMQMintStatusTopic : public CZMQMintStatusEvent

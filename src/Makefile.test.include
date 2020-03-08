@@ -51,7 +51,7 @@ BITCOIN_TESTS =\
   test/zerocoin_tests2_v3.cpp \
   test/zerocoin_tests3_v3.cpp \
   test/remint_tests.cpp \
-  test/znode_tests.cpp \
+  test/indexnode_tests.cpp \
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \
   test/fixtures.h \
