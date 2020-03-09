@@ -971,13 +971,13 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         CBlock *pblock = &pblocktemplate->block;
 
         // indexnode payments
-        // if (nHeight >= Params().GetConsensus().nIndexnodePaymentsStartBlock) {
-        //     const CChainParams &chainparams = Params();
-        //     const Consensus::Params &params = chainparams.GetConsensus();
-        //     CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
-        //     nReward -= indexnodePayment;
-        //     FillBlockPayments(txNew, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
-        // }
+        if (nHeight >= Params().GetConsensus().nIndexnodePaymentsStartBlock) {
+            const CChainParams &chainparams = Params();
+            const Consensus::Params &params = chainparams.GetConsensus();
+            CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
+            nReward -= indexnodePayment;
+            FillBlockPayments(txNew, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
+        }
 
         nCredit += nReward;
     }

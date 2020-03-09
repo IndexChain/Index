@@ -476,12 +476,12 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         CAmount blockReward = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus(), nBlockTime);
         // Update coinbase transaction with additional info about indexnode and governance payments,
         // get some info back to pass to getblocktemplate
-        // if (nHeight >= chainparams.GetConsensus().nIndexnodePaymentsStartBlock && !fProofOfStake) {
-        //     const Consensus::Params &params = chainparams.GetConsensus();
-        //     CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime,nHeight);
-        //     coinbaseTx.vout[0].nValue -= indexnodePayment;
-        //     FillBlockPayments(coinbaseTx, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
-        // }
+        if (nHeight >= chainparams.GetConsensus().nIndexnodePaymentsStartBlock && !fProofOfStake) {
+            const Consensus::Params &params = chainparams.GetConsensus();
+            CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime,nHeight);
+            coinbaseTx.vout[0].nValue -= indexnodePayment;
+            FillBlockPayments(coinbaseTx, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
+        }
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
