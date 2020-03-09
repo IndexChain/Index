@@ -39,7 +39,7 @@ double GetDifficultyHelper(unsigned int nBits) {
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params,bool fProofOfStake = false ) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
-    int64_t nPastBlocks = pindexLast->nHeight + 1 > params.nLargerDGWAvgHeight ? 30:5;
+    int64_t nPastBlocks = pindexLast->nHeight + 1 > params.nLargerDGWAvgHeight ? 40:5;
     
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
