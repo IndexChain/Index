@@ -1305,7 +1305,7 @@ bool CWallet::AddToWallet(const CWalletTx &wtxIn, bool fFromLoadWallet, CWalletD
 
     }
     // If Indexnode payment, lock corresponding outpoint
-    if (GetBoolArg("-znconflock", true) && (indexnodeConfig.getCount() > 0)) {
+    if (GetBoolArg("-inconflock", true) && (indexnodeConfig.getCount() > 0)) {
         BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
             uint256 mnTxHash(uint256S(mne.getTxHash()));
             int outputIndex = boost::lexical_cast<unsigned int>(mne.getOutputIndex());

@@ -249,9 +249,9 @@ void Shutdown() {
     GenerateBitcoins(false, 0, Params());
     StopNode();
 
-    CFlatDB<CIndexnodeMan> flatdb1("zncache.dat", "magicIndexnodeCache");
+    CFlatDB<CIndexnodeMan> flatdb1("incache.dat", "magicIndexnodeCache");
     flatdb1.Dump(mnodeman);
-    CFlatDB<CIndexnodePayments> flatdb2("znpayments.dat", "magicIndexnodePaymentsCache");
+    CFlatDB<CIndexnodePayments> flatdb2("inpayments.dat", "magicIndexnodePaymentsCache");
     flatdb2.Dump(mnpayments);
     CFlatDB<CNetFulfilledRequestManager> flatdb4("netfulfilled.dat", "magicFulfilledCache");
     flatdb4.Dump(netfulfilledman);
@@ -2069,7 +2069,7 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     LogPrintf("Using Indexnode config file %s\n", GetIndexnodeConfigFile().string());
 
     // Lock Existing Indexnodes
-    if (GetBoolArg("-znconflock", true) && (indexnodeConfig.getCount() > 0)) {
+    if (GetBoolArg("-inconflock", true) && (indexnodeConfig.getCount() > 0)) {
         LogPrintf(" Locking Existing Indexnodes..\n");
         LOCK2(cs_main, pwalletMain->cs_wallet);
         BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
@@ -2124,16 +2124,16 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
     if (GetBoolArg("-persistentindexnodestate", true)) {
         uiInterface.InitMessage(_("Loading indexnode cache..."));
-        CFlatDB<CIndexnodeMan> flatdb1("zncache.dat", "magicIndexnodeCache");
+        CFlatDB<CIndexnodeMan> flatdb1("incache.dat", "magicIndexnodeCache");
         if (!flatdb1.Load(mnodeman)) {
-            return InitError("Failed to load indexnode cache from zncache.dat");
+            return InitError("Failed to load indexnode cache from incache.dat");
         }
 
         if (mnodeman.size()) {
             uiInterface.InitMessage(_("Loading Indexnode payment cache..."));
-            CFlatDB<CIndexnodePayments> flatdb2("znpayments.dat", "magicIndexnodePaymentsCache");
+            CFlatDB<CIndexnodePayments> flatdb2("inpayments.dat", "magicIndexnodePaymentsCache");
             if (!flatdb2.Load(mnpayments)) {
-                return InitError("Failed to load indexnode payments cache from znpayments.dat");
+                return InitError("Failed to load indexnode payments cache from inpayments.dat");
             }
         } else {
             uiInterface.InitMessage(_("Indexnode cache is empty, skipping payments cache..."));
