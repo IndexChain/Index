@@ -100,7 +100,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nDGWPoSHeight = 37600;//Use DGW Difficulty adjustment for PoS blocks after this height
-        consensus.nLargerDGWAvgHeight = 43500;//Use 40 blocks as average after this blockHeight
+        consensus.nLargerDGWAvgHeight = 43290;//Use 40 blocks as average after this blockHeight
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
         consensus.nMinerConfirmationWindow = 10800; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
