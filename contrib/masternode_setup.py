@@ -92,7 +92,7 @@ def compile_wallet():
 
     if is_download_from_release:
         print_info("Downloading daemon files...")
-        run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.9.2/index-0.13.9-x86_64-linux-gnu.tar.gz")
+        run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.9.3/index-0.13.9-x86_64-linux-gnu.tar.gz")
         #Assuming the command went well,extract the targz
         run_command("tar xzf index-0.13.9-x86_64-linux-gnu.tar.gz")
         run_command("cd index-0.13.9 && cp bin/* /usr/local/bin/ && cd ~")
