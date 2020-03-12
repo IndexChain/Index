@@ -78,6 +78,7 @@ struct Params {
     uint256 posLimit;
     int nDGWPoSHeight;
     int nLargerDGWAvgHeight;
+    int nSeperateCalcDiffHeight;
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;

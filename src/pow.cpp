@@ -40,7 +40,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     int64_t nPastBlocks = pindexLast->nHeight + 1 > params.nLargerDGWAvgHeight ? 40:5;
-    
+    bool shouldCalcAvgSeperate = pindexLast->nHeight + 1 > params.nSeperateCalcDiffHeight;
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
         return bnPowLimit.GetCompact();
@@ -78,7 +78,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
 
         if(nCountBlocks != nPastBlocks) {
             assert(pindex->pprev); // should never fail
-            pindex = pindex->pprev;
+            pindex = shouldCalcAvgSeperate ? GetLastBlockIndex(pindex->pprev,fProofOfStake) : pindex->pprev;
         }
     }
 
