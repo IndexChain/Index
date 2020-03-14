@@ -83,10 +83,13 @@ def secure_server():
     run_command("ufw default allow outgoing")
     run_command("ufw --force enable")
 
+def checkdaemon():
+    return os.path.isfile('/usr/local/bin/indexd')
+
 def compile_wallet():
     is_compile = False
     is_download_from_release = True
-    if os.path.isfile('/usr/local/bin/indexd'):
+    if checkdaemon():
         print_warning('Wallet already installed on the system')
         is_download_from_release = False
 
@@ -98,6 +101,15 @@ def compile_wallet():
         run_command("cd index-0.13.9 && cp bin/* /usr/local/bin/ && cd ~")
         print_info("Finished downloading and installing daemon")
 
+def stopandupdate():
+    os.system('su - mn1 -c "{}" '.format('index-cli stop &> /dev/null'))
+    print_info("Downloading daemon files...")
+    run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.9.4/index-0.13.9-x86_64-linux-gnu.tar.gz")
+    #Assuming the command went well,extract the targz
+    run_command("tar xzf index-0.13.9-x86_64-linux-gnu.tar.gz")
+    run_command("cd index-0.13.9 && cp bin/* /usr/local/bin/ && cd ~")
+    print_info("Finished updating,now starting mn back up")
+    os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
 
 def get_total_memory():
     return (os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES'))/(1024*1024)
@@ -235,9 +247,12 @@ def main():
     chech_root()
     update_system()
     secure_server()
-    compile_wallet()
-    setup_masternodes()
-    porologe()
+    if checkdaemon():
+        updatedaemon()
+    else:
+        compile_wallet()
+        setup_masternodes()
+        porologe()
 
 if __name__ == "__main__":
     main()

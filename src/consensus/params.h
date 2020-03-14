@@ -79,6 +79,7 @@ struct Params {
     int nDGWPoSHeight;
     int nLargerDGWAvgHeight;
     int nSeperateCalcDiffHeight;
+    int nLowerAvgHFHeight;
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;

@@ -39,8 +39,15 @@ double GetDifficultyHelper(unsigned int nBits) {
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params,bool fProofOfStake = false ) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
-    int64_t nPastBlocks = pindexLast->nHeight + 1 > params.nLargerDGWAvgHeight ? 40:5;
+    //Various hardfork phases
+    bool shouldReduceAvg = pindexLast->nHeight + 1 > params.nLowerAvgHFHeight;
     bool shouldCalcAvgSeperate = pindexLast->nHeight + 1 > params.nSeperateCalcDiffHeight;
+    bool shouldTakeLargerAvg = pindexLast->nHeight + 1 > params.nLargerDGWAvgHeight;
+
+    int64_t nPastBlocks = (shouldTakeLargerAvg && !shouldReduceAvg) ? 40:5;
+    if(shouldReduceAvg)
+        nPastBlocks = 25;
+
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
         return bnPowLimit.GetCompact();

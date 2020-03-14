@@ -102,6 +102,7 @@ public:
         consensus.nDGWPoSHeight = 37600;//Use DGW Difficulty adjustment for PoS blocks after this height
         consensus.nLargerDGWAvgHeight = 43290;//Use 40 blocks as average after this blockHeight
         consensus.nSeperateCalcDiffHeight = 47569;//Calculate avg diff seperately after this height for pow and pos blocks
+        consensus.nLowerAvgHFHeight = 53010;//Use last 24 blocks to calc avg instead of 40 after this height
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
         consensus.nMinerConfirmationWindow = 10800; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
