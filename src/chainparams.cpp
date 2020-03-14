@@ -420,16 +420,16 @@ public:
         extraNonce[1] = 0x00;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 568343, 504365040, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 2483434, 504365040, 2, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
         // std::cout << "index testnet genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
         // std::cout << "index testnet hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         // //btzc: update testnet index hashGenesisBlock and hashMerkleRoot
         
-        // assert(consensus.hashGenesisBlock ==
-        //         uint256S("0x00000046d4a29c850187070cc5ea6fb3e493bcbbb2afa17ef21aaf70f5361b22"));
-        // assert(genesis.hashMerkleRoot ==
-        //         uint256S("3f105b7ee0068c963cab5e889bcec419d82646b9060905f559eb8c4c1975f4c6"));
+        assert(consensus.hashGenesisBlock ==
+                uint256S("0x0000047a38d21a06ca54cd84cc01561a7173e662d6ad12620cccdd934a885ea4"));
+        assert(genesis.hashMerkleRoot ==
+                uint256S("3f105b7ee0068c963cab5e889bcec419d82646b9060905f559eb8c4c1975f4c6"));
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
@@ -513,7 +513,7 @@ public:
         consensus.nMajorityWindow = 1000;
         consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
         consensus.BIP34Hash = uint256();
-        consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("7fffff0000000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 60 * 60 * 1000; // 60 minutes between retargets
         consensus.nPowTargetSpacing = 1; // 10 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -581,16 +581,57 @@ public:
         extraNonce[1] = 0x00;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 414098459, 0x207fffff, 1, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 2, 0x207fffff, 2, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
+        //         uint32_t nGenesisTime = ZC_GENESIS_BLOCK_TIME;
+        // arith_uint256 test;
+        // bool fNegative;
+        // bool fOverflow;
+        // test.SetCompact(0x207fffff, &fNegative, &fOverflow);
+        // std::cout << "Test threshold: " << test.GetHex() << "\n\n";
+        // int genesisNonce = 0;
+        // uint256 TempHashHolding = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
+        // uint256 BestBlockHash = uint256S("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        // for (int i=0;i<40000000;i++) {
+        //     genesis = CreateGenesisBlock(nGenesisTime, i, 0x207fffff, 2, 0 * COIN,extraNonce);
+        //     //genesis.hashPrevBlock = TempHashHolding;
+        //     consensus.hashGenesisBlock = genesis.GetHash();
+        //     arith_uint256 BestBlockHashArith = UintToArith256(BestBlockHash);
+        //     if (UintToArith256(consensus.hashGenesisBlock) < BestBlockHashArith) {
+        //         BestBlockHash = consensus.hashGenesisBlock;
+        //         std::cout << BestBlockHash.GetHex() << " Nonce: " << i << "\n";
+        //         std::cout << "   PrevBlockxHash: " << genesis.hashPrevBlock.GetHex() << "\n";
+        // 	std::cout << "hashGenesisBlocxk to 0x" << BestBlockHash.GetHex() << std::endl;
+        // 	std::cout << "Genesis xNonce to " << genesisNonce << std::endl;
+        // 	std::cout << "Genesisx Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
+        //     }
+        //     TempHashHolding = consensus.hashGenesisBlock;
+        //     if (BestBlockHashArith < test) {
+        //         genesisNonce = i - 1;
+        //         break;
+        //     }
+        //     //std::cout << consensus.hashGenesisBlock.GetHex() << "\n";
+        // }
+        // std::cout << "\n";
+        // std::cout << "\n";
+        // std::cout << "FINAL\n";
+        // std::cout << "REGTEST hashGenesisBlock to 0x" << BestBlockHash.GetHex() << std::endl;
+        // std::cout << "REGTEST Genesis Nonce to " << genesisNonce << std::endl;
+        // std::cout << "REGTEST Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
+        // std::cout << "\n";
+        //    exit(0);
         //btzc: update regtest index hashGenesisBlock and hashMerkleRoot
-//        std::cout << "index regtest genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
-//        std::cout << "index regtest hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
+    //    std::cout << "index regtest genesisBlock hash: " << consensus.hashGenesisBlock.ToString() << std::endl;
+    //    std::cout << "index regtest hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         //btzc: update testnet index hashGenesisBlock and hashMerkleRoot
-        //assert(consensus.hashGenesisBlock ==
-        //       uint256S("0x0080c7bf30bb2579ed9c93213475bf8fafc1f53807da908cde19cf405b9eb55b"));
-        //assert(genesis.hashMerkleRoot ==
-        //       uint256S("0x25b361d60bc7a66b311e72389bf5d9add911c735102bcb6425f63aceeff5b7b8"));
+        assert(consensus.hashGenesisBlock ==
+              uint256S("0x2dbdd06f5a5c14b0eed5cb74a4ff481ad7ca9a52f87dfb0d25b457e48b088f27"));
+        assert(genesis.hashMerkleRoot ==
+              uint256S("3f105b7ee0068c963cab5e889bcec419d82646b9060905f559eb8c4c1975f4c6"));
+        //Disable consecutive checks
+        nConsecutivePoWHeight = INT_MAX;
+        nMaxPoWBlocks = 101;
+        consensus.nFirstPOSBlock = nConsecutivePoWHeight;//TODO akshaynexus :This needs to be decided
 
         vFixedSeeds.clear(); //!< Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();      //!< Regtest mode doesn't have any DNS seeds.
@@ -603,7 +644,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-                (0, uint256S("0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206")),
+                (0, uint256S("0x2dbdd06f5a5c14b0eed5cb74a4ff481ad7ca9a52f87dfb0d25b457e48b088f27")),
                 0,
                 0,
                 0

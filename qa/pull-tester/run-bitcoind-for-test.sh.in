@@ -11,10 +11,10 @@ tail -q -n 1 -F "$DATADIR/regtest/debug.log" | grep -m 1 -q "Done loading" &
 WAITER=$!
 PORT=`expr 10000 + $$ % 55536`
 "@abs_top_builddir@/src/indexd@EXEEXT@" -connect=0.0.0.0 -datadir="$DATADIR" -rpcuser=user -rpcpassword=pass -listen -keypool=3 -debug=0 -debug=net -logtimestamps -checkmempool=0 -relaypriority=0 -port=$PORT -whitelist=127.0.0.1 -regtest -rpcport=`expr $PORT + 1` &
-ZCOIND=$!
+INDEXD=$!
 
 #Install a watchdog.
-(sleep 10 && kill -0 $WAITER 2>/dev/null && kill -9 $ZCOIND $$)&
+(sleep 10 && kill -0 $WAITER 2>/dev/null && kill -9 $INDEXD $$)&
 wait $WAITER
 
 if [ -n "$TIMEOUT" ]; then
@@ -25,8 +25,8 @@ else
   RETURN=$?
 fi
 
-(sleep 15 && kill -0 $ZCOIND 2>/dev/null && kill -9 $ZCOIND $$)&
-kill $ZCOIND && wait $ZCOIND
+(sleep 15 && kill -0 $INDEXD 2>/dev/null && kill -9 $INDEXD $$)&
+kill $INDEXD && wait $INDEXD
 
 # timeout returns 124 on timeout, otherwise the return value of the child
 

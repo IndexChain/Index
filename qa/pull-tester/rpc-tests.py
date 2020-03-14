@@ -75,10 +75,10 @@ for arg in sys.argv[1:]:
         opts.add(arg)
 
 #Set env vars
-if "ZCOIND" not in os.environ:
-    os.environ["ZCOIND"] = BUILDDIR + '/src/indexd' + EXEEXT
-if "ZCOINCLI" not in os.environ:
-    os.environ["ZCOINCLI"] = BUILDDIR + '/src/index-cli' + EXEEXT
+if "INDEXD" not in os.environ:
+    os.environ["INDEXD"] = BUILDDIR + '/src/indexd' + EXEEXT
+if "INDEXCLI" not in os.environ:
+    os.environ["INDEXCLI"] = BUILDDIR + '/src/index-cli' + EXEEXT
 
 if EXEEXT == ".exe" and "-win" not in opts:
     # https://github.com/bitcoin/bitcoin/commit/d52802551752140cf41f0d9a225a43e84404d3e9
