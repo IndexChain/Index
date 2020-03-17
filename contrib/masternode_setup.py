@@ -6,11 +6,16 @@ import sys
 import time
 import math
 import os
+import requests,json
 from urllib.request import urlopen
 from subprocess import *
 from crontab import CronTab
 SERVER_IP = urlopen('http://ip.42.pl/raw').read()
 # BOOTSTRAP_URL = "http://index.org/dprice.zip"
+#Change this to match your coin releases
+GITHUB_REPO = 'IndexChain/Index'
+BINARY_PREFIX = 'index-'
+BINARY_SUFFIX='-x86_64-linux-gnu.tar.gz'
 
 DEFAULT_COLOR = "\x1b[0m"
 PRIVATE_KEYS = []
@@ -86,6 +91,20 @@ def secure_server():
 def checkdaemon():
     return os.path.isfile('/usr/local/bin/indexd')
 
+# Helper functions for automating updating and installing daemon
+def getlatestrelease():
+    r = requests.get(url='https://api.github.com/repos/IndexChain/Index/releases/latest')
+    data = json.loads(r.text)['assets']
+    for x in range(len(data)):
+        if 'x86_64-linux-gnu.tar.gz' in data[x]['browser_download_url']:
+            return data[x]['browser_download_url']
+
+def getbinaryname(downloadurl):
+    return downloadurl[downloadurl.find(BINARY_prefix):]
+
+def getextfoldername(binaryname):
+    return binaryname[:binaryname.find(BINARY_SUFFIX)]
+
 def compile_wallet():
     is_compile = False
     is_download_from_release = True
@@ -94,22 +113,22 @@ def compile_wallet():
         is_download_from_release = False
 
     if is_download_from_release:
-        print_info("Downloading daemon files...")
-        run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.9.5/index-0.13.9-x86_64-linux-gnu.tar.gz")
-        #Assuming the command went well,extract the targz
-        run_command("tar xzf index-0.13.9-x86_64-linux-gnu.tar.gz")
-        run_command("cd index-0.13.9 && cp bin/* /usr/local/bin/ && cd ~")
-        print_info("Finished downloading and installing daemon")
+        installdaemon(false)
 
-def stopandupdate():
+def installdaemon(fupdate):
     os.system('su - mn1 -c "{}" '.format('index-cli stop &> /dev/null'))
     print_info("Downloading daemon files...")
-    run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.9.5/index-0.13.9-x86_64-linux-gnu.tar.gz")
-    #Assuming the command went well,extract the targz
-    run_command("tar xzf index-0.13.9-x86_64-linux-gnu.tar.gz")
-    run_command("cd index-0.13.9 && cp bin/* /usr/local/bin/ && cd ~")
-    print_info("Finished updating,now starting mn back up")
-    os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
+    binraryurl = getlatestrelease()
+    binaryname = getbinaryname(binraryurl)
+    foldername = getextfoldername(binaryname)
+    run_command("wget " + binraryurl )
+    run_command("tar xzf " +binaryname)
+    run_command("cd " + foldername +" && cp bin/* /usr/local/bin/ && cd ~")
+    if fupdate:
+        print_info("Finished updating,now starting mn back up")
+        os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
+    else:
+        print_info("Finished downloading and installing daemon")
 
 def get_total_memory():
     return (os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES'))/(1024*1024)
@@ -248,7 +267,7 @@ def main():
     update_system()
     secure_server()
     if checkdaemon():
-        updatedaemon()
+        installdaemon(True)
     else:
         compile_wallet()
         setup_masternodes()
