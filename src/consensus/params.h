@@ -80,6 +80,7 @@ struct Params {
     int nLargerDGWAvgHeight;
     int nSeperateCalcDiffHeight;
     int nLowerAvgHFHeight;
+    int nLWMAPoSHeight;
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
