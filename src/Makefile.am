@@ -464,21 +464,7 @@ libbitcoin_consensus_a_SOURCES = \
   crypto/Lyra2Z/sph_blake.h \
   crypto/Lyra2Z/sph_types.h \
   crypto/Lyra2Z/Sponge.c \
-  crypto/Lyra2Z/Sponge.h \
-  crypto/MerkleTreeProof/mtp.h \
-  crypto/MerkleTreeProof/argon2.h \
-  crypto/MerkleTreeProof/thread.h \
-  crypto/MerkleTreeProof/merkle-tree.hpp \
-  crypto/MerkleTreeProof/core.h \
-  crypto/MerkleTreeProof/ref.h \
-  crypto/MerkleTreeProof/blake2/blake2.h \
-  crypto/MerkleTreeProof/blake2/blamka-round-opt.h \
-  crypto/MerkleTreeProof/blake2/blake2-impl.h \
-  crypto/MerkleTreeProof/blake2/blamka-round-ref.h \
-  crypto/MerkleTreeProof/thread.c \
-  crypto/MerkleTreeProof/core.c \
-  crypto/MerkleTreeProof/ref.c \
-  crypto/MerkleTreeProof/blake2/blake2b.c
+  crypto/Lyra2Z/Sponge.h
 
 # common: shared between indexd, and index-qt and non-server tools
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
@@ -552,8 +538,6 @@ libbitcoin_util_a_SOURCES = \
   libzerocoin/SpendMetaData.h \
   libzerocoin/SpendMetaData.cpp \
   libzerocoin/Zerocoin.h \
-  crypto/MerkleTreeProof/mtp.cpp \
-  crypto/MerkleTreeProof/merkle-tree.cpp \
   $(BITCOIN_CORE_H)
 
 libsigma_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -Werror

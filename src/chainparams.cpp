@@ -93,17 +93,12 @@ public:
         consensus.nChainStartTime = 1576332572;
         consensus.BIP34Height = 227931;
         consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
-        consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
         consensus.nPowTargetTimespan = 40 * 60; // 40 minutes between retargets 
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nDGWPoSHeight = 37600;//Use DGW Difficulty adjustment for PoS blocks after this height
-        consensus.nLargerDGWAvgHeight = 43290;//Use 40 blocks as average after this blockHeight
-        consensus.nLWMAPoSHeight = 61270;//Use LWMA for PoS
-        consensus.nSeperateCalcDiffHeight = 47569;//Calculate avg diff seperately after this height for pow and pos blocks
-        consensus.nLowerAvgHFHeight = 53010;//Use last 24 blocks to calc avg instead of 40 after this height
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
         consensus.nMinerConfirmationWindow = 10800; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -178,10 +173,10 @@ public:
        `  * a large 32-bit integer with any alignment.
          */
         //btzc: update index pchMessage
-        pchMessageStart[0] = 0xe3;
-        pchMessageStart[1] = 0xd9;
-        pchMessageStart[2] = 0xf3;
-        pchMessageStart[3] = 0x4a;
+        pchMessageStart[0] = 0xe4;
+        pchMessageStart[1] = 0xd5;
+        pchMessageStart[2] = 0xf2;
+        pchMessageStart[3] = 0x4c;
         nDefaultPort = 7082;
         nPruneAfterHeight = 100000;
         /**
@@ -198,7 +193,7 @@ public:
         extraNonce[1] = 0x3a;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 939185, 504365040, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 8453308, 0x1e00ffff, 2, 0 * COIN, extraNonce);
         // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
         consensus.hashGenesisBlock = genesis.GetHash();    
@@ -206,13 +201,13 @@ public:
         // arith_uint256 test;
         // bool fNegative;
         // bool fOverflow;
-        // test.SetCompact(504365040, &fNegative, &fOverflow);
+        // test.SetCompact(0x1e00ffff, &fNegative, &fOverflow);
         // std::cout << "Test threshold: " << test.GetHex() << "\n\n";
         // int genesisNonce = 0;
         // uint256 TempHashHolding = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
         // uint256 BestBlockHash = uint256S("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        // for (int i=10000;i<40000000;i++) {
-        //     genesis = CreateGenesisBlock(nGenesisTime, i, 504365040, 2, 0 * COIN,extraNonce);
+        // for (int i=0;i<40000000;i++) {
+        //     genesis = CreateGenesisBlock(nGenesisTime, i, 0x1e00ffff, 2, 0 * COIN,extraNonce);
         //     //genesis.hashPrevBlock = TempHashHolding;
         //     consensus.hashGenesisBlock = genesis.GetHash();
         //     arith_uint256 BestBlockHashArith = UintToArith256(BestBlockHash);
@@ -238,8 +233,8 @@ public:
         // std::cout << "Genesis Nonce to " << genesisNonce << std::endl;
         // std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
         // std::cout << "\n";
-        // return;
-        assert(consensus.hashGenesisBlock == uint256S("0x000000dce8c8f0bc6c1ff56f6b0eb2a0ac12ffe56432cf14eb3faa5e6ace463f"));
+        // std::exit(0);
+        assert(consensus.hashGenesisBlock == uint256S("0x000000eca85e49b890583a0a5e66060ed055e2a55f46edc659a2dc3c2526622f"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));

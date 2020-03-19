@@ -9,7 +9,7 @@
  * network protocol versioning
  */
 
-static const int PROTOCOL_VERSION = 90032;
+static const int PROTOCOL_VERSION = 90033;
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 90013;
@@ -18,7 +18,7 @@ static const int INIT_PROTO_VERSION = 90013;
 static const int GETHEADERS_VERSION = 90020;
 
 //! disconnect from peers older than this proto version
-static const int MIN_PEER_PROTO_VERSION = 90031;
+static const int MIN_PEER_PROTO_VERSION = 90033;
 
 //! disconnect from all older peers after Indexnode payment HF
 static const int MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF = PROTOCOL_VERSION;
@@ -49,6 +49,6 @@ static const int SHORT_IDS_BLOCKS_VERSION = 90013;
 static const int INVALID_CB_NO_BAN_VERSION = 90013;
 
 //! minimum version of official client to connect to
-static const int MIN_ZCOIN_CLIENT_VERSION = 130904; // 0.13.9.1
+static const int MIN_ZCOIN_CLIENT_VERSION = 130907; // 0.13.9.7
 
 #endif // BITCOIN_VERSION_H

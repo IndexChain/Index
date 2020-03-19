@@ -349,13 +349,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
 
                 pindexNew->sigmaMintedPubCoins   = diskindex.sigmaMintedPubCoins;
                 pindexNew->sigmaSpentSerials     = diskindex.sigmaSpentSerials;
-                pindexNew->fProofOfStake = diskindex.fProofOfStake;
-		        if (diskindex.fProofOfStake){
+		        if (pindexNew->nNonce == 0){
                     pindexNew->nStakeModifier = diskindex.nStakeModifier;
                     pindexNew->vchBlockSig    = diskindex.vchBlockSig; // qtum
                 }
 
-                if (!diskindex.fProofOfStake && !CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
+                if (pindexNew->nNonce != 0 && !CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
                         return error("LoadBlockIndex(): CheckProofOfWork failed: %s", pindexNew->ToString());
 
                 pcursor->Next();

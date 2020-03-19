@@ -37,14 +37,8 @@ double GetDifficultyHelper(unsigned int nBits) {
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params,bool fProofOfStake = false ) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
-    //Various hardfork phases
-    bool shouldReduceAvg = pindexLast->nHeight + 1 > params.nLowerAvgHFHeight;
-    bool shouldCalcAvgSeperate = pindexLast->nHeight + 1 > params.nSeperateCalcDiffHeight;
-    bool shouldTakeLargerAvg = pindexLast->nHeight + 1 > params.nLargerDGWAvgHeight;
 
-    int64_t nPastBlocks = (shouldTakeLargerAvg && !shouldReduceAvg) ? 40:5;
-    if(shouldReduceAvg)
-        nPastBlocks = 25;
+    int64_t nPastBlocks = 24;
 
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
@@ -83,7 +77,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
 
         if(nCountBlocks != nPastBlocks) {
             assert(pindex->pprev); // should never fail
-            pindex = shouldCalcAvgSeperate ? GetLastBlockIndex(pindex->pprev,fProofOfStake) : pindex->pprev;
+            pindex = GetLastBlockIndex(pindex->pprev,fProofOfStake);
         }
     }
 
@@ -108,82 +102,33 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
 
     return bnNew.GetCompact();
 }
-
-unsigned int Lwma3CalculateNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params, bool fProofOfStake)
-{
-    const arith_uint256 workLimit = fProofOfStake ? UintToArith256(params.posLimit) : UintToArith256(params.powLimit);
-    const int64_t T = params.nPowTargetSpacing;
-    const int64_t N = 25;
-    const int64_t k = N * (N + 1) * T / 2;
-    const int64_t height = GetLastBlockIndex(pindexLast, fProofOfStake)->nHeight;
-
-    if (height < N) { return workLimit.GetCompact(); }
-
-    arith_uint256 sumTarget, nextTarget;
-    int64_t thisTimestamp, previousTimestamp;
-    int64_t t = 0, j = 0;
-    previousTimestamp = GetLastBlockIndex(pindexLast, fProofOfStake)->GetAncestor(height - N)->GetBlockTime();
-
-    // Loop through N most recent blocks.
-    for (int64_t i = height - N + 1; i <= height; i++) {
-        const CBlockIndex* block = GetLastBlockIndex(pindexLast, fProofOfStake)->GetAncestor(i);
-        thisTimestamp = (block->GetBlockTime() > previousTimestamp) ?
-                         block->GetBlockTime() : previousTimestamp + 1;
-        int64_t solvetime = std::min(6 * T, thisTimestamp - previousTimestamp);
-        previousTimestamp = thisTimestamp;
-        j++;
-        t += solvetime * j; // Weighted solvetime sum.
-        arith_uint256 target;
-        target.SetCompact(block->nBits);
-        sumTarget += target / (k * N);
-    }
-    nextTarget = t * sumTarget;
-    if (nextTarget > workLimit)
-        nextTarget = workLimit;
-
-    return nextTarget.GetCompact();
-}
-
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, bool fProofOfStake)
 {
-    unsigned int nTargetLimit = UintToArith256(Params().GetConsensus().posLimit).GetCompact();
-    bool fLWMAPoS = pindexLast->nHeight + 1 > params.nLWMAPoSHeight;
-
-    // Genesis block or first proof-of-stake block
-    if (pindexLast == NULL || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
-        return UintToArith256(params.posLimit).GetCompact();
+    if (pindexLast == nullptr)
+        return UintToArith256(params.powLimit).GetCompact(); // genesis block
 
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
-
-    if (pindexPrev->pprev == NULL)
-        return nTargetLimit; // first block
+    if (pindexPrev->pprev == nullptr || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
+        return UintToArith256(params.posLimit).GetCompact(); // first block
     const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
-    if (pindexPrevPrev->pprev == NULL)
-        return nTargetLimit; // second block
-    
-    if (pindexPrev->nHeight + 1 > params.nDGWPoSHeight && !fLWMAPoS)// Use DGW after the nDGWPoS Height
-        return DarkGravityWave(pindexLast,pblock,params,fProofOfStake);
-    else if(fLWMAPoS)
-        return Lwma3CalculateNextWorkRequired(pindexPrev,params,fProofOfStake);
+    if (pindexPrevPrev->pprev == nullptr || pindexLast->nHeight  + 1 == Params().GetConsensus().nFirstPOSBlock + 1)
+        return UintToArith256(params.posLimit).GetCompact(); // second block
 
-    return CalculateNextTargetRequired(pindexPrev, pindexPrevPrev->GetBlockTime(), params, fProofOfStake);
-}
+    int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
 
-unsigned int CalculateNextTargetRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params, bool fProofOfStake)
-{
-    int64_t nTargetSpacing = Params().GetConsensus().nPowTargetSpacing;
-    int64_t nActualSpacing = pindexLast->GetBlockTime() - nFirstBlockTime;
+    // peercoin: target change every block
+    // peercoin: retarget with exponential moving toward target spacing
+    CBigNum bnNew;
+    bnNew.SetCompact(pindexPrev->nBits);
+    if (Params().NetworkIDString() != CBaseChainParams::REGTEST) {
+        int64_t nTargetSpacing = fProofOfStake? params.nPowTargetSpacing : std::min(params.nPowTargetSpacing, params.nPowTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+        int64_t nInterval = params.nPowTargetTimespan / nTargetSpacing;
+        bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+        bnNew /= ((nInterval + 1) * nTargetSpacing);
+        }
 
-    // retarget with exponential moving toward target spacing
-    const arith_uint256 bnTargetLimit = UintToArith256(Params().GetConsensus().posLimit);
-    arith_uint256 bnNew;
-    bnNew.SetCompact(pindexLast->nBits);
-    int64_t nInterval = params.nPowTargetTimespan / nTargetSpacing;
-    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-    bnNew /= ((nInterval + 1) * nTargetSpacing);
-
-    if (bnNew <= 0 || bnNew > bnTargetLimit)
-        bnNew = bnTargetLimit;
+    if (bnNew > CBigNum(params.powLimit))
+        bnNew = CBigNum(params.powLimit);
 
     return bnNew.GetCompact();
 }

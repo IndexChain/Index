@@ -2840,7 +2840,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
     pindex->nStakeModifier = ComputeStakeModifier(pindex->pprev, block.IsProofOfStake() ? block.vtx[1].vin[0].prevout.hash : block.GetHash());
 
     // Check proof-of-stake
-    if (block.IsProofOfStake() && block.fProofOfStake) {
+    if (block.IsProofOfStake()) {
          const COutPoint &prevout = block.vtx[1].vin[0].prevout;
          const CCoins *coins = view.AccessCoins(prevout.hash);
           if (!coins)
@@ -4242,7 +4242,7 @@ CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
         pindexNew->BuildSkip();
     }
-    if (block.fProofOfStake)
+    if (block.nNonce == 0)
         pindexNew->SetProofOfStake();
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
@@ -4257,7 +4257,7 @@ CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
 /** Mark a block as having its data received and checked (up to BLOCK_VALID_TRANSACTIONS). */
 bool ReceivedBlockTransactions(const CBlock &block, CValidationState &state, CBlockIndex *pindexNew,
                                const CDiskBlockPos &pos) {
-    if (block.IsProofOfStake())
+    if (block.nNonce == 0 && !block.IsProofOfStake)
         pindexNew->SetProofOfStake();
     pindexNew->nTx = block.vtx.size();
     pindexNew->nChainTx = 0;
@@ -4456,7 +4456,7 @@ static bool CheckBlockSignature(const CBlock& block)
 //btzc: code from vertcoin, add
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
-    fCheckPOW = !block.fProofOfStake && fCheckPOW;
+    fCheckPOW = block.nNonce !=0 && fCheckPOW;
     if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
             if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
                return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
@@ -4701,10 +4701,11 @@ GenerateCoinbaseCommitment(CBlock &block, const CBlockIndex *pindexPrev, const C
 bool
 ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams,
                            CBlockIndex *const pindexPrev, int64_t nAdjustedTime, bool isTestBlockValidity) {
+    bool fProofOfStakeBlock = block.nNonce == 0;
 	// Check proof of work
-    if (!block.fProofOfStake && block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+    if (!fProofOfStakeBlock && block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
-    if(block.fProofOfStake && block.nBits != GetNextTargetRequired(pindexPrev, &block, consensusParams,/** checkpos**/true))
+    if(fProofOfStakeBlock && block.nBits != GetNextTargetRequired(pindexPrev, &block, consensusParams,/** checkpos**/true))
         return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of stakehash");
 
     // Check timestamp against prev
@@ -4712,9 +4713,9 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
         return state.Invalid(false, REJECT_INVALID, "time-too-old", "block's timestamp is too early");
 
     // Check timestamp
-    if (block.GetBlockTime() > nAdjustedTime + 2 * 60 * 60 && !block.fProofOfStake)
+    if (block.GetBlockTime() > nAdjustedTime + 2 * 60 * 60 && !fProofOfStakeBlock)
         return state.Invalid(false, REJECT_INVALID, "time-too-new", "block timestamp too far in the future");
-    if (block.GetBlockTime() > nAdjustedTime + 180 && block.fProofOfStake)
+    if (block.GetBlockTime() > nAdjustedTime + 180 && fProofOfStakeBlock)
        return state.Invalid(false, REJECT_INVALID, "time-too-new-pos", "block timestamp too far in the future on PoS Block"); 
 
     // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:
@@ -4940,12 +4941,11 @@ bool SignBlock(CBlock& block, CWallet& wallet, int64_t& nFees, CBlockTemplate *p
                 block.vtx.insert(block.vtx.begin() + 1, txCoinStake);
 
                 block.hashMerkleRoot = BlockMerkleRoot(block);
-                block.fProofOfStake = true;
                 // append a signature to our block
                 key.SignCompact(block.GetHash(), block.vchBlockSig);
                 if(!block.vchBlockSig.empty()){
     
-                    LogPrintf("Block signed\n");
+                    LogPrintf("PoS Block signed\n");
                     return true;
                 }
                 else
@@ -4983,7 +4983,7 @@ static bool AcceptBlockHeader(const CBlockHeader &block, CValidationState &state
 //        int nHeight = ZerocoinGetNHeight(block);
 //        int64_t start = std::chrono::duration_cast<std::chrono::milliseconds>(
 //                std::chrono::system_clock::now().time_since_epoch()).count();
-        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), !block.fProofOfStake))
+        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), block.nNonce != 0))
             return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__, hash.ToString(),
                          FormatStateMessage(state));
 //        int64_t end = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -6645,7 +6645,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             nHeight = chainActive.Height();
         }
         //New update for masternode protocol change
-        int minPeerVersion = nHeight + 1 < chainparams.GetConsensus().nLWMAPoSHeight ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
+        int minPeerVersion = nHeight + 1 < 200 ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
         if (pfrom->nVersion < minPeerVersion) {
             // disconnect from peers older than this proto version
             // LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);
@@ -7792,7 +7792,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
                     return error("non-continuous headers sequence");
                 }
                 //TODOS
-                if (!AcceptBlockHeader(header, state, chainparams, &pindexLast, header.fProofOfStake)) {
+                if (!AcceptBlockHeader(header, state, chainparams, &pindexLast, header.nNonce == 0)) {
                     int nDoS;
                     if (state.IsInvalid(nDoS)) {
                         if (nDoS > 0) Misbehaving(pfrom->GetId(), nDoS);

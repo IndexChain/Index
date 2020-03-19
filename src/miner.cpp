@@ -154,7 +154,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
     CAmount coin = COIN / nFeeReductionFactor;
 
     resetBlock();
-    auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
+    unique_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
         return NULL;
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
@@ -1101,7 +1101,7 @@ void static ZcoinMiner(const CChainParams &chainparams) {
                 LogPrintf("loop pindexPrev->nHeight=%s\n", pindexPrev->nHeight);
             }
             LogPrintf("BEFORE: pblocktemplate\n");
-            auto_ptr <CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(
+            unique_ptr <CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(
                 coinbaseScript->reserveScript, {}));
             LogPrintf("AFTER: pblocktemplate\n");
             if (!pblocktemplate.get()) {

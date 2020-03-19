@@ -3,7 +3,7 @@ AC_PREREQ([2.60])
 define(_CLIENT_VERSION_MAJOR, 0)
 define(_CLIENT_VERSION_MINOR, 13)
 define(_CLIENT_VERSION_REVISION, 9)
-define(_CLIENT_VERSION_BUILD,6)
+define(_CLIENT_VERSION_BUILD,7)
 define(_CLIENT_VERSION_IS_RELEASE, true)
 define(_COPYRIGHT_YEAR, 2019)
 define(_COPYRIGHT_HOLDERS,[The %s developers])
@@ -105,9 +105,9 @@ AC_ARG_ENABLE([clientapi],
   [enable_clientapi=no])
 
 AC_ARG_ENABLE([exodus],
-  [AS_HELP_STRING([--enable-exodus],[enable exodus (enabled by default)])],
+  [AS_HELP_STRING([--enable-exodus],[enable exodus (disabled by default)])],
   [enable_exodus=$enableval],
-  [enable_exodus=yes])
+  [enable_exodus=no])
 
 AC_ARG_WITH([miniupnpc],
   [AS_HELP_STRING([--with-miniupnpc],
