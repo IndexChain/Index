@@ -142,7 +142,7 @@ static bool writePersistence(int block_now)
 
 bool isExodusEnabled()
 {
-    return GetBoolArg("-exodus", true);
+    return GetBoolArg("-exodus", false);
 }
 
 std::string exodus::strMPProperty(uint32_t propertyId)

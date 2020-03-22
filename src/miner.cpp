@@ -503,8 +503,10 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         else{
             pblock->nBits = GetNextTargetRequired(pindexPrev, pblock, chainparams.GetConsensus(), true);
         }
-        pblock->nNonce         = 0;
-
+        if(fProofOfStake)
+            pblock->nNonce         = 0;
+        else
+            pblock->nNonce         = 1;//Fix nonce issue on mining
         pblocktemplate->vTxSigOpsCost[0] = GetLegacySigOpCount(pblock->vtx[0]);
 
         //LogPrintf("CreateNewBlock(): AFTER pblocktemplate->vTxSigOpsCost[0] = GetLegacySigOpCount(pblock->vtx[0])\n");
