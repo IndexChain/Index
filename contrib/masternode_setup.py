@@ -100,7 +100,7 @@ def getlatestrelease():
             return data[x]['browser_download_url']
 
 def getbinaryname(downloadurl):
-    return downloadurl[downloadurl.find(BINARY_prefix):]
+    return downloadurl[downloadurl.find(BINARY_PREFIX):]
 
 def getextfoldername(binaryname):
     return binaryname[:binaryname.find(BINARY_SUFFIX)]
@@ -113,7 +113,7 @@ def compile_wallet():
         is_download_from_release = False
 
     if is_download_from_release:
-        installdaemon(false)
+        installdaemon(False)
 
 def installdaemon(fupdate):
     os.system('su - mn1 -c "{}" '.format('index-cli stop &> /dev/null'))
