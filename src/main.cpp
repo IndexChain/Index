@@ -3381,7 +3381,7 @@ void PruneAndFlush() {
 
 /** Update chainActive and related internal data structures. */
 void static UpdateTip(CBlockIndex *pindexNew, const CChainParams &chainParams) {
-    LogPrintf("UpdateTip() pindexNew.nHeight=%s\n", pindexNew->nHeight);
+    // LogPrintf("UpdateTip() pindexNew.nHeight=%s\n", pindexNew->nHeight);
     chainActive.SetTip(pindexNew);
     mnodeman.UpdatedBlockTip(chainActive.Tip());
     darkSendPool.UpdatedBlockTip(chainActive.Tip());
@@ -3585,7 +3585,7 @@ static int64_t nTimePostConnect = 0;
  */
 bool static
 ConnectTip(CValidationState &state, const CChainParams &chainparams, CBlockIndex *pindexNew, const CBlock *pblock) {
-    LogPrintf("ConnectTip() nHeight=%s\n", pindexNew->nHeight);
+    // LogPrintf("ConnectTip() nHeight=%s\n", pindexNew->nHeight);
     assert(pindexNew->pprev == chainActive.Tip());
     // Read block from disk.
     int64_t nTime1 = GetTimeMicros();
@@ -3868,7 +3868,7 @@ static void PruneBlockIndexCandidates() {
  */
 static bool ActivateBestChainStep(CValidationState &state, const CChainParams &chainparams, CBlockIndex *pindexMostWork,
                                   const CBlock *pblock, bool &fInvalidFound) {
-    LogPrintf("ActivateBestChainStep()\n");
+    // LogPrintf("ActivateBestChainStep()\n");
     AssertLockHeld(cs_main);
     const CBlockIndex *pindexOldTip = chainActive.Tip();
     const CBlockIndex *pindexFork = chainActive.FindFork(pindexMostWork);
