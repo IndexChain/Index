@@ -97,7 +97,7 @@ public:
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
         consensus.nPowTargetTimespan = 40 * 60; // 40 minutes between retargets 
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
-        consensus.nHeightPPCDiffRetarget = 14780;//Use Peercoin's per block retarget after this block
+        consensus.nHeightPPCDiffRetarget = 14900;//Use Peercoin's per block retarget after this block
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
