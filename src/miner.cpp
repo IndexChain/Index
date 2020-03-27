@@ -1236,22 +1236,22 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                 nLastCoinStakeSearchInterval = 0;
                 MilliSleep(10000);
             }
-            // while (vNodes.empty() || IsInitialBlockDownload())
-            // {
-            //     nLastCoinStakeSearchInterval = 0;
-            //         LogPrintf("ThreadStakeMiner(): sleep due to vnode empty or initalblockdnld\n");
+            while (vNodes.empty() || IsInitialBlockDownload())
+            {
+                nLastCoinStakeSearchInterval = 0;
+                    LogPrintf("ThreadStakeMiner(): sleep due to vnode empty or initalblockdnld\n");
 
-            //     fTryToSync = true;
-            //     MilliSleep(1000);
-            // }
+                fTryToSync = true;
+                MilliSleep(1000);
+            }
             if (fTryToSync)
             {
                 fTryToSync = false;
-                if (vNodes.size() < 3 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60)
+                if (vNodes.size() < 2 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60)
                 {
-                    // LogPrintf("ThreadStakeMiner(): sleep due to vnode\n");
-                    // MilliSleep(60000);
-                    // continue;
+                    LogPrintf("ThreadStakeMiner(): sleep due to vnode\n");
+                    MilliSleep(6000);
+                    continue;
                 }
             }
 
