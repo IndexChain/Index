@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2015-2020 The PIVX developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -177,7 +178,72 @@ namespace {
             return false;
         }
     };
+   class CNodeBlocks {
+      public:
+        CNodeBlocks():
+        maxSize(0),
+        maxAvg(0) {
+          maxSize = GetArg("-blockspamfiltermaxsize", DEFAULT_BLOCK_SPAM_FILTER_MAX_SIZE);
+          maxAvg = GetArg("-blockspamfiltermaxavg", DEFAULT_BLOCK_SPAM_FILTER_MAX_AVG);
+        }
 
+      bool onBlockReceived(int nHeight) {
+        if (nHeight > 0 && maxSize && maxAvg) {
+          addPoint(nHeight);
+          return true;
+        }
+        return false;
+      }
+
+      bool updateState(CValidationState & state, bool ret) {
+        // No Blocks
+        size_t size = points.size();
+        if (size == 0)
+          return ret;
+
+        // Compute the number of the received blocks
+        size_t nBlocks = 0;
+        for (auto point: points) {
+          nBlocks += point.second;
+        }
+
+        // Compute the average value per height
+        double nAvgValue = (double) nBlocks / size;
+
+        // Ban the node if try to spam
+        bool banNode = (nAvgValue >= 1.5 * maxAvg && size >= maxAvg) ||
+          (nAvgValue >= maxAvg && nBlocks >= maxSize) ||
+          (nBlocks >= maxSize * 3);
+        if (banNode) {
+          // Clear the points and ban the node
+          points.clear();
+          return state.DoS(100, error("block-spam ban node for sending spam"));
+        }
+
+        return ret;
+      }
+
+      private:
+        void addPoint(int height) {
+          // Remove the last element in the list
+          if (points.size() == maxSize) {
+            points.erase(points.begin());
+          }
+
+          // Add the point to the list
+          int occurrence = 0;
+          auto mi = points.find(height);
+          if (mi != points.end())
+            occurrence = ( * mi).second;
+          occurrence++;
+          points[height] = occurrence;
+        }
+
+      private:
+        std::map < int, int > points;
+      size_t maxSize;
+      size_t maxAvg;
+    };
     CBlockIndex *pindexBestInvalid;
 
     /**
@@ -256,6 +322,8 @@ namespace {
 
     /** Number of preferable block download peers. */
     int nPreferredDownload = 0;
+    /** Fake stake fix from PIVX**/
+    CNodeBlocks nodeBlocks;
 
     /** Dirty block index entries. */
     set<CBlockIndex *> setDirtyBlockIndex;
@@ -286,7 +354,6 @@ namespace {
         string strRejectReason;
         uint256 hashBlock;
     };
-
 /**
  * Maintain validation-specific state about nodes, protected by cs_main, instead
  * by CNode's own locks. This simplifies asynchronous operation, where
@@ -2819,7 +2886,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
     int64_t nTimeStart = GetTimeMicros();
     //btzc: update nHeight, isVerifyDB
     // Check it again in case a previous version let a bad block in
-    LogPrintf("ConnectBlock nHeight=%s, hash=%s\n", pindex->nHeight, block.GetHash().ToString());
+    // LogPrintf("ConnectBlock nHeight=%s, hash=%s\n", pindex->nHeight, block.GetHash().ToString());
     if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck, pindex->nHeight, false, !fJustCheck)) {
         LogPrintf("--> failed\n");
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
@@ -3104,8 +3171,9 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
     if (!IsBlockValueValid(block, pindex->nHeight, blockReward, strError)) {
         return state.DoS(0, error("ConnectBlock(): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
-
-    if (pindex->nTime > sporkManager.GetSporkValue(SPORK_8_INDEXNODE_PAYMENT_ENFORCEMENT) && !IsBlockPayeeValid(block.vtx[0], pindex->nHeight, blockReward)) {
+    //get proper vtx to check mn payments for
+    const CTransaction& txNew = (block.nNonce == 0) ? block.vtx[1] : block.vtx[0];
+    if (block.nTime > sporkManager.GetSporkValue(SPORK_8_INDEXNODE_PAYMENT_ENFORCEMENT) && !IsBlockPayeeValid(txNew, pindex->nHeight, blockReward)) {
         mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
         return state.DoS(0, error("ConnectBlock(): couldn't find indexnode or superblock payments"),
                          REJECT_INVALID, "bad-cb-payee");
@@ -5072,6 +5140,106 @@ AcceptBlock(const CBlock &block, CValidationState &state, const CChainParams &ch
     if (block.IsProofOfStake() && nHeight < chainparams.GetConsensus().nFirstPOSBlock)
         return state.DoS(100, error("%s: reject proof-of-stake at height %d",  __func__, nHeight),
                         REJECT_INVALID, "bad-pos-height");
+    int splitHeight = -1;
+    if (block.IsProofOfStake()) {
+        LOCK(cs_main);
+
+        // Blocks arrives in order, so if prev block is not the tip then we are on a fork.
+        // Extra info: duplicated blocks are skipping this checks, so we don't have to worry about those here.
+        bool isBlockFromFork = pindex->pprev != nullptr && chainActive.Tip() != pindex->pprev;
+
+        // Coin stake
+        CTransaction stakeTxIn = block.vtx[1];
+
+        // Inputs
+        std::vector<CTxIn> idxInputs;
+
+        for (const CTxIn& stakeIn : stakeTxIn.vin) {
+                idxInputs.push_back(stakeIn);
+        }
+
+        const bool hasIDXInputs = !idxInputs.empty();
+
+        std::vector<CBigNum> inBlockSerials;
+        for (const CTransaction& tx : block.vtx) {
+            for (const CTxIn& in: tx.vin) {
+                if(tx.IsCoinStake()) continue;
+                if(hasIDXInputs) {
+                    // Check if coinstake input is double spent inside the same block
+                    for (const CTxIn& pivIn : idxInputs)
+                        if(pivIn.prevout == in.prevout)
+                            // double spent coinstake input inside block
+                            return error("%s: double spent coinstake input inside block", __func__);
+                }
+            }
+        }
+        inBlockSerials.clear();
+
+
+        // Check whether is a fork or not
+        if (isBlockFromFork) {
+
+            // Start at the block we're adding on to
+            CBlockIndex *prev = pindex->pprev;
+
+            CBlock bl;
+            if (!ReadBlockFromDisk(bl, prev,chainparams.GetConsensus()))
+                return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex());
+
+            std::vector<CBigNum> vBlockSerials;
+            int readBlock = 0;
+            // Go backwards on the forked chain up to the split
+            while (!chainActive.Contains(prev)) {
+
+                // Increase amount of read blocks
+                readBlock++;
+                // Check if the forked chain is longer than the max reorg limit
+                if (readBlock == GetArg("-maxreorg", 100)) {
+                    // TODO: Remove this chain from disk.
+                    return error("%s: forked chain longer than maximum reorg limit", __func__);
+                }
+
+                // Loop through every tx of this block
+                for (const CTransaction& t : bl.vtx) {
+                    // Loop through every input of this tx
+                    for (const CTxIn& in: t.vin) {
+
+                        // Loop through every input of the staking tx
+                        if (hasIDXInputs) {
+                            for (const CTxIn& stakeIn : idxInputs)
+                                // check if the tx input is double spending any coinstake input
+                                if (stakeIn.prevout == in.prevout)
+                                    return state.DoS(100, error("%s: input already spent on a previous block", __func__));
+                        }
+                    }
+                }
+
+                // Prev block
+                prev = prev->pprev;
+                if (!ReadBlockFromDisk(bl, prev,chainparams.GetConsensus()))
+                    // Previous block not on disk
+                    return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex());
+
+            }
+            // Split height
+            splitHeight = prev->nHeight;
+        }
+        const CCoinsViewCache coins(pcoinsTip);
+            for (const CTxIn& in: stakeTxIn.vin) {
+                const CCoins* coin = coins.AccessCoins(in.prevout.hash);
+
+                if(!coin && !isBlockFromFork){
+                    // No coins on the main chain
+                    return error("%s: coin stake inputs not available on main chain, received height %d vs current %d", __func__, nHeight, chainActive.Height());
+                }
+                if(coin && !coin->IsAvailable(in.prevout.n)){
+                    if(!isBlockFromFork){
+                        // Coins not available
+                        return error("%s: coin stake inputs already spent in main chain", __func__);
+                    }
+                }
+            }
+    }
     // Write block to history file
     try {
         unsigned int nBlockSize = ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
@@ -6644,7 +6812,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             nHeight = chainActive.Height();
         }
         //New update for masternode protocol change
-        int minPeerVersion = nHeight + 1 < 200 ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
+        int minPeerVersion = nHeight + 1 < chainparams.GetConsensus().nHeightPPCDiffRetarget ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
         if (pfrom->nVersion < minPeerVersion) {
             // disconnect from peers older than this proto version
             // LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);

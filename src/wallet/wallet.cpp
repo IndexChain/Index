@@ -3023,7 +3023,7 @@ CAmount CWallet::GetStake() const
         {
             const CWalletTx* pcoin = &entry.second;
             if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0)
-                nTotal += entry.second.GetCredit(ISMINE_ALL);
+                nTotal += pcoin->GetCredit(ISMINE_SPENDABLE);
         }
     }
     return nTotal;

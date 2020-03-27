@@ -165,7 +165,12 @@ static const int MAX_UNCONNECTING_HEADERS = 10;
 static std::map<int, CBlock> mapBlockData;
 
 static const bool DEFAULT_PEERBLOOMFILTERS = true;
-
+/** Default for -blockspamfilter, use header spam filter */
+static const bool DEFAULT_BLOCK_SPAM_FILTER = true;
+/** Default for -blockspamfiltermaxsize, maximum size of the list of indexes in the block spam filter */
+static const unsigned int DEFAULT_BLOCK_SPAM_FILTER_MAX_SIZE = 100;
+/** Default for -blockspamfiltermaxavg, maximum average size of an index occurrence in the block spam filter */
+static const unsigned int DEFAULT_BLOCK_SPAM_FILTER_MAX_AVG = 10;
 // Block Height Lyra2Z
 #define LYRA2Z_HEIGHT 20500
 

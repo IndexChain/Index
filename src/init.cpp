@@ -668,6 +668,10 @@ std::string HelpMessage(HelpMessageMode mode) {
     strUsage += HelpMessageOpt("-rpcthreads=<n>",
                                strprintf(_("Set the number of threads to service RPC calls (default: %d)"),
                                          DEFAULT_HTTP_THREADS));
+    strUsage += HelpMessageOpt("-blockspamfilter=<n>", strprintf(_("Use block spam filter (default: %u)"), DEFAULT_BLOCK_SPAM_FILTER));
+    strUsage += HelpMessageOpt("-blockspamfiltermaxsize=<n>", strprintf(_("Maximum size of the list of indexes in the block spam filter (default: %u)"), DEFAULT_BLOCK_SPAM_FILTER_MAX_SIZE));
+    strUsage += HelpMessageOpt("-blockspamfiltermaxavg=<n>", strprintf(_("Maximum average size of an index occurrence in the block spam filter (default: %u)"), DEFAULT_BLOCK_SPAM_FILTER_MAX_AVG));
+
     if (showDebug) {
         strUsage += HelpMessageOpt("-rpcworkqueue=<n>",
                                    strprintf("Set the depth of the work queue to service RPC calls (default: %d)",

@@ -139,6 +139,12 @@ unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHead
     if (params.fPowNoRetargeting) {
         return pindexLast->nBits;
     }
+
+    else if(pindexLast->nHeight + 1 > params.nHeightPPCDiffRetarget){
+        //Use peercoin diff retarget after this height to ensure 60 sec avg blocktimes
+        return GetNextTargetRequired(pindexLast,pblock,params,false);
+    }
+
     return DarkGravityWave(pindexLast, pblock, params,false);
 
 }

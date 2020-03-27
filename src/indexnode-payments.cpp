@@ -520,7 +520,7 @@ bool CIndexnodeBlockPayees::IsTransactionValid(const CTransaction &txNew, bool f
             nMaxSignatures = payee.GetVoteCount();
         }
     }
-
+    LogPrintf("nmaxsig = %s ",nMaxSignatures);
     // if we don't have at least MNPAYMENTS_SIGNATURES_REQUIRED signatures on a payee, approve whichever is the longest chain
     if (nMaxSignatures < MNPAYMENTS_SIGNATURES_REQUIRED) return true;
 

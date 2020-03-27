@@ -81,6 +81,7 @@ struct Params {
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
     int64_t nChainStartTime;
+    int nHeightPPCDiffRetarget;
     unsigned char nMinNFactor;
     unsigned char nMaxNFactor;
     int nInstantSendKeepLock; // in blocks
