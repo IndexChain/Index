@@ -1131,7 +1131,7 @@ bool CheckTransaction(
         CZerocoinTxInfo *zerocoinTxInfo,
         sigma::CSigmaTxInfo *sigmaTxInfo)
 {
-    LogPrintf("CheckTransaction nHeight=%s, isVerifyDB=%s, isCheckWallet=%s, txHash=%s\n", nHeight, isVerifyDB, isCheckWallet, tx.GetHash().ToString());
+    // LogPrintf("CheckTransaction nHeight=%s, isVerifyDB=%s, isCheckWallet=%s, txHash=%s\n", nHeight, isVerifyDB, isCheckWallet, tx.GetHash().ToString());
 //    LogPrintf("transaction = %s\n", tx.ToString());
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
@@ -3985,7 +3985,7 @@ static void NotifyHeaderTip() {
  * that is already loaded (to avoid loading it again from disk).
  */
 bool ActivateBestChain(CValidationState &state, const CChainParams &chainparams, const CBlock *pblock) {
-    LogPrintf("ActivateBestChain()\n");
+    // LogPrintf("ActivateBestChain()\n");
 //    if (pblock) {
 //        LogPrint("ActivateBestChain", "block=%s\n", pblock->ToString());
 //    }
@@ -4472,8 +4472,8 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
         block.zerocoinTxInfo = std::make_shared<CZerocoinTxInfo>();
     if (!block.sigmaTxInfo)
         block.sigmaTxInfo = std::make_shared<sigma::CSigmaTxInfo>();
-    LogPrintf("CheckBlock() nHeight=%s, blockHash= %s, isVerifyDB = %s\n",
-              nHeight, block.GetHash().ToString(), isVerifyDB);
+    // LogPrintf("CheckBlock() nHeight=%s, blockHash= %s, isVerifyDB = %s\n",
+    //           nHeight, block.GetHash().ToString(), isVerifyDB);
     try {
         // These are checks that are independent of context.
         if (block.fChecked)
@@ -5031,12 +5031,12 @@ AcceptBlock(const CBlock &block, CValidationState &state, const CChainParams &ch
     AssertLockHeld(cs_main);
     CBlockIndex *pindexDummy = NULL;
     CBlockIndex *&pindex = ppindex ? *ppindex : pindexDummy;
-    LogPrintf("AcceptBlock ...\n");
+    // LogPrintf("AcceptBlock ...\n");
     if (!AcceptBlockHeader(block, state, chainparams, &pindex, block.IsProofOfStake())) {
         LogPrintf("Invalid AcceptBlockHeader()\n");
         return false;
     }
-    LogPrintf("AcceptBlock nHeight=%s\n", pindex->nHeight);
+    // LogPrintf("AcceptBlock nHeight=%s\n", pindex->nHeight);
     // Try to process all requested blocks that we don't have, but only
     // process an unrequested block if it's new and has enough work to
     // advance our tip, and isn't too many blocks ahead.
@@ -5131,7 +5131,7 @@ bool ProcessNewBlock(CValidationState &state, const CChainParams &chainparams, C
     }
 
     NotifyHeaderTip();
-    LogPrintf("ProcessNewBlock->ActivateBestChain\n");
+    // LogPrintf("ProcessNewBlock->ActivateBestChain\n");
     if (!ActivateBestChain(state, chainparams, pblock)) {
         LogPrintf("->failed\n");
         return error("%s: ActivateBestChain failed", __func__);
