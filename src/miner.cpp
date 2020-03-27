@@ -1239,8 +1239,6 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
             while (vNodes.empty() || IsInitialBlockDownload())
             {
                 nLastCoinStakeSearchInterval = 0;
-                    LogPrintf("ThreadStakeMiner(): sleep due to vnode empty or initalblockdnld\n");
-
                 fTryToSync = true;
                 MilliSleep(1000);
             }
@@ -1249,7 +1247,6 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                 fTryToSync = false;
                 if (vNodes.size() < 2 || pindexBestHeader->GetBlockTime() < GetTime() - 10 * 60)
                 {
-                    LogPrintf("ThreadStakeMiner(): sleep due to vnode\n");
                     MilliSleep(6000);
                     continue;
                 }
