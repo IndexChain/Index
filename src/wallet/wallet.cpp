@@ -2268,7 +2268,7 @@ CAmount CWalletTx::GetImmatureStakeCredit(bool fUseCache) const
     {
         if (fUseCache && fImmatureStakeCreditCached)
             return nImmatureStakeCreditCached;
-        nImmatureStakeCreditCached = pwallet->GetCredit(*this, ISMINE_SPENDABLE);
+        nImmatureStakeCreditCached = pwallet->GetCredit(*this, ISMINE_ALL);
         fImmatureStakeCreditCached = true;
         return nImmatureStakeCreditCached;
     }
@@ -3023,7 +3023,7 @@ CAmount CWallet::GetStake() const
         {
             const CWalletTx* pcoin = &entry.second;
             if (pcoin->IsCoinStake() && pcoin->GetBlocksToMaturity() > 0 && pcoin->GetDepthInMainChain() > 0)
-                nTotal += pcoin->GetCredit(ISMINE_SPENDABLE);
+                nTotal += pcoin->GetImmatureStakeCredit();
         }
     }
     return nTotal;
