@@ -214,9 +214,9 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0x000000eca85e49b890583a0a5e66060ed055e2a55f46edc659a2dc3c2526622f"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
-        vSeeds.push_back(CDNSSeedData("mineit.io", "mineit.io", false));
         vSeeds.push_back(CDNSSeedData("202.182.107.84", "202.182.107.84", false));
-        vSeeds.push_back(CDNSSeedData("idxseeder.mineit.io", "mineit.io", false));
+        vSeeds.push_back(CDNSSeedData("mineit.io", "mineit.io", false));
+        vSeeds.push_back(CDNSSeedData("idxseeder.mineit.io", "idxseeder.ineit.io", false));
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));
         vSeeds.push_back(CDNSSeedData("198.13.41.221", "198.13.41.221", false));
         vSeeds.push_back(CDNSSeedData("202.182.101.157", "202.182.101.157", false));
