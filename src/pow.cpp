@@ -108,7 +108,6 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
         return UintToArith256(params.powLimit).GetCompact(); // genesis block
 
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
-    const CBlockIndex* pindexPrevOutliner = pindex;
 
     if (pindexPrev->pprev == nullptr || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
         return UintToArith256(params.posLimit).GetCompact(); // first block
