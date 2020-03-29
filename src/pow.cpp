@@ -127,7 +127,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
         bnNew /= ((nInterval + 1) * nTargetSpacing);
         
     }
-    bool fShouldDoubleTarget = pindexLast->nHeight + 1 > params.nDoubleTargetHeight && (chainActive.Tip()->GetBlockTime() - chainActive.Tip()->pprev->GetBlockTime()) <= (params.nPowTargetSpacing - 20);
+    bool fShouldDoubleTarget = pindexLast->nHeight + 1 > params.nDoubleTargetHeight && (chainActive.Tip()->GetBlockTime() - chainActive.Tip()->pprev->GetBlockTime()) <= (params.nPowTargetSpacing - 25);
     if(fShouldDoubleTarget)
         bnNew *= 2;
 
