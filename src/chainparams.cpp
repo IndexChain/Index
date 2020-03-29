@@ -92,7 +92,7 @@ public:
         consensus.nPowTargetTimespan = 40 * 60; // 40 minutes between retargets 
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.nHeightPPCDiffRetarget = 14900;//Use Peercoin's per block retarget after this block
-        consensus.nDoubleTargetHeight = 19000;//Double Difficulty for all blocks after this height
+        consensus.nDoubleTargetHeight = 19040;//Double Difficulty for all blocks after this height
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
