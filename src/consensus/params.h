@@ -18,8 +18,6 @@ enum DeploymentPos
     DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
     DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
 
-    DEPLOYMENT_MTP, // Deployment of MTP
-
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };
@@ -62,8 +60,6 @@ struct Params {
     int nMajorityEnforceBlockUpgrade;
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
-    /** Block height and hash at which BIP34 becomes active */
-    int BIP34Height;
     uint256 BIP34Hash;
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargetting period,
@@ -80,19 +76,11 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
-    int64_t nChainStartTime;
     int nHeightPPCDiffRetarget;
-    unsigned char nMinNFactor;
-    unsigned char nMaxNFactor;
+    int nDoubleTargetHeight;
     int nInstantSendKeepLock; // in blocks
-    //int nBudgetPaymentsStartBlock;
-    //int nBudgetPaymentsCycleBlocks;
-    //int nBudgetPaymentsWindowBlocks;
     int nIndexnodeMinimumConfirmations;
     int nIndexnodePaymentsStartBlock;
-    //int nIndexnodePaymentsIncreaseBlock;
-    //int nIndexnodePaymentsIncreasePeriod; // in blocks
-    //int nSuperblockStartBlock;
 
 	/** Zerocoin-related block numbers when features are changed */
     int nCheckBugFixedAtBlock;
@@ -164,32 +152,12 @@ struct Params {
     // Number of blocks with allowed zerocoin to sigma remint transaction (after nSigmaStartBlock)
     int nZerocoinToSigmaRemintWindowSize;
 
-    /** switch to MTP time */
-    uint32_t nMTPSwitchTime;
-    /** block number to reduce distance between blocks */
-    int nMTPFiveMinutesStartBlock;
-
-    /** don't adjust difficulty until some block number */
-    int nDifficultyAdjustStartBlock;
-    /** fixed diffuculty to use before adjustment takes place */
-    int nFixedDifficulty;
-
-    /** pow target spacing after switch to MTP */
-    int64_t nPowTargetSpacingMTP;
-
-    /** initial MTP difficulty */
-    int nInitialMTPDifficulty;
-
-    /** reduction coefficient for rewards after MTP kicks in */
-    int nMTPRewardReduction;
-
     /** block number to disable zerocoin on consensus level */
     int nDisableZerocoinStartBlock;
 	
      // Params for Zawy's LWMA difficulty adjustment algorithm.
 
-    int nZawyLwmaAveragingWindow;
-    int64_t DifficultyAdjustmentInterval(bool fMTP = false) const { return nPowTargetTimespan / (fMTP ? nPowTargetSpacingMTP : nPowTargetSpacing); }
+    int64_t DifficultyAdjustmentInterval(bool fMTP = false) const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
 	
     // proof-of-stake

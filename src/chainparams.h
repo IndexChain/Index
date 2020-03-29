@@ -54,7 +54,6 @@ public:
     };
 
     const Consensus::Params& GetConsensus() const { return consensus; }
-    void SetRegTestMtpSwitchTime(uint32_t time) { if(consensus.chainType == Consensus::chainRegtest) consensus.nMTPSwitchTime = time;}
     const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
     int GetDefaultPort() const { return nDefaultPort; }
 

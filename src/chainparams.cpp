@@ -87,17 +87,12 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 8100;
         consensus.nMajorityRejectBlockOutdated = 10260;
         consensus.nMajorityWindow = 10800;
-        consensus.nMinNFactor = 10;
-        consensus.nMaxNFactor = 30;
-        //nVertcoinStartTime
-        consensus.nChainStartTime = 1576332572;
-        consensus.BIP34Height = 227931;
-        consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
         consensus.nPowTargetTimespan = 40 * 60; // 40 minutes between retargets 
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.nHeightPPCDiffRetarget = 14900;//Use Peercoin's per block retarget after this block
+        consensus.nDoubleTargetHeight = 19000;//Double Difficulty for all blocks after this height
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
@@ -116,14 +111,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1580217929; // November 15th, 2016.
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1611840329; // November 15th, 2017.
 
-        // Deployment of MTP
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].bit = 12;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nStartTime = SWITCH_TO_MTP_BLOCK_HEADER - 2*60; // 2 hours leeway
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nTimeout = SWITCH_TO_MTP_BLOCK_HEADER + consensus.nMinerConfirmationWindow*2 * 5*60;
-
         // The best chain should have at least this much work
-        //TODO Change this to minchainwork from mainnet
-        consensus.nMinimumChainWork = uint256S("0x0");
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000009290b1227d544");
 
         consensus.nCheckBugFixedAtBlock = ZC_CHECK_BUG_FIXED_AT_BLOCK;
         consensus.nIndexnodePaymentsBugFixedAtBlock = ZC_INDEXNODE_PAYMENT_BUG_FIXED_AT_BLOCK;
@@ -141,20 +130,7 @@ public:
 
         // indexnode params
         consensus.nIndexnodePaymentsStartBlock = HF_INDEXNODE_PAYMENT_START; // not true, but it's ok as long as it's less then nIndexnodePaymentsIncreaseBlock
-        // consensus.nIndexnodePaymentsIncreaseBlock = 680000; // actual historical value // not used for now, probably later
-        // consensus.nIndexnodePaymentsIncreasePeriod = 576*30; // 17280 - actual historical value // not used for now, probably later
-        // consensus.nSuperblockStartBlock = 614820;
-        // consensus.nBudgetPaymentsStartBlock = 328008; // actual historical value
-        // consensus.nBudgetPaymentsCycleBlocks = 16616; // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
-        // consensus.nBudgetPaymentsWindowBlocks = 100;
 
-        consensus.nMTPSwitchTime = SWITCH_TO_MTP_BLOCK_HEADER;
-        consensus.nMTPFiveMinutesStartBlock = SWITCH_TO_MTP_5MIN_BLOCK;
-        consensus.nDifficultyAdjustStartBlock = 0;
-        consensus.nFixedDifficulty = 0x2000ffff;
-        consensus.nPowTargetSpacingMTP = 5*60;
-        consensus.nInitialMTPDifficulty = 0x1c021e57;
-        consensus.nMTPRewardReduction = 2;
 
         consensus.nDisableZerocoinStartBlock = 1;
 
@@ -164,7 +140,7 @@ public:
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
         strSporkPubKey = "024faf77b973d9c858991c6e1d6b5865f6221831467691718108ebbb907e7d5ccd";
         //Stake stuff
-        consensus.nFirstPOSBlock = 52;//TODO akshaynexus :This needs to be decided
+        consensus.nFirstPOSBlock = 52;
         consensus.nStakeTimestampMask = 0xf; // 15
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
@@ -238,11 +214,13 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0x000000eca85e49b890583a0a5e66060ed055e2a55f46edc659a2dc3c2526622f"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
+        vSeeds.push_back(CDNSSeedData("mineit.io", "mineit.io", false));
+        vSeeds.push_back(CDNSSeedData("202.182.107.84", "202.182.107.84", false));
+        vSeeds.push_back(CDNSSeedData("idxseeder.mineit.io", "mineit.io", false));
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));
         vSeeds.push_back(CDNSSeedData("198.13.41.221", "198.13.41.221", false));
         vSeeds.push_back(CDNSSeedData("202.182.101.157", "202.182.101.157", false));
         vSeeds.push_back(CDNSSeedData("207.148.96.237", "207.148.96.237", false));
-        vSeeds.push_back(CDNSSeedData("202.182.107.84", "202.182.107.84", false));
 
         // Note that of those with the service bits flag, most only support a subset of possible options
         base58Prefixes[PUBKEY_ADDRESS] = std::vector < unsigned char > (1, 102);//Index address starts with 'i'
@@ -277,8 +255,6 @@ public:
         consensus.nModulusV2StartBlock = ZC_MODULUS_V2_START_BLOCK;
         consensus.nModulusV1MempoolStopBlock = ZC_MODULUS_V1_MEMPOOL_STOP_BLOCK;
         consensus.nModulusV1StopBlock = ZC_MODULUS_V1_STOP_BLOCK;
-        //LWMA related param
-        consensus.nZawyLwmaAveragingWindow = 36;
 
         // Sigma related values.
         consensus.nSigmaStartBlock = ZC_SIGMA_STARTING_BLOCK;
@@ -293,7 +269,7 @@ public:
         consensus.nMaxValueSigmaSpendPerBlock = ZC_SIGMA_VALUE_SPEND_LIMIT_PER_BLOCK;
         consensus.nMaxSigmaInputPerTransaction = ZC_SIGMA_INPUT_LIMIT_PER_TRANSACTION;
         consensus.nMaxValueSigmaSpendPerTransaction = ZC_SIGMA_VALUE_SPEND_LIMIT_PER_TRANSACTION;
-        consensus.nZerocoinToSigmaRemintWindowSize = 50000;
+        consensus.nZerocoinToSigmaRemintWindowSize = 0;
 
         // Dandelion related values.
         consensus.nDandelionEmbargoMinimum = DANDELION_EMBARGO_MINIMUM;
@@ -323,10 +299,6 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 51;
         consensus.nMajorityRejectBlockOutdated = 75;
         consensus.nMajorityWindow = 100;
-        consensus.nMinNFactor = 10;
-        consensus.nMaxNFactor = 30;
-        consensus.nChainStartTime = 1389306217;
-        consensus.BIP34Height = 21111;
         consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -353,11 +325,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1462060800; // May 1st 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1493596800; // May 1st 2017
 
-        // Deployment of MTP
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].bit = 12;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nStartTime = 1539172800 - 2*60;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nTimeout = 1539172800 + consensus.nMinerConfirmationWindow*2 * 5*60;
-
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x0");
 
@@ -378,21 +345,8 @@ public:
 
         // Indexnode params testnet
         consensus.nIndexnodePaymentsStartBlock = 2200;
-        //consensus.nIndexnodePaymentsIncreaseBlock = 360; // not used for now, probably later
-        //consensus.nIndexnodePaymentsIncreasePeriod = 650; // not used for now, probably later
-        //consensus.nSuperblockStartBlock = 61000;
-        //consensus.nBudgetPaymentsStartBlock = 60000;
-        //consensus.nBudgetPaymentsCycleBlocks = 50;
-        //consensus.nBudgetPaymentsWindowBlocks = 10;
         nMaxTipAge = 0x7fffffff; // allow mining on top of old blocks for testnet
 
-        consensus.nMTPSwitchTime = 1539172800;
-        consensus.nMTPFiveMinutesStartBlock = 0;
-        consensus.nDifficultyAdjustStartBlock = 100;
-        consensus.nFixedDifficulty = 0x2000ffff;
-        consensus.nPowTargetSpacingMTP = 5*60;
-        consensus.nInitialMTPDifficulty = 0x2000ffff;  // !!!! change it to the real value
-        consensus.nMTPRewardReduction = 2;
 
         consensus.nDisableZerocoinStartBlock = 50500;
 
@@ -500,8 +454,6 @@ public:
         consensus.nModulusV2StartBlock = ZC_MODULUS_V2_TESTNET_START_BLOCK;
         consensus.nModulusV1MempoolStopBlock = ZC_MODULUS_V1_TESTNET_MEMPOOL_STOP_BLOCK;
         consensus.nModulusV1StopBlock = ZC_MODULUS_V1_TESTNET_STOP_BLOCK;
-        //LWMA related param
-        consensus.nZawyLwmaAveragingWindow = 36;
         // Sigma related values.
         consensus.nSigmaStartBlock = ZC_SIGMA_TESTNET_STARTING_BLOCK;
         consensus.nSigmaPaddingBlock = ZC_SIGMA_TESTNET_PADDING_BLOCK;
@@ -545,8 +497,6 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
-        consensus.BIP34Hash = uint256();
         consensus.powLimit = uint256S("7fffff0000000000000000000000000000000000000000000000000000000000");
         consensus.nPowTargetTimespan = 60 * 60 * 1000; // 60 minutes between retargets
         consensus.nPowTargetSpacing = 1; // 10 minute blocks
@@ -564,9 +514,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 999999999999ULL;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].bit = 12;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nStartTime = INT_MAX;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MTP].nTimeout = 999999999999ULL;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -587,14 +534,6 @@ public:
         consensus.nModulusV1StopBlock = 140;
         consensus.nMultipleSpendInputsInOneTxStartBlock = 1;
         consensus.nDontAllowDupTxsStartBlock = 1;
-
-        consensus.nMTPSwitchTime = INT_MAX;
-        consensus.nMTPFiveMinutesStartBlock = 0;
-        consensus.nDifficultyAdjustStartBlock = 5000;
-        consensus.nFixedDifficulty = 0x2000ffff;
-        consensus.nPowTargetSpacingMTP = 5*60;
-        consensus.nInitialMTPDifficulty = 0x2070ffff;  // !!!! change it to the real value
-        consensus.nMTPRewardReduction = 2;
 
         consensus.nDisableZerocoinStartBlock = INT_MAX;
 

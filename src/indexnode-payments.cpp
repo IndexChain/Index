@@ -520,7 +520,7 @@ bool CIndexnodeBlockPayees::IsTransactionValid(const CTransaction &txNew, bool f
             nMaxSignatures = payee.GetVoteCount();
         }
     }
-    LogPrintf("nmaxsig = %s ",nMaxSignatures);
+    LogPrintf("nmaxsig = %s \n",nMaxSignatures);
     // if we don't have at least MNPAYMENTS_SIGNATURES_REQUIRED signatures on a payee, approve whichever is the longest chain
     if (nMaxSignatures < MNPAYMENTS_SIGNATURES_REQUIRED) return true;
 
@@ -550,7 +550,8 @@ bool CIndexnodeBlockPayees::IsTransactionValid(const CTransaction &txNew, bool f
         }
     }
 
-    if (!hasValidPayee) return true;
+    if (!hasValidPayee && nHeight < Params().GetConsensus().nDoubleTargetHeight) return true;
+
 
     LogPrintf("CIndexnodeBlockPayees::IsTransactionValid -- ERROR: Missing required payment, possible payees: '%s', amount: %f IDX\n", strPayeesPossible, (float) nIndexnodePayment / COIN);
     return false;

@@ -108,6 +108,8 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
         return UintToArith256(params.powLimit).GetCompact(); // genesis block
 
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+    const CBlockIndex* pindexPrevOutliner = pindex;
+
     if (pindexPrev->pprev == nullptr || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
         return UintToArith256(params.posLimit).GetCompact(); // first block
     const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
@@ -115,7 +117,6 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
         return UintToArith256(params.posLimit).GetCompact(); // second block
 
     int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-
     // peercoin: target change every block
     // peercoin: retarget with exponential moving toward target spacing
     CBigNum bnNew;
@@ -125,7 +126,11 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
         int64_t nInterval = params.nPowTargetTimespan / nTargetSpacing;
         bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
         bnNew /= ((nInterval + 1) * nTargetSpacing);
-        }
+        
+    }
+    bool fShouldDoubleTarget = pindexLast->nHeight + 1 > params.nDoubleTargetHeight && (pindex->GetBlockTime - pindex->pprev->GetBlockTime()) <= (params.nPowTargetSpacing - 15);
+    if(fShouldDoubleTarget)
+        bnNew *= 2;
 
     if (bnNew > CBigNum(params.powLimit))
         bnNew = CBigNum(params.powLimit);

@@ -149,8 +149,8 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         nBlockTime = GetAdjustedTime();
     }
 
-    fMTP = nBlockTime >= params.nMTPSwitchTime;
-    int nFeeReductionFactor = fMTP ? params.nMTPRewardReduction : 1;
+    fMTP = false;
+    int nFeeReductionFactor = 1;
     CAmount coin = COIN / nFeeReductionFactor;
 
     resetBlock();
@@ -478,7 +478,7 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         // get some info back to pass to getblocktemplate
         if (nHeight >= chainparams.GetConsensus().nIndexnodePaymentsStartBlock && !fProofOfStake) {
             const Consensus::Params &params = chainparams.GetConsensus();
-            CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(), nHeight > 0 && nBlockTime >= params.nMTPSwitchTime,nHeight);
+            CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
             coinbaseTx.vout[0].nValue -= indexnodePayment;
             FillBlockPayments(coinbaseTx, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
         }

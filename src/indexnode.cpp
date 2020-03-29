@@ -530,8 +530,7 @@ void CIndexnode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScanB
                 LogPrintf("ReadBlockFromDisk failed\n");
                 continue;
             }
-            bool fMTP = BlockReading->nHeight > 0 && BlockReading->nTime >= params.nMTPSwitchTime;
-            CAmount nIndexnodePayment = GetIndexnodePayment(params, fMTP,BlockReading->nHeight);
+            CAmount nIndexnodePayment = GetIndexnodePayment(params, false,BlockReading->nHeight);
 
             BOOST_FOREACH(CTxOut txout, block.vtx[0].vout)
             if (mnpayee == txout.scriptPubKey && nIndexnodePayment == txout.nValue) {

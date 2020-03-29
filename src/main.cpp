@@ -2896,10 +2896,6 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
     // before the first had been spent.  Since those coinbases are sufficiently buried its no longer possible to create further
     // duplicate transactions descending from the known pairs either.
     // If we're on the known chain at height greater than where BIP34 activated, we can save the db accesses needed for the BIP30 check.
-//    CBlockIndex *pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
-    //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
-//    fEnforceBIP30 = fEnforceBIP30 && (!pindexBIP34height ||
-//                                      !(pindexBIP34height->GetBlockHash() == chainparams.GetConsensus().BIP34Hash));
 
     bool fEnforceBIP30 = true;
     if (fEnforceBIP30) {
@@ -6644,7 +6640,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             nHeight = chainActive.Height();
         }
         //New update for masternode protocol change
-        int minPeerVersion = nHeight + 1 < chainparams.GetConsensus().nHeightPPCDiffRetarget ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
+        int minPeerVersion = nHeight + 1 < chainparams.GetConsensus().nDoubleTargetHeight ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
         if (pfrom->nVersion < minPeerVersion) {
             // disconnect from peers older than this proto version
             // LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);

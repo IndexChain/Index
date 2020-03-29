@@ -19,10 +19,7 @@ using namespace boost::chrono;
 uint32_t AvgBlockTime(){
     uint32_t avgBlockTime;
     Consensus::Params nParams = Params().GetConsensus();
-    if(chainActive.Tip()->nHeight >= nParams.nMTPFiveMinutesStartBlock)
-        avgBlockTime = nParams.nPowTargetSpacingMTP;
-    else
-        avgBlockTime = nParams.nPowTargetSpacing;
+    avgBlockTime = nParams.nPowTargetSpacing;
 
     return avgBlockTime;
 }

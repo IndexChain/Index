@@ -249,8 +249,7 @@ BITCOIN_CORE_H = \
   sigma.h \
   coin_containers.h \
   zerocoin_params.h \
-  addresstype.h \
-  mtpstate.h
+  addresstype.h
 
 obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
@@ -305,7 +304,6 @@ libbitcoin_server_a_SOURCES = \
   zerocoin.cpp \
   sigma.cpp \
   coin_containers.cpp \
-  mtpstate.cpp \
   $(BITCOIN_CORE_H)
 
 if ENABLE_CLIENTAPI
