@@ -78,6 +78,7 @@ struct Params {
     int64_t nPowTargetTimespan;
     int nHeightPPCDiffRetarget;
     int nDoubleTargetHeight;
+    int nStopdoubleDiffHeight;
     int nInstantSendKeepLock; // in blocks
     int nIndexnodeMinimumConfirmations;
     int nIndexnodePaymentsStartBlock;

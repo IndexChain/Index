@@ -93,6 +93,7 @@ public:
         consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
         consensus.nHeightPPCDiffRetarget = 14900;//Use Peercoin's per block retarget after this block
         consensus.nDoubleTargetHeight = 19040;//Double Difficulty for all blocks after this height
+        consensus.nStopdoubleDiffHeight = 19062;//stop the doublediff which caused a reset in diff.
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
@@ -112,7 +113,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1611840329; // November 15th, 2017.
 
         // The best chain should have at least this much work
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000009290b1227d544");
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000009f1739f07e062");
 
         consensus.nCheckBugFixedAtBlock = ZC_CHECK_BUG_FIXED_AT_BLOCK;
         consensus.nIndexnodePaymentsBugFixedAtBlock = ZC_INDEXNODE_PAYMENT_BUG_FIXED_AT_BLOCK;
@@ -240,8 +241,9 @@ public:
         nMaxPoWBlocks = 101;
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
-                    (0, genesis.GetHash()),
-                ZC_GENESIS_BLOCK_TIME, // * UNIX timestamp of last checkpoint block
+                    (0, genesis.GetHash())
+                    (19061,uint256S("0x46f4ec70dc9c2917520106c52c0c1bd3958807bf9c6faed13675d7f9f04823cd")),
+                1585536912, // * UNIX timestamp of last checkpoint block
                 2,    // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)
                 1440     // * estimated number of transactions per day after checkpoint
