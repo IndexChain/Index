@@ -199,11 +199,12 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     currentWatchOnlyBalance = watchOnlyBalance;
     currentWatchUnconfBalance = watchUnconfBalance;
     currentWatchImmatureBalance = watchImmatureBalance;
+    CAmount totalbal = balance + unconfirmedBalance + immatureBalance + currentSigmaBalance + currentSigmaUnconfirmedBalance + currentStake;
     ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, currentBalance, false, BitcoinUnits::separatorAlways));
     ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, unconfirmedBalance, false, BitcoinUnits::separatorAlways));
     ui->labelStakeBalance->setText(BitcoinUnits::formatWithUnit(unit, currentStake, false, BitcoinUnits::separatorAlways));
     ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, immatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance + currentSigmaBalance + currentSigmaUnconfirmedBalance + currentStake, false, BitcoinUnits::separatorAlways));
+    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, (totalbal > 7446) ? totalbal:0, false, BitcoinUnits::separatorAlways));
     ui->labelWatchAvailable->setText(BitcoinUnits::formatWithUnit(unit, watchOnlyBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(unit, watchUnconfBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(unit, watchImmatureBalance, false, BitcoinUnits::separatorAlways));

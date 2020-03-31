@@ -76,9 +76,7 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
-    int nHeightPPCDiffRetarget;
-    int nDoubleTargetHeight;
-    int nStopdoubleDiffHeight;
+    int nDgwPastBlocks;
     int nInstantSendKeepLock; // in blocks
     int nIndexnodeMinimumConfirmations;
     int nIndexnodePaymentsStartBlock;

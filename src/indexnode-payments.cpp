@@ -550,9 +550,6 @@ bool CIndexnodeBlockPayees::IsTransactionValid(const CTransaction &txNew, bool f
         }
     }
 
-    if (!hasValidPayee && nHeight < Params().GetConsensus().nDoubleTargetHeight) return true;
-
-
     LogPrintf("CIndexnodeBlockPayees::IsTransactionValid -- ERROR: Missing required payment, possible payees: '%s', amount: %f IDX\n", strPayeesPossible, (float) nIndexnodePayment / COIN);
     return false;
 }

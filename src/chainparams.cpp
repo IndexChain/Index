@@ -90,10 +90,8 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         //static const int64 nInterval = nTargetTimespan / nTargetSpacing;
         consensus.nPowTargetTimespan = 40 * 60; // 40 minutes between retargets 
-        consensus.nPowTargetSpacing = 1 * 60; // 1 minute blocks
-        consensus.nHeightPPCDiffRetarget = 14900;//Use Peercoin's per block retarget after this block
-        consensus.nDoubleTargetHeight = 19040;//Double Difficulty for all blocks after this height
-        consensus.nStopdoubleDiffHeight = 19062;//stop the doublediff which caused a reset in diff.
+        consensus.nPowTargetSpacing = 120; // alternate PoW/PoS every one minute
+        consensus.nDgwPastBlocks = 30; // number of blocks to average in Dark Gravity Wave
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 10260; // 95% of 10800
@@ -113,7 +111,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1611840329; // November 15th, 2017.
 
         // The best chain should have at least this much work
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000009f1739f07e062");
+        consensus.nMinimumChainWork = uint256S("0x0");
 
         consensus.nCheckBugFixedAtBlock = ZC_CHECK_BUG_FIXED_AT_BLOCK;
         consensus.nIndexnodePaymentsBugFixedAtBlock = ZC_INDEXNODE_PAYMENT_BUG_FIXED_AT_BLOCK;
@@ -151,10 +149,10 @@ public:
        `  * a large 32-bit integer with any alignment.
          */
         //btzc: update index pchMessage
-        pchMessageStart[0] = 0xe4;
-        pchMessageStart[1] = 0xd5;
-        pchMessageStart[2] = 0xf2;
-        pchMessageStart[3] = 0x4c;
+        pchMessageStart[0] = 0xe5;
+        pchMessageStart[1] = 0xd3;
+        pchMessageStart[2] = 0xf7;
+        pchMessageStart[3] = 0x4d;
         nDefaultPort = 7082;
         nPruneAfterHeight = 100000;
         /**
@@ -171,7 +169,7 @@ public:
         extraNonce[1] = 0x3a;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 8453308, 0x1e00ffff, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 48351, 0x1e00ffff, 2, 0 * COIN, extraNonce);
         // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
         consensus.hashGenesisBlock = genesis.GetHash();    
@@ -212,11 +210,11 @@ public:
         // std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
         // std::cout << "\n";
         // std::exit(0);
-        assert(consensus.hashGenesisBlock == uint256S("0x000000eca85e49b890583a0a5e66060ed055e2a55f46edc659a2dc3c2526622f"));
+        assert(consensus.hashGenesisBlock == uint256S("0x000000263aa7c2332ccdaa9f5ae5b9008c685c6c263020d2529432ed5bd77b32"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
-        vSeeds.push_back(CDNSSeedData("202.182.107.84", "202.182.107.84", false));
         vSeeds.push_back(CDNSSeedData("mineit.io", "mineit.io", false));
+        vSeeds.push_back(CDNSSeedData("202.182.107.84", "202.182.107.84", false));
         vSeeds.push_back(CDNSSeedData("idxseeder.mineit.io", "idxseeder.ineit.io", false));
         vSeeds.push_back(CDNSSeedData("45.76.196.198", "45.76.196.198", false));
         vSeeds.push_back(CDNSSeedData("198.13.41.221", "198.13.41.221", false));
@@ -237,13 +235,12 @@ public:
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
         fTestnetToBeDeprecatedFieldRPC = false;
-        nConsecutivePoWHeight = 1000;
-        nMaxPoWBlocks = 101;
+        nConsecutivePoWHeight = 40000;
+        nMaxPoWBlocks = 1000;
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
-                    (0, genesis.GetHash())
-                    (19061,uint256S("0x46f4ec70dc9c2917520106c52c0c1bd3958807bf9c6faed13675d7f9f04823cd")),
-                1585536912, // * UNIX timestamp of last checkpoint block
+                    (0, genesis.GetHash()),
+                ZC_GENESIS_BLOCK_TIME, // * UNIX timestamp of last checkpoint block
                 2,    // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)
                 1440     // * estimated number of transactions per day after checkpoint
@@ -373,7 +370,7 @@ public:
         extraNonce[1] = 0x00;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 1232921, 504365040, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 215095, 504365040, 2, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
         // uint32_t nGenesisTime = ZC_GENESIS_BLOCK_TIME;
         // arith_uint256 test;
@@ -417,7 +414,7 @@ public:
         // //btzc: update testnet index hashGenesisBlock and hashMerkleRoot
         
         assert(consensus.hashGenesisBlock ==
-                uint256S("0x00000727408c84b62f7a59748422a1ad7954667a2284149d803e3dfd95a0543d"));
+                uint256S("0x00000bab1c62ca4063a0b1c2f0562cf6427e047333359106b8799cfa923c79f3"));
         assert(genesis.hashMerkleRoot ==
                 uint256S("3f105b7ee0068c963cab5e889bcec419d82646b9060905f559eb8c4c1975f4c6"));
         vFixedSeeds.clear();
@@ -441,7 +438,7 @@ public:
 
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
-                    (0, uint256S("0x00000727408c84b62f7a59748422a1ad7954667a2284149d803e3dfd95a0543d")),
+                    (0, uint256S("0x00000bab1c62ca4063a0b1c2f0562cf6427e047333359106b8799cfa923c79f3")),
                     ZC_GENESIS_BLOCK_TIME,
                     0,
                     100.0
@@ -556,7 +553,7 @@ public:
         extraNonce[1] = 0x00;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
-        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 0, 0x207fffff, 2, 0 * COIN, extraNonce);
+        genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 5, 0x207fffff, 2, 0 * COIN, extraNonce);
         consensus.hashGenesisBlock = genesis.GetHash();
         // uint32_t nGenesisTime = ZC_GENESIS_BLOCK_TIME;
         // arith_uint256 test;
@@ -600,7 +597,7 @@ public:
     //    std::cout << "index regtest hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
         //btzc: update testnet index hashGenesisBlock and hashMerkleRoot
         assert(consensus.hashGenesisBlock ==
-              uint256S("0x653484af743b1251559a61cfe9d7786c78b145b154fee53bb06b01000ea107b9"));
+              uint256S("0x5b3c937d388c0d1682d5ce5a6483a0f4cdd5c398346432ad6a4a54f6e4cb084d"));
         assert(genesis.hashMerkleRoot ==
               uint256S("3f105b7ee0068c963cab5e889bcec419d82646b9060905f559eb8c4c1975f4c6"));
         //Disable consecutive checks
@@ -619,7 +616,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-                (0, uint256S("0x653484af743b1251559a61cfe9d7786c78b145b154fee53bb06b01000ea107b9")),
+                (0, uint256S("0x5b3c937d388c0d1682d5ce5a6483a0f4cdd5c398346432ad6a4a54f6e4cb084d")),
                 0,
                 0,
                 0

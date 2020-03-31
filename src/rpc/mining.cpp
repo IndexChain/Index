@@ -20,6 +20,7 @@
 #include "rpc/server.h"
 #include "txmempool.h"
 #include "util.h"
+#include "spork.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
 #include "indexnode-sync.h"
@@ -44,18 +45,18 @@ extern CTxMemPool stempool;
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
-UniValue GetNetworkHashPS(int lookup, int height) {
+static UniValue GetNetworkHashPS(int lookup, int height) {
     CBlockIndex *pb = chainActive.Tip();
 
     if (height >= 0 && height < chainActive.Height())
         pb = chainActive[height];
 
-    if (pb == NULL || !pb->nHeight)
+    if (pb == nullptr || !pb->nHeight)
         return 0;
 
     // If lookup is -1, then use blocks since last difficulty change.
     if (lookup <= 0)
-        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+        lookup = 1;
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
@@ -80,6 +81,7 @@ UniValue GetNetworkHashPS(int lookup, int height) {
 
     return workDiff.getdouble() / timeDiff;
 }
+
 
 UniValue getnetworkhashps(const UniValue& params, bool fHelp)
 {
@@ -609,12 +611,12 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     if (strMode != "template")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
 
-    if (vNodes.empty())
+    if (vNodes.empty() && chainActive.Tip()->nHeight > 100)
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Index is not connected!");
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Index is downloading blocks...");
 
-    if (!indexnodeSync.IsSynced())
+    if (!indexnodeSync.IsSynced() && chainActive.Tip()->nHeight > 500)
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Index Core is syncing with network...");
 
     static unsigned int nTransactionsUpdatedLast;
@@ -842,7 +844,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     }
     result.push_back(Pair("indexnode", indexnodeObj));
     result.push_back(Pair("indexnode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nIndexnodePaymentsStartBlock));
-//    result.push_back(Pair("indexnode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
+    result.push_back(Pair("indexnode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_INDEXNODE_PAYMENT_ENFORCEMENT)));
 
     const struct BIP9DeploymentInfo& segwit_info = VersionBitsDeploymentInfo[Consensus::DEPLOYMENT_SEGWIT];
     if (!pblocktemplate->vchCoinbaseCommitment.empty() && setClientRules.find(segwit_info.name) != setClientRules.end()) {

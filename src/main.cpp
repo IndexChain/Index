@@ -2103,10 +2103,10 @@ bool ReadBlockHeaderFromDisk(CBlock &block, const CDiskBlockPos &pos) {
 }
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, int nTime) {
-    bool fPremineBlock = nHeight > 0 && nHeight <= 51;
+    bool fPremineBlock = nHeight ==2;
     int nYearBlocksinmin = 525600;
-    bool phaseinitaldiff = nHeight > 51 && nHeight <= 30000;
-    bool phaseyear1 = nHeight > 30000 && nHeight <= nYearBlocksinmin;
+    bool phaseinitaldiff = nHeight > 2 && nHeight <= 5000;
+    bool phaseyear1 = nHeight > 5000 && nHeight <= nYearBlocksinmin;
     bool phaseyear2 = nHeight > nYearBlocksinmin && nHeight <= (nYearBlocksinmin * 2);
     bool phaseyear3 = nHeight > (nYearBlocksinmin * 2) && nHeight <= (nYearBlocksinmin * 3);
     bool phaseyear4 = nHeight > (nYearBlocksinmin * 3) && nHeight <= (nYearBlocksinmin * 4);
@@ -2115,10 +2115,10 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams, i
     bool phaseyear7 = nHeight > (nYearBlocksinmin * 6) && nHeight <= (nYearBlocksinmin * 7);
 
     // Genesis block is 0 coin
-    if (nHeight == 0)
+    if (nHeight < 2)
         return 0 * COIN;
     else if (fPremineBlock)
-        return 6000000.1 * COIN;//0.1 Extra for The Miners who mine it
+        return 306001473.12730116 * COIN;//Snapshot sending block
     else if (phaseinitaldiff)
         return 0.1 * COIN;
     else if (phaseyear1)
@@ -4452,8 +4452,8 @@ static bool CheckBlockSignature(const CBlock& block)
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);
     fCheckPOW = block.nNonce !=0 && fCheckPOW;
-    if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
-            if (fCheckPOW && !CheckProofOfWork(block.GetPoWHash(), block.nBits, consensusParams)) {
+    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
+            if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
                return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
         }
     }
@@ -4698,10 +4698,8 @@ ContextualCheckBlockHeader(const CBlockHeader &block, CValidationState &state, c
                            CBlockIndex *const pindexPrev, int64_t nAdjustedTime, bool isTestBlockValidity) {
     bool fProofOfStakeBlock = block.nNonce == 0;
 	// Check proof of work
-    if (!fProofOfStakeBlock && block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams,fProofOfStakeBlock))
         return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
-    if(fProofOfStakeBlock && block.nBits != GetNextTargetRequired(pindexPrev, &block, consensusParams,/** checkpos**/true))
-        return state.DoS(0, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of stakehash");
 
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
@@ -6640,7 +6638,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             nHeight = chainActive.Height();
         }
         //New update for masternode protocol change
-        int minPeerVersion = nHeight + 1 < chainparams.GetConsensus().nStopdoubleDiffHeight ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
+        int minPeerVersion = nHeight + 1 < 1 ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
         if (pfrom->nVersion < minPeerVersion) {
             // disconnect from peers older than this proto version
             // LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);

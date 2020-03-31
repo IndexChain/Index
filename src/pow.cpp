@@ -34,58 +34,54 @@ double GetDifficultyHelper(unsigned int nBits) {
     return dDiff;
 }
 
-unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params,bool fProofOfStake = false ) {
-    /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
+unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Params& params, bool fProofOfStake) {
+    /* current difficulty formula, veil - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
 
-    int64_t nPastBlocks = 24;
-
+    const CBlockIndex *pindex = pindexLast;
+    const CBlockIndex* pindexLastMatchingProof = nullptr;
+    arith_uint256 bnPastTargetAvg = 0;
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
-    if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
+    if (!pindexLast || pindexLast->nHeight < params.nDgwPastBlocks) {
         return bnPowLimit.GetCompact();
     }
 
-    if (params.fPowAllowMinDifficultyBlocks) {
-        // recent block is more than 2 hours old
-        if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + 2 * 60 * 60) {
+    /** Custom PoS Start Diff reset for PoS start and second pos block from Peercoin**/
+    if (pindexLast->pprev == nullptr || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
+        return UintToArith256(params.posLimit).GetCompact(); // first block
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexLast->pprev, fProofOfStake);
+    if (pindexPrevPrev->pprev == nullptr || pindexLast->nHeight  + 1 == Params().GetConsensus().nFirstPOSBlock + 1)
+        return UintToArith256(params.posLimit).GetCompact(); // second block
+
+    unsigned int nCountBlocks = 0;
+    while (nCountBlocks < params.nDgwPastBlocks) {
+        // Ran out of blocks, return pow limit
+        if (!pindex)
             return bnPowLimit.GetCompact();
+
+        // Only consider PoW or PoS blocks but not both
+        if (pindex->IsProofOfStake() != fProofOfStake) {
+            pindex = pindex->pprev;
+            continue;
+        } else if (!pindexLastMatchingProof) {
+            pindexLastMatchingProof = pindex;
         }
-        // recent block is more than 10 minutes old
-        if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 4) {
-            arith_uint256 bnNew = arith_uint256().SetCompact(pindexLast->nBits) * 10;
-            if (bnNew > bnPowLimit) {
-                bnNew = bnPowLimit;
-            }
-            return bnNew.GetCompact();
-        }
-    }
 
-    const CBlockIndex *pindex = pindexLast;
-    //Get last block of specific type,can be either PoW or PoS
-    pindex = GetLastBlockIndex(pindexLast,fProofOfStake);
-
-    arith_uint256 bnPastTargetAvg;
-
-    for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
         arith_uint256 bnTarget = arith_uint256().SetCompact(pindex->nBits);
-        if (nCountBlocks == 1) {
-            bnPastTargetAvg = bnTarget;
-        } else {
-            // NOTE: that's not an average really...
-            bnPastTargetAvg = (bnPastTargetAvg * nCountBlocks + bnTarget) / (nCountBlocks + 1);
-        }
+        bnPastTargetAvg = (bnPastTargetAvg * nCountBlocks + bnTarget) / (nCountBlocks + 1);
 
-        if(nCountBlocks != nPastBlocks) {
-            assert(pindex->pprev); // should never fail
-            pindex = GetLastBlockIndex(pindex->pprev,fProofOfStake);
-        }
+        if (++nCountBlocks != params.nDgwPastBlocks)
+            pindex = pindex->pprev;
     }
 
     arith_uint256 bnNew(bnPastTargetAvg);
 
-    int64_t nActualTimespan = pindexLast->GetBlockTime() - pindex->GetBlockTime();
-    // NOTE: is this accurate? nActualTimespan counts it for (nPastBlocks - 1) blocks only...
-    int64_t nTargetTimespan = nPastBlocks * params.nPowTargetSpacing;
+    //Should only happen on the first PoS block
+    if (pindexLastMatchingProof)
+        pindexLastMatchingProof = pindexLast;
+
+    int64_t nActualTimespan = pindexLastMatchingProof->GetBlockTime() - pindex->GetBlockTime();
+    int64_t nTargetTimespan = params.nDgwPastBlocks * params.nPowTargetSpacing;
 
     if (nActualTimespan < nTargetTimespan/3)
         nActualTimespan = nTargetTimespan/3;
@@ -102,6 +98,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
 
     return bnNew.GetCompact();
 }
+
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, bool fProofOfStake)
 {
     if (pindexLast == nullptr)
@@ -127,11 +124,6 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
         bnNew /= ((nInterval + 1) * nTargetSpacing);
         
     }
-    bool fShouldDoubleTarget = pindexLast->nHeight + 1 > params.nDoubleTargetHeight && 
-    (chainActive.Tip()->GetBlockTime() - chainActive.Tip()->pprev->GetBlockTime()) <= (params.nPowTargetSpacing - 25) && 
-    pindexLast->nHeight + 1 < params.nStopdoubleDiffHeight;
-    if(fShouldDoubleTarget)
-        bnNew *= 2;
 
     if (bnNew > CBigNum(params.powLimit))
         bnNew = CBigNum(params.powLimit);
@@ -140,18 +132,15 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHe
 }
 
 // Index GetNextWorkRequired
-unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params) {
+unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params,bool fProofOfStake) {
+    assert(pindexLast != nullptr);
+
     // Special rule for regtest: we never retarget.
     if (params.fPowNoRetargeting) {
         return pindexLast->nBits;
     }
 
-    else if(pindexLast->nHeight + 1 > params.nHeightPPCDiffRetarget){
-        //Use peercoin diff retarget after this height to ensure 60 sec avg blocktimes
-        return GetNextTargetRequired(pindexLast,pblock,params,false);
-    }
-
-    return DarkGravityWave(pindexLast, pblock, params,false);
+    return DarkGravityWave(pindexLast, params,fProofOfStake);
 
 }
 
