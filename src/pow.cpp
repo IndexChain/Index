@@ -45,14 +45,7 @@ unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Par
     if (!pindexLast || pindexLast->nHeight < params.nDgwPastBlocks) {
         return bnPowLimit.GetCompact();
     }
-
-    /** Custom PoS Start Diff reset for PoS start and second pos block from Peercoin**/
-    if (pindexLast->pprev == nullptr || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
-        return UintToArith256(params.posLimit).GetCompact(); // first block
-    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexLast->pprev, fProofOfStake);
-    if (pindexPrevPrev->pprev == nullptr || pindexLast->nHeight  + 1 == Params().GetConsensus().nFirstPOSBlock + 1)
-        return UintToArith256(params.posLimit).GetCompact(); // second block
-
+    
     unsigned int nCountBlocks = 0;
     while (nCountBlocks < params.nDgwPastBlocks) {
         // Ran out of blocks, return pow limit
