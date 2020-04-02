@@ -2284,12 +2284,6 @@ void static InvalidChainFound(CBlockIndex *pindexNew) {
               log(pindexNew->nChainWork.getdouble()) / log(2.0), DateTimeStrFormat("%Y-%m-%d %H:%M:%S",
                                                                                    pindexNew->GetBlockTime()));
     CBlockIndex *tip = chainActive.Tip();
-    if (!tip) {
-        int x = 5;
-        ++x;
-        --x;
-        //debugging.
-    }
     assert(tip);
     LogPrintf("%s:  current best=%s  height=%d  log2_work=%.8g  date=%s\n", __func__,
               tip->GetBlockHash().ToString(), chainActive.Height(), log(tip->nChainWork.getdouble()) / log(2.0),
@@ -2854,7 +2848,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
          if(!CheckStakeBlockTimestamp(block.nTime))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake time check failed"),
                                  REJECT_INVALID, "bad-cs-timecheck");
-        if (!CheckProofOfStake(mapBlockIndex[block.hashPrevBlock], block.vtx[1], block.nTime, block.nBits, state))
+        if (!CheckProofOfStake(pindex->pprev, block.vtx[1], block.nTime, block.nBits, state))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake check failed"),
                                  REJECT_INVALID, "bad-cs-proofhash");
         
