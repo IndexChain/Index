@@ -161,8 +161,21 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 }
                 if (wtx.IsCoinBase())
                 {
-                    // Generated
-                    sub.type = TransactionRecord::Generated;
+                    if (isminetype mine = wallet->IsMine(wtx.vout[0])) {
+                        // Generated
+                        sub.type = TransactionRecord::Generated;
+                    }
+                    else{
+                        CTxDestination destMN;
+                        int nIndexMN = wtx.vout.size() - 1;
+                        if (ExtractDestination(wtx.vout[nIndexMN].scriptPubKey, destMN) && IsMine(*wallet, destMN)) {
+                            isminetype mine = wallet->IsMine(wtx.vout[nIndexMN]);
+                            sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
+                            sub.type = TransactionRecord::INReward;
+                            sub.address = CBitcoinAddress(destMN).ToString();
+                            sub.credit = wtx.vout[nIndexMN].nValue;
+                        }
+                    }
                 } else if (wtx.IsCoinStake()) {
                     if (isminetype mine = wallet->IsMine(wtx.vout[1])) {
                         // Stake reward
