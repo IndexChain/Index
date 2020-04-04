@@ -526,10 +526,8 @@ public:
         }
 
 	    // PoS
-        if (IsProofOfStake()) {
-            LogPrintf("CDiskBlockIndex::SerializationOp(): proof-of-stake block found at height=%u\n", nHeight);
+        if (IsProofOfStake())
             READWRITE(nStakeModifier);
-        }
 
         nDiskBlockVersion = nVersion;
     }
