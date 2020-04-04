@@ -72,6 +72,7 @@ namespace {
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
 {
     uint256 txid = tx.GetHash();
+    entry.push_back(Pair("iscoinstake",tx.IsCoinStake()));
     entry.push_back(Pair("txid", txid.GetHex()));
     entry.push_back(Pair("hash", tx.GetWitnessHash().GetHex()));
     entry.push_back(Pair("size", (int)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION)));

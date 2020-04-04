@@ -8,3 +8,5 @@
 - Add Waiting for new block to progress text if connected peers are > 1 instead of no block source available.
 - Fix mention of zcoin in encryption text.
 - Fix getstake to use ismine type from ISMINE_ALL to ISMINE_SPENDABLE (Should fix the fake balance issue some users reported).
+- Add fallback for checkproofofstake to mapBlockIndex.
+- Add iscoinstake to getrawtranasction and raw tx decode commands to differentiate coinstakes vs other txes.
