@@ -895,6 +895,9 @@ void BitcoinGUI::setNumConnections(int count)
     default: icon = ":/icons/connect_4"; break;
     }
     labelConnectionsIcon->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    if(progressBarLabel->text() == "No block source available..." && count > 1){
+        progressBarLabel->setText("Waiting for new block...");
+    }
     labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Index network", "", count));
 }
 
@@ -929,8 +932,10 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
             if (header) {
                 return;
             }
+            if(vNodes.size() == 0){
             // Case: not Importing, not Reindexing and no network connection
             progressBarLabel->setText(tr("No block source available..."));
+            }
             break;
     }
 
