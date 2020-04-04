@@ -1,7 +1,8 @@
-This release is a non-mandatory but recommended update 
-This release includes the following changes:
+# Release v0.13.10.2 : <b>non-mandatory</b> but <b>recommended</b> update 
+## Changes in this release:
 - Fix connection loss bug on restart of wallet.
 - Add filter for Indexnode rewards and stakes.
 - Add more inital seeds to sync and connect to.
 - Change text in generated/staked block txes accordingly.
 - Changed copyright year to 2020.
+- Add Waiting for new block to progress text if connected peers are > 1 instead of no block source available.
