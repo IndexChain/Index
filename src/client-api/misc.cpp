@@ -215,7 +215,7 @@ UniValue stop(Type type, const UniValue& data, const UniValue& auth, bool fHelp)
     if (fHelp)
         throw runtime_error(
             "stop\n"
-            "\nStop Zcoin server.");
+            "\nStop IndexChain server.");
     // Event loop will exit after current HTTP requests have been handled, so
     // this reply will get back to the client.
     StartShutdown();
