@@ -1282,7 +1282,6 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
-        labelEncryptionIcon->setStyleSheet("background-color: rgba(255, 165, 0, 0);");//TODO akshaynexus:check and change this color/css
         encryptWalletAction->setChecked(true);
         unlockWalletForStakingAction->setChecked(true);
         lockWalletAction->setChecked(false);
@@ -1295,7 +1294,6 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b> for staking only"));
-        labelEncryptionIcon->setStyleSheet("background-color: rgba(124, 252, 0, 255);");//TODO akshaynexus:check and change this color/css
         encryptWalletAction->setChecked(true);
         unlockWalletForStakingAction->setChecked(true);
         lockWalletAction->setChecked(false);
@@ -1308,7 +1306,6 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
-        labelEncryptionIcon->setStyleSheet("background-color: rgba(255, 165, 0, 0);");//TODO akshaynexus:check and change this color/css
         encryptWalletAction->setChecked(true);
         unlockWalletForStakingAction->setChecked(false);
         lockWalletAction->setChecked(true);

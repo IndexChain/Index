@@ -544,15 +544,14 @@ void WalletView::changePassphrase()
     dlg.exec();
 }
 
-void WalletView::unlockWallet(bool iconClicked)
+void WalletView::unlockWallet(bool iconClicked,bool fStaking)
 {
     if(!walletModel)
         return;
     // Unlock wallet when requested by wallet model
-	if (walletModel->getEncryptionStatus() == WalletModel::Locked
-        || (!iconClicked && walletModel->getEncryptionStatus() == WalletModel::UnlockedForStaking))
+	if (walletModel->getEncryptionStatus() == WalletModel::Locked || (!iconClicked && walletModel->getEncryptionStatus() == WalletModel::UnlockedForStaking))
             {
-        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        AskPassphraseDialog dlg(fStaking ? AskPassphraseDialog::UnlockManual : AskPassphraseDialog::Unlock, this);
         dlg.setModel(walletModel);
         dlg.exec();
     }
