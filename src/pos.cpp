@@ -150,7 +150,7 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
 
     unsigned int nTime = pindexPrev->GetBlockTime();
 
-    if (!CheckStakeKernelHash(pindexPrev, nBits, nTime, new CCoins(txPrev, pindexPrev->nHeight), txin.prevout, nBlockTime, fDebug) && indexnodeSync.IsBlockchainSynced())
+    if (!CheckStakeKernelHash(pindexPrev, nBits, nTime, new CCoins(txPrev, pindexPrev->nHeight), txin.prevout, nBlockTime, fDebug))
        return state.Invalid(false, REJECT_INVALID,"CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString()); // may occur during initial download or if behind on block chain sync
     return true;
 }
