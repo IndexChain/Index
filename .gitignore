@@ -45,6 +45,7 @@ src/univalue/gen
 
 src/qt/*.moc
 src/qt/moc_*.cpp
+src/qt/hybridui/moc_*.cpp
 src/qt/forms/ui_*.h
 
 src/qt/test/moc*.cpp
