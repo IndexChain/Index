@@ -841,13 +841,14 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
     if (setCoins.empty())
         return false;
-/*
+
     if (stakeCache.size() > setCoins.size() + 100){
         //Determining if the cache is still valid is harder than just clearing it when it gets too big, so instead just clear it
         //when it has more than 100 entries more than the actual setCoins.
         stakeCache.clear();
     }
-    if (GetBoolArg("-stakecache", true)) {
+
+    if (GetBoolArg("-stakecache", indexnodeSync.IsBlockchainSynced())) {
         BOOST_FOREACH(const PAIRTYPE(const CWalletTx*, unsigned int)& pcoin, setCoins)
         {
             boost::this_thread::interruption_point();
@@ -855,7 +856,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             CacheKernel(stakeCache, prevoutStake, pindexPrev); //this will do a 2 disk loads per op
         }
     }
-*/
+
     int64_t nCredit = 0;
     CScript scriptPubKeyKernel;
     BOOST_FOREACH(const PAIRTYPE(const CWalletTx*, unsigned int)& pcoin, setCoins)

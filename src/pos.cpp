@@ -20,6 +20,7 @@
 #include "primitives/transaction.h"
 #include <stdio.h>
 #include "util.h"
+#include "indexnode-sync.h"
 
 // Stake Modifier (hash modifier of proof-of-stake):
 // The purpose of stake modifier is to prevent a txout (coin) owner from
@@ -148,9 +149,8 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
 
     unsigned int nTime = pindexPrev->GetBlockTime();
 
-    if (!CheckStakeKernelHash(pindexPrev, nBits, nTime, new CCoins(txPrev, pindexPrev->nHeight), txin.prevout, nBlockTime, fDebug)
-     && !CheckStakeKernelHash(mapBlockIndexFallback, nBits, mapBlockIndexFallback->GetBlockTime(), new CCoins(txPrev, mapBlockIndexFallback->nHeight), txin.prevout, nBlockTime, fDebug)) 
-       return state.DoS(1, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
+    if (!CheckStakeKernelHash(pindexPrev, nBits, nTime, new CCoins(txPrev, pindexPrev->nHeight), txin.prevout, nBlockTime, fDebug) && indexnodeSync.IsBlockchainSynced())
+       return state.Invalid(false, REJECT_INVALID,"CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString()); // may occur during initial download or if behind on block chain sync
 
     return true;
 }
@@ -183,6 +183,7 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, co
     auto it=cache.find(prevout);
 
     *pBlockTime = pindexPrev->GetBlockTime();
+    if(nTime < *pBlockTime) return false;
 
     if(it == cache.end()) {
         CTransaction txPrev;
@@ -210,7 +211,6 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, co
             // Cache could potentially cause false positive stakes in the event of deep reorgs, so check without cache also
             return CheckKernel(pindexPrev, nBits, nTime, prevout);
         }
-        
         LogPrintf("CheckKernel()::CheckStakeKernelHash(): pBlockTime=%u, nTime=%u\n", *pBlockTime, nTime);
         return CheckStakeKernelHash(pindexPrev, nBits, *pBlockTime, new CCoins(stake.txPrev, pindexPrev->nHeight), prevout, nTime);
     }

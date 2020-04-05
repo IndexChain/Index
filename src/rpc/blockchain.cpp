@@ -993,6 +993,10 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
             "{\n"
             "  \"chain\": \"xxxx\",        (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"blocks\": xxxxxx,         (numeric) the current number of blocks processed in the server\n"
+            "  \"lastpowblock\": xxxxxx,   (numeric) The last PoW Block in Block index\n"
+            "  \"lastpowdiff\": xxxxxx,    (numeric) The last PoW Block difficulty in Block index\n"
+            "  \"lastposblock\": xxxxxx,   (numeric) The last PoS Block in Block index\n"
+            "  \"lastposdiff\": xxxxxx,    (numeric) The last PoS Block difficulty in Block index\n"
             "  \"headers\": xxxxxx,        (numeric) the current number of headers we have validated\n"
             "  \"bestblockhash\": \"...\", (string) the hash of the currently best block\n"
             "  \"difficulty\": xxxxxx,     (numeric) the current difficulty\n"
@@ -1033,6 +1037,10 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("chain",                 Params().NetworkIDString()));
     obj.push_back(Pair("blocks",                (int)chainActive.Height()));
+    obj.push_back(Pair("lastpowblock",          GetLastBlockIndex(chainActive.Tip(), false)->nHeight));
+    obj.push_back(Pair("lastpowdiff",           GetDifficulty(GetLastBlockIndex(chainActive.Tip(), false))));
+    obj.push_back(Pair("lastposblock",          GetLastBlockIndex(chainActive.Tip(), true)->nHeight));
+    obj.push_back(Pair("lastposdiff",           GetDifficulty(GetLastBlockIndex(chainActive.Tip(), true))));
     obj.push_back(Pair("headers",               pindexBestHeader ? pindexBestHeader->nHeight : -1));
     obj.push_back(Pair("bestblockhash",         chainActive.Tip()->GetBlockHash().GetHex()));
     obj.push_back(Pair("difficulty",            (double)GetDifficulty()));
