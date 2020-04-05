@@ -447,7 +447,7 @@ void BitcoinGUI::createActions()
     unlockWalletForStakingAction->setStatusTip(tr("Unlock your wallet for staking, sending functions are disabled in this mode"));
     unlockWalletForStakingAction->setCheckable(true);
     lockWalletAction =new QAction(platformStyle->TextColorIcon(":/icons/lock_closed"), tr("&Lock Wallet..."), this);
-    lockWalletAction->setStatusTip(tr("Lock yout wallet if currently unlocked for staking"));
+    lockWalletAction->setStatusTip(tr("Lock your wallet if currently unlocked for staking"));
     lockWalletAction->setCheckable(true);
     backupWalletAction = new QAction(platformStyle->TextColorIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
     backupWalletAction->setStatusTip(tr("Backup wallet to another location"));
