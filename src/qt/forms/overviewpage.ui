@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>642</width>
-    <height>342</height>
+    <width>683</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -498,6 +498,9 @@
               </property>
               <property name="text">
                <string>0.000 000 00 IDX</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>

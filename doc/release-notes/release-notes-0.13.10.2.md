@@ -11,4 +11,6 @@
 - Add fallback for checkproofofstake to mapBlockIndex.
 - Add iscoinstake to getrawtranasction and raw tx decode commands to differentiate coinstakes vs other txes.
 - Remove excessive log on PoS Block storage to db.
-- Update installer icons and graphics to IndexChain
+- Update installer icons and graphics to IndexChain.
+- UI Revamp based on Qtum stylesheets.
+- Align staking amount to left to match with other amounts.

@@ -11,7 +11,7 @@
 #include "sync.h"
 #include "wallet/wallet.h"
 #include "walletmodel.h"
-
+#include "hybridui/styleSheet.h"
 #include <QTimer>
 #include <QMessageBox>
 
@@ -57,6 +57,7 @@ IndexnodeList::IndexnodeList(const PlatformStyle *platformStyle, QWidget *parent
     ui->tableWidgetIndexnodes->setColumnWidth(4, columnLastSeenWidth);
 
     ui->tableWidgetMyIndexnodes->setContextMenuPolicy(Qt::CustomContextMenu);
+    SetObjectStyleSheet(ui->tableWidgetMyIndexnodes, StyleSheetNames::TableViewLight);
 
     QAction *startAliasAction = new QAction(tr("Start alias"), this);
     contextMenu = new QMenu();
