@@ -71,7 +71,8 @@ bool CheckStakeBlockTimestamp(int64_t nTimeBlock)
 bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, unsigned int nBits, unsigned int nBlockTime, const CCoins* txPrev, const COutPoint& prevout, unsigned int nTimeTx, bool fPrintProofOfStake)
 {
       if ((nTimeTx < nBlockTime) && !(txPrev->nHeight <= Params().GetConsensus().nFirstPOSBlock))  // Transaction timestamp violation
-        return error("CheckStakeKernelHash() : nTime violation");
+        return false;
+        // return error("CheckStakeKernelHash() : nTime violation");
 
     // Base target
     arith_uint256 bnTarget;
@@ -151,7 +152,6 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
 
     if (!CheckStakeKernelHash(pindexPrev, nBits, nTime, new CCoins(txPrev, pindexPrev->nHeight), txin.prevout, nBlockTime, fDebug) && indexnodeSync.IsBlockchainSynced())
        return state.Invalid(false, REJECT_INVALID,"CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString()); // may occur during initial download or if behind on block chain sync
-
     return true;
 }
 
@@ -211,7 +211,7 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, co
             // Cache could potentially cause false positive stakes in the event of deep reorgs, so check without cache also
             return CheckKernel(pindexPrev, nBits, nTime, prevout);
         }
-        LogPrintf("CheckKernel()::CheckStakeKernelHash(): pBlockTime=%u, nTime=%u\n", *pBlockTime, nTime);
+        // LogPrintf("CheckKernel()::CheckStakeKernelHash(): pBlockTime=%u, nTime=%u\n", *pBlockTime, nTime);
         return CheckStakeKernelHash(pindexPrev, nBits, *pBlockTime, new CCoins(stake.txPrev, pindexPrev->nHeight), prevout, nTime);
     }
 }

@@ -842,20 +842,20 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     if (setCoins.empty())
         return false;
 
-    if (stakeCache.size() > setCoins.size() + 100){
-        //Determining if the cache is still valid is harder than just clearing it when it gets too big, so instead just clear it
-        //when it has more than 100 entries more than the actual setCoins.
-        stakeCache.clear();
-    }
+    // if (stakeCache.size() > setCoins.size() + 100){
+    //     //Determining if the cache is still valid is harder than just clearing it when it gets too big, so instead just clear it
+    //     //when it has more than 100 entries more than the actual setCoins.
+    //     stakeCache.clear();
+    // }
 
-    if (GetBoolArg("-stakecache", indexnodeSync.IsBlockchainSynced())) {
-        BOOST_FOREACH(const PAIRTYPE(const CWalletTx*, unsigned int)& pcoin, setCoins)
-        {
-            boost::this_thread::interruption_point();
-            COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
-            CacheKernel(stakeCache, prevoutStake, pindexPrev); //this will do a 2 disk loads per op
-        }
-    }
+    // if (GetBoolArg("-stakecache", indexnodeSync.IsBlockchainSynced())) {
+    //     BOOST_FOREACH(const PAIRTYPE(const CWalletTx*, unsigned int)& pcoin, setCoins)
+    //     {
+    //         boost::this_thread::interruption_point();
+    //         COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
+    //         CacheKernel(stakeCache, prevoutStake, pindexPrev); //this will do a 2 disk loads per op
+    //     }
+    // }
 
     int64_t nCredit = 0;
     CScript scriptPubKeyKernel;
@@ -972,14 +972,16 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         }
 
         CBlock *pblock = &pblocktemplate->block;
-
+        CAmount indexnodePayment = 0; 
         // indexnode payments
         if (nHeight >= Params().GetConsensus().nIndexnodePaymentsStartBlock) {
             const CChainParams &chainparams = Params();
             const Consensus::Params &params = chainparams.GetConsensus();
-            CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
-            nReward -= indexnodePayment;
+             indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
             FillBlockPayments(txNew, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
+        }
+        if(pblock->txoutIndexnode != CTxOut() && indexnodePayment != 0){
+            nReward -= indexnodePayment;
         }
 
         nCredit += nReward;
