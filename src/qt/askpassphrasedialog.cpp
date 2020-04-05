@@ -8,7 +8,7 @@
 
 #include "askpassphrasedialog.h"
 #include "ui_askpassphrasedialog.h"
-
+#include "hybridui/styleSheet.h"
 #include "guiconstants.h"
 #include "walletmodel.h"
 
@@ -27,7 +27,8 @@ AskPassphraseDialog::AskPassphraseDialog(Mode mode, QWidget *parent, QLabel *isS
     fCapsLock(false)
 {
     ui->setupUi(this);
-
+    SetObjectStyleSheet(ui->buttonBox->button(QDialogButtonBox::Cancel), StyleSheetNames::ButtonLight);
+    SetObjectStyleSheet(ui->buttonBox->button(QDialogButtonBox::Ok), StyleSheetNames::ButtonGray);
     ui->passEdit1->setMinimumSize(ui->passEdit1->sizeHint());
     ui->passEdit2->setMinimumSize(ui->passEdit2->sizeHint());
     ui->passEdit3->setMinimumSize(ui->passEdit3->sizeHint());

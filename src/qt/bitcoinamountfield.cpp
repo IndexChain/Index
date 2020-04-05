@@ -13,7 +13,7 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLineEdit>
-
+#include "hybridui/styleSheet.h"
 /** QSpinBox that uses fixed-point numbers internally and uses our own
  * formatting/parsing functions.
  */
@@ -245,7 +245,7 @@ void BitcoinAmountField::setValid(bool valid)
     if (valid)
         amount->setStyleSheet("");
     else
-        amount->setStyleSheet(STYLE_INVALID);
+        SetObjectStyleSheet(amount, StyleSheetNames::Invalid);
 }
 
 bool BitcoinAmountField::eventFilter(QObject *object, QEvent *event)

@@ -8,7 +8,7 @@
 
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
-
+#include "hybridui/styleSheet.h"
 #include "bitcoinunits.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
@@ -37,6 +37,9 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     mapper(0)
 {
     ui->setupUi(this);
+    SetObjectStyleSheet(ui->resetButton, StyleSheetNames::ButtonLight);
+    SetObjectStyleSheet(ui->okButton, StyleSheetNames::ButtonGray);
+    SetObjectStyleSheet(ui->cancelButton, StyleSheetNames::ButtonGray);
 
     /* Main elements init */
     ui->databaseCache->setMinimum(nMinDbCache);

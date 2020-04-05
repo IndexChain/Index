@@ -1,4 +1,4 @@
-#include <qt/navigationbar.h>
+#include <qt/hybridui/navigationbar.h>
 #include <QActionGroup>
 #include <QToolButton>
 #include <QLayout>
@@ -6,7 +6,7 @@
 #include <QStyleOptionToolButton>
 #include <QStyle>
 #include <QLabel>
-#include <qt/styleSheet.h>
+#include <qt/hybridui/styleSheet.h>
 #include <qt/platformstyle.h>
 
 namespace NavigationBar_NS

@@ -4,6 +4,7 @@
 
 #include "openuridialog.h"
 #include "ui_openuridialog.h"
+#include "hybridui/styleSheet.h"
 
 #include "guiutil.h"
 #include "walletmodel.h"
@@ -15,6 +16,9 @@ OpenURIDialog::OpenURIDialog(QWidget *parent) :
     ui(new Ui::OpenURIDialog)
 {
     ui->setupUi(this);
+    SetObjectStyleSheet(ui->buttonBox->button(QDialogButtonBox::Cancel), StyleSheetNames::ButtonLight);
+    SetObjectStyleSheet(ui->buttonBox->button(QDialogButtonBox::Ok), StyleSheetNames::ButtonGray);
+
 #if QT_VERSION >= 0x040700
     ui->uriEdit->setPlaceholderText("index:");
 #endif
