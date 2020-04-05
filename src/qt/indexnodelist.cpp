@@ -85,7 +85,7 @@ void IndexnodeList::setClientModel(ClientModel *model)
     this->clientModel = model;
     if(model) {
         // try to update list when indexnode count changes
-        connect(clientModel, SIGNAL(strIndexnodesChanged(QString)), this, SLOT(updateNodeList()));
+        // connect(clientModel, SIGNAL(strIndexnodesChanged(QString)), this, SLOT(updateNodeList()));
     }
 }
 

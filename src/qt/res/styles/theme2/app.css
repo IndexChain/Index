@@ -76,7 +76,7 @@ QLabel#overriddenByCommandLineLabel{
     color: #6f80ab;
 }
 NavigationBar #labelLogo{
-    image:url(":/icons/logo");
+    image:url(":/icons/bitcoin");
 }
 NavigationBar #hLineLogo,
 NavigationBar #hLineStatus{

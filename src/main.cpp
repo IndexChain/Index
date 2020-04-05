@@ -2848,7 +2848,7 @@ bool ConnectBlock(const CBlock &block, CValidationState &state, CBlockIndex *pin
          if(!CheckStakeBlockTimestamp(block.nTime))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake time check failed"),
                                  REJECT_INVALID, "bad-cs-timecheck");
-        if (!CheckProofOfStake(pindex->pprev, block.vtx[1], block.nTime, block.nBits, state))
+        if (!CheckProofOfStake(pindex->pprev, block.vtx[1], block.nTime, block.nBits, state,mapBlockIndex[block.hashPrevBlock]))
               return state.DoS(100, error("ConnectBlock(): proof-of-stake check failed"),
                                  REJECT_INVALID, "bad-cs-proofhash");
         
@@ -4862,7 +4862,7 @@ bool CheckStake(CBlock* pblock, CWallet& wallet, const CChainParams& chainparams
 
     CValidationState state;
     // verify hash target and signature of coinstake tx
-    if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], pblock->vtx[1], pblock->nTime, pblock->nBits, state))
+    if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], pblock->vtx[1], pblock->nTime, pblock->nBits, state,mapBlockIndex[pblock->hashPrevBlock]))
         return error("CheckStake() : proof-of-stake checking failed");
 
     //// debug print

@@ -526,8 +526,9 @@ public:
         }
 
 	    // PoS
-        if (IsProofOfStake())
-            READWRITE(nStakeModifier);
+        if (nNonce == 0){
+             READWRITE(nStakeModifier);
+        }
 
         nDiskBlockVersion = nVersion;
     }
