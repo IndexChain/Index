@@ -526,9 +526,7 @@ public:
         }
 
 	    // PoS
-        if (nNonce == 0){
-             READWRITE(nStakeModifier);
-        }
+        READWRITE(nStakeModifier);
 
         nDiskBlockVersion = nVersion;
     }
