@@ -1912,12 +1912,12 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                     CheckStake(pblock, *pwallet, chainparams);
                     // return back to low priority
                     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-                    MilliSleep(500);
+                    MilliSleep(5000);
                 }
             }
             MilliSleep(nMinerSleep);
         }
-        MilliSleep(100);
+        MilliSleep(10000);
     }
 }
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
