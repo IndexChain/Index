@@ -39,20 +39,13 @@
 using namespace std;
 
 extern CTxMemPool stempool;
-//For hashpersec
-CBlockIndex* GetLastBlockIndexX(CBlockIndex* pindex, bool fProofOfStake)
-{
-    while (pindex && pindex->pprev && (pindex->IsProofOfStake() != fProofOfStake))
-        pindex = pindex->pprev;
-    return pindex;
-}
 /**
  * Return average network hashes per second based on the last 'lookup' blocks,
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
 static UniValue GetNetworkHashPS(int lookup, int height) {
-    CBlockIndex *pb = GetLastBlockIndexX(chainActive.Tip(),false);
+    CBlockIndex *pb = chainActive.Tip();
 
     if (height >= 0 && height < chainActive.Height())
         pb = chainActive[height];
@@ -62,7 +55,7 @@ static UniValue GetNetworkHashPS(int lookup, int height) {
 
     // If lookup is -1, then use blocks since last difficulty change.
     if (lookup <= 0)
-        lookup = pb->nHeight % ( (Params().GetConsensus().nDgwPastBlocks * Params().GetConsensus().nPowTargetSpacing) / Params().GetConsensus().nPowTargetSpacing  + 1);
+        lookup = 1;
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
@@ -72,7 +65,7 @@ static UniValue GetNetworkHashPS(int lookup, int height) {
     int64_t minTime = pb0->GetBlockTime();
     int64_t maxTime = minTime;
     for (int i = 0; i < lookup; i++) {
-        pb0 = GetLastBlockIndexX(pb0->pprev,false);
+        pb0 = pb0->pprev;
         int64_t time = pb0->GetBlockTime();
         minTime = std::min(time, minTime);
         maxTime = std::max(time, maxTime);
