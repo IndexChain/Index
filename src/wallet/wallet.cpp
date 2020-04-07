@@ -2188,7 +2188,6 @@ bool CWalletTx::RelayWalletTransaction(bool fCheckInputs) {
             }
         }
     }
-    LogPrintf("CWalletTx::RelayWalletTransaction() --> invalid condition\n");
     return false;
 }
 

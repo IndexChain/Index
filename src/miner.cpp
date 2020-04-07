@@ -59,7 +59,7 @@ uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 uint64_t nLastBlockWeight = 0;
 int64_t nLastCoinStakeSearchInterval = 0;
-unsigned int nMinerSleep = 4500;
+unsigned int nMinerSleep = 4000;
 class ScoreCompare
 {
 public:
@@ -1115,12 +1115,16 @@ CBlockTemplate* BlockAssembler::CreateNewBlock(
         CAmount blockReward = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus(), nBlockTime);
         // Update coinbase transaction with additional info about indexnode and governance payments,
         // get some info back to pass to getblocktemplate
-        if (nHeight >= chainparams.GetConsensus().nIndexnodePaymentsStartBlock && !fProofOfStake) {
+        bool fPayIDXNode = nHeight >= chainparams.GetConsensus().nIndexnodePaymentsStartBlock && !fProofOfStake;
+        CAmount indexnodePayment = 0;
+        if (fPayIDXNode) {
             const Consensus::Params &params = chainparams.GetConsensus();
-            CAmount indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
-            coinbaseTx.vout[0].nValue -= indexnodePayment;
+            indexnodePayment = GetIndexnodePayment(chainparams.GetConsensus(),false,nHeight);
             FillBlockPayments(coinbaseTx, nHeight, indexnodePayment, pblock->txoutIndexnode, pblock->voutSuperblock);
         }
+        //Only take out idx payment if a indexnode is actually filled in txoutindexnode and indexnodepayment is not 0
+        if(pblock->txoutIndexnode != CTxOut() && indexnodePayment != 0)
+            coinbaseTx.vout[0].nValue -= indexnodePayment;
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
@@ -1913,7 +1917,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
             }
             MilliSleep(nMinerSleep);
         }
-        MilliSleep(10000);
+        MilliSleep(100);
     }
 }
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)

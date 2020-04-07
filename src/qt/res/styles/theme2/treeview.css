@@ -12,7 +12,6 @@ QTreeView{
     alternate-background-color: #1d2843;
     border: none;
     font: normal;
-    qproperty-showGrid: false;
     qproperty-alternatingRowColors: false;
     qproperty-selectionBehavior: SelectRows;
 }

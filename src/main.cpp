@@ -1295,7 +1295,7 @@ bool AcceptToMemoryPoolWorker(
     }
     // Coinstake is also only valid in a block, not as a loose transaction
     if (tx.IsCoinStake()){
-        LogPrintf("cause by -> coinstake!\n");
+        // LogPrintf("cause by -> coinstake!\n");
         return state.DoS(100, false, REJECT_INVALID, "coinstake");
     }
 
@@ -2375,13 +2375,13 @@ namespace Consensus {
             const COutPoint &prevout = tx.vin[i].prevout;
             const CCoins *coins = inputs.AccessCoins(prevout.hash);
             assert(coins);
-
-            // If prev is coinbase, check that it's matured
-            if (coins->IsCoinBase()) {
+            bool fCoinStake = coins->IsCoinStake();
+            // If prev is coinbase or coinstake, check that it's matured
+            if (coins->IsCoinBase() || fCoinStake) {
                 if (nSpendHeight - coins->nHeight < COINBASE_MATURITY)
                     return state.Invalid(false,
-                                         REJECT_INVALID, "bad-txns-premature-spend-of-coinbase",
-                                         strprintf("tried to spend coinbase at depth %d",
+                                         REJECT_INVALID, fCoinStake ? "bad-txns-premature-spend-of-coinstake":"bad-txns-premature-spend-of-coinbase",
+                                         strprintf(fCoinStake ? "tried to spend coinstake at depth %d":"tried to spend coinbase at depth %d",
                                                    nSpendHeight - coins->nHeight));
             }
 
@@ -4900,7 +4900,7 @@ bool SignBlock(CBlock& block, CWallet& wallet, int64_t& nFees, CBlockTemplate *p
 
     // if we are trying to sign
     // a complete proof-of-stake block
-    if (block.IsProofOfStake()){
+    if (block.IsProofOfStake() && !block.vchBlockSig.empty()){
         LogPrintf("trying to sign a complete proof-of-stake block\n");
         return true;
     }
