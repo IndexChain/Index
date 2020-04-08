@@ -500,6 +500,8 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord *wtx)
     case TransactionStatus::OpenUntilBlock:
     case TransactionStatus::OpenUntilDate:
         return color_tx_status_openuntildate;
+    case TransactionStatus::Offline:
+        return COLOR_TX_STATUS_OFFLINE;
     case TransactionStatus::Unconfirmed:
         return platformStyle->TableColorIcon(":/icons/transaction_0", PlatformStyle::Normal);
     case TransactionStatus::Abandoned:
@@ -518,6 +520,7 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord *wtx)
         int part = (wtx->status.depth * 4 / total) + 1;
         return platformStyle->TableColorIcon(QString(":/icons/transaction_%1").arg(part), PlatformStyle::Normal);
         }
+    case TransactionStatus::MaturesWarning:
     case TransactionStatus::NotAccepted:
         return platformStyle->TableColorIcon(":/icons/transaction_0", PlatformStyle::Error);
     default:
