@@ -45,7 +45,7 @@ extern CTxMemPool stempool;
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
 static UniValue GetNetworkHashPS(int lookup, int height) {
-    double currentDiffPoW  = GetDifficulty(GetLastBlockIndex(chainActive.Tip(), false));
+    double currentDiffPoW  = GetDifficulty();
     double netHashPS = currentDiffPoW * std::pow(2,32)  / Params().GetConsensus().nPowTargetSpacing;
     return netHashPS;
 }
