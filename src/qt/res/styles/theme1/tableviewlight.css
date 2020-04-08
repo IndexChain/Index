@@ -3,7 +3,7 @@ Table View light CSS
 --------------------------------------------*/
 QHeaderView{
     color: #5a5a5d;
-    background-color: #e1e1e1;
+    background-color: #1f1f1f;
     border: none;
 }
 QHeaderView:section{
@@ -26,22 +26,9 @@ QHeaderView::up-arrow {
     margin-bottom: 1px;
 }
 QTableView{
-    background-color: #f3f3f3;
-    alternate-background-color: #ededed;
-    border: 1px solid #919192;
-    font: normal;
-    qproperty-showGrid: false;
-    qproperty-alternatingRowColors: true;
-    qproperty-selectionBehavior: SelectRows;
-}
-QTableView::item{
-    border: none;
-    color: #989898;
-}
-QTableView::item:selected{
-    qproperty-showGrid: false;
-    background-color: #ffffff;
-    color: #5a5a5d;
+    background-color: #1f1f1f;
+    border: 1px solid #49587a;
+    border-radius: 6px;
 }
 
 /*--------------------------------------------

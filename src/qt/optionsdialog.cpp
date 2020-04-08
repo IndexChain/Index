@@ -118,7 +118,20 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
 #endif
 
     ui->unit->setModel(new BitcoinUnits(this));
-
+    ui->theme->setToolTip(ui->theme->toolTip().arg(tr(PACKAGE_NAME)));
+    ui->theme->addItem(QString("(") + tr("default") + QString(")"), QVariant(""));
+    QStringList themes = StyleSheet::getSupportedThemes();
+    QStringList themesNames = StyleSheet::getSupportedThemesNames();
+    for(int i = 0; i < themes.size(); i++)
+    {
+        QString themeStr = themes[i];
+        QString themeName = themeStr;
+        if(themesNames.size() > i)
+        {
+            themeName = themesNames[i];
+        }
+        ui->theme->addItem(tr(themeName.toStdString().c_str()), QVariant(themeStr));
+    }
     /* Widget-to-option mapper */
     mapper = new QDataWidgetMapper(this);
     mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
@@ -174,6 +187,8 @@ void OptionsDialog::setModel(OptionsModel *model)
     /* Display */
     connect(ui->lang, SIGNAL(valueChanged()), this, SLOT(showRestartWarning()));
     connect(ui->thirdPartyTxUrls, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
+    connect(ui->theme, static_cast<void (QValueComboBox::*)()>(&QValueComboBox::valueChanged), [this]{ showRestartWarning(); });
+
 }
 
 void OptionsDialog::setMapper()
@@ -210,6 +225,8 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
+    mapper->addMapping(ui->theme, OptionsModel::Theme);
+
 }
 
 void OptionsDialog::setOkButtonState(bool fState)

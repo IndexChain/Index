@@ -47,7 +47,6 @@ public:
     void setStyleSheet(QWidget* widget, const QString& style_name);
     void setStyleSheet(QApplication* app, const QString& style_name);
     QVariant getStyleValue(const QString& key, const QVariant &defaultValue);
-
     QString getCurrentTheme();
     static QStringList getSupportedThemes();
     static QString getDefaultTheme();
@@ -62,7 +61,7 @@ private:
 
     explicit StyleSheet();
     QMap<QString, QString> m_cacheStyles;
-    QString m_theme;
     QPointer<QSettings> m_config;
+    QString m_theme;
 };
 #endif // STYLESHEET_H

@@ -1,5 +1,6 @@
 #include <qt/hybridui/styleSheet.h>
-
+#include <qt/guiconstants.h>
+#include "util.h"
 #include <QFile>
 #include <QWidget>
 #include <QApplication>
@@ -110,6 +111,9 @@ StyleSheet &StyleSheet::instance()
 
 StyleSheet::StyleSheet()
 {
+    QApplication::setOrganizationName(QAPP_ORG_NAME);
+    QApplication::setOrganizationDomain(QAPP_ORG_DOMAIN);
+    QApplication::setApplicationName(QAPP_APP_NAME_DEFAULT);
     QSettings settings;
     m_theme = settings.value("Theme", getDefaultTheme()).toString();
     QStringList supportedThemes = getSupportedThemes();

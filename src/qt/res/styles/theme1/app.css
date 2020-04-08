@@ -74,7 +74,7 @@ QLabel#overriddenByCommandLineLabel{
     color: #bdbdbd;
 }
 NavigationBar #labelLogo{
-    image:url(":/icons/logo");
+    image:url(":/icons/bitcoin");
 }
 .QFrame#frameBlocks {
     background: transparent;

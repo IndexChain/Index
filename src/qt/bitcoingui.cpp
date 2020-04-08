@@ -307,14 +307,14 @@ void BitcoinGUI::createActions()
     size_t key = Qt::Key_1;
 	QActionGroup *tabGroup = new QActionGroup(this);
 
-	overviewAction = new QAction(platformStyle->SingleColorIcon(":/icons/overview"), tr("&Overview"), this);
+	overviewAction = new QAction(platformStyle->MultiStatesIcon(":/icons/overview"), tr("&Overview"), this);
 	overviewAction->setStatusTip(tr("Show general overview of wallet"));
 	overviewAction->setToolTip(overviewAction->statusTip());
 	overviewAction->setCheckable(true);
 	overviewAction->setShortcut(QKeySequence(Qt::ALT + key++));
 	tabGroup->addAction(overviewAction);
 
-	sendCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Send"), this);
+	sendCoinsAction = new QAction(platformStyle->MultiStatesIcon(":/icons/send"), tr("&Send"), this);
 	sendCoinsAction->setStatusTip(tr("Send coins to a Index address"));
 	sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
 	sendCoinsAction->setCheckable(true);
@@ -325,7 +325,7 @@ void BitcoinGUI::createActions()
 	sendCoinsMenuAction->setStatusTip(sendCoinsAction->statusTip());
 	sendCoinsMenuAction->setToolTip(sendCoinsMenuAction->statusTip());
 
-	receiveCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
+	receiveCoinsAction = new QAction(platformStyle->MultiStatesIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
 	receiveCoinsAction->setStatusTip(tr("Request payments (generates QR codes and index: URIs)"));
 	receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
 	receiveCoinsAction->setCheckable(true);
@@ -336,14 +336,14 @@ void BitcoinGUI::createActions()
 	receiveCoinsMenuAction->setStatusTip(receiveCoinsAction->statusTip());
 	receiveCoinsMenuAction->setToolTip(receiveCoinsMenuAction->statusTip());
 
-	historyAction = new QAction(platformStyle->SingleColorIcon(":/icons/history"), tr("&Transactions"), this);
+	historyAction = new QAction(platformStyle->MultiStatesIcon(":/icons/history"), tr("&Transactions"), this);
 	historyAction->setStatusTip(tr("Browse transaction history"));
 	historyAction->setToolTip(historyAction->statusTip());
 	historyAction->setCheckable(true);
 	historyAction->setShortcut(QKeySequence(Qt::ALT + key++));
 	tabGroup->addAction(historyAction);
 
-    sigmaAction = new QAction(platformStyle->SingleColorIcon(":/icons/sigma"), tr("Si&gma"), this);
+    sigmaAction = new QAction(platformStyle->MultiStatesIcon(":/icons/sigma"), tr("Si&gma"), this);
     sigmaAction->setStatusTip(tr("Anonymize your coins and perform private transfers using Sigma"));
     sigmaAction->setToolTip(sigmaAction->statusTip());
     sigmaAction->setCheckable(true);
@@ -351,7 +351,7 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(sigmaAction);
     sigmaAction->setVisible(true);
 
-    zc2SigmaAction = new QAction(platformStyle->SingleColorIcon(":/icons/zerocoin"), tr("&Remint"), this);
+    zc2SigmaAction = new QAction(platformStyle->MultiStatesIcon(":/icons/zerocoin"), tr("&Remint"), this);
     zc2SigmaAction->setStatusTip(tr("Show the list of public Zerocoins that could be reminted in Sigma"));
     zc2SigmaAction->setToolTip(zc2SigmaAction->statusTip());
     zc2SigmaAction->setCheckable(true);
@@ -362,7 +362,7 @@ void BitcoinGUI::createActions()
 #ifdef ENABLE_WALLET
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
-    indexnodeAction = new QAction(platformStyle->SingleColorIcon(":/icons/indexnodes"), tr("&Indexnodes"), this);
+    indexnodeAction = new QAction(platformStyle->MultiStatesIcon(":/icons/indexnodes"), tr("&Indexnodes"), this);
     indexnodeAction->setStatusTip(tr("Browse indexnodes"));
     indexnodeAction->setToolTip(indexnodeAction->statusTip());
     indexnodeAction->setCheckable(true);
@@ -378,14 +378,14 @@ void BitcoinGUI::createActions()
     bool exodusEnabled = isExodusEnabled();
 
     if (exodusEnabled) {
-        exoAssetsAction = new QAction(platformStyle->SingleColorIcon(":/icons/balances"), tr("E&xoAssets"), this);
+        exoAssetsAction = new QAction(platformStyle->MultiStatesIcon(":/icons/balances"), tr("E&xoAssets"), this);
         exoAssetsAction->setStatusTip(tr("Show Exodus balances"));
         exoAssetsAction->setToolTip(exoAssetsAction->statusTip());
         exoAssetsAction->setCheckable(true);
         exoAssetsAction->setShortcut(QKeySequence(Qt::ALT + key++));
         tabGroup->addAction(exoAssetsAction);
 
-        toolboxAction = new QAction(platformStyle->SingleColorIcon(":/icons/tools"), tr("&Toolbox"), this);
+        toolboxAction = new QAction(platformStyle->MultiStatesIcon(":/icons/tools"), tr("&Toolbox"), this);
         toolboxAction->setStatusTip(tr("Tools to obtain varions Exodus information and transaction information"));
         toolboxAction->setToolTip(toolboxAction->statusTip());
         toolboxAction->setCheckable(true);
@@ -422,57 +422,57 @@ void BitcoinGUI::createActions()
 #endif
 #endif // ENABLE_WALLET
 
-    quitAction = new QAction(platformStyle->TextColorIcon(":/icons/quit"), tr("E&xit"), this);
+    quitAction = new QAction(platformStyle->MultiStatesIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setStatusTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&About %1").arg(tr(PACKAGE_NAME)), this);
+    aboutAction = new QAction(platformStyle->MultiStatesIcon(":/icons/about"), tr("&About %1").arg(tr(PACKAGE_NAME)), this);
     aboutAction->setStatusTip(tr("Show information about %1").arg(tr(PACKAGE_NAME)));
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutAction->setEnabled(false);
-    aboutQtAction = new QAction(platformStyle->TextColorIcon(":/icons/about_qt"), tr("About &Qt"), this);
+    aboutQtAction = new QAction(platformStyle->MultiStatesIcon(":/icons/about_qt"), tr("About &Qt"), this);
     aboutQtAction->setStatusTip(tr("Show information about Qt"));
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
-    optionsAction = new QAction(platformStyle->TextColorIcon(":/icons/options"), tr("&Options..."), this);
+    optionsAction = new QAction(platformStyle->MultiStatesIcon(":/icons/options"), tr("&Options..."), this);
     optionsAction->setStatusTip(tr("Modify configuration options for %1").arg(tr(PACKAGE_NAME)));
     optionsAction->setMenuRole(QAction::PreferencesRole);
     optionsAction->setEnabled(false);
-    toggleHideAction = new QAction(platformStyle->TextColorIcon(":/icons/about"), tr("&Show / Hide"), this);
+    toggleHideAction = new QAction(platformStyle->MultiStatesIcon(":/icons/about"), tr("&Show / Hide"), this);
     toggleHideAction->setStatusTip(tr("Show or hide the main Window"));
 
-    encryptWalletAction = new QAction(platformStyle->TextColorIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
+    encryptWalletAction = new QAction(platformStyle->MultiStatesIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setStatusTip(tr("Encrypt the private keys that belong to your wallet"));
     encryptWalletAction->setCheckable(true);
-    unlockWalletForStakingAction =new QAction(platformStyle->TextColorIcon(":/icons/lock_open"), tr("&Unlock For Staking..."), this);
+    unlockWalletForStakingAction =new QAction(platformStyle->MultiStatesIcon(":/icons/lock_open"), tr("&Unlock For Staking..."), this);
     unlockWalletForStakingAction->setStatusTip(tr("Unlock your wallet for staking, sending functions are disabled in this mode"));
     unlockWalletForStakingAction->setCheckable(true);
-    lockWalletAction =new QAction(platformStyle->TextColorIcon(":/icons/lock_closed"), tr("&Lock Wallet..."), this);
+    lockWalletAction =new QAction(platformStyle->MultiStatesIcon(":/icons/lock_closed"), tr("&Lock Wallet..."), this);
     lockWalletAction->setStatusTip(tr("Lock your wallet if currently unlocked for staking"));
     lockWalletAction->setCheckable(true);
-    backupWalletAction = new QAction(platformStyle->TextColorIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
+    backupWalletAction = new QAction(platformStyle->MultiStatesIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
     backupWalletAction->setStatusTip(tr("Backup wallet to another location"));
-    changePassphraseAction = new QAction(platformStyle->TextColorIcon(":/icons/key"), tr("&Change Passphrase..."), this);
+    changePassphraseAction = new QAction(platformStyle->MultiStatesIcon(":/icons/key"), tr("&Change Passphrase..."), this);
     changePassphraseAction->setStatusTip(tr("Change the passphrase used for wallet encryption"));
-    signMessageAction = new QAction(platformStyle->TextColorIcon(":/icons/edit"), tr("Sign &message..."), this);
+    signMessageAction = new QAction(platformStyle->MultiStatesIcon(":/icons/edit"), tr("Sign &message..."), this);
     signMessageAction->setStatusTip(tr("Sign messages with your Index addresses to prove you own them"));
-    verifyMessageAction = new QAction(platformStyle->TextColorIcon(":/icons/verify"), tr("&Verify message..."), this);
+    verifyMessageAction = new QAction(platformStyle->MultiStatesIcon(":/icons/verify"), tr("&Verify message..."), this);
     verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified Index addresses"));
 
-    openRPCConsoleAction = new QAction(platformStyle->TextColorIcon(":/icons/debugwindow"), tr("&Debug window"), this);
+    openRPCConsoleAction = new QAction(platformStyle->MultiStatesIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setStatusTip(tr("Open debugging and diagnostic console"));
     // initially disable the debug window menu item
     openRPCConsoleAction->setEnabled(false);
     openRPCConsoleAction->setObjectName("openRPCConsoleAction");
 
-    usedSendingAddressesAction = new QAction(platformStyle->TextColorIcon(":/icons/address-book"), tr("&Sending addresses..."), this);
+    usedSendingAddressesAction = new QAction(platformStyle->MultiStatesIcon(":/icons/address-book"), tr("&Sending addresses..."), this);
     usedSendingAddressesAction->setStatusTip(tr("Show the list of used sending addresses and labels"));
-    usedReceivingAddressesAction = new QAction(platformStyle->TextColorIcon(":/icons/address-book"), tr("&Receiving addresses..."), this);
+    usedReceivingAddressesAction = new QAction(platformStyle->MultiStatesIcon(":/icons/address-book"), tr("&Receiving addresses..."), this);
     usedReceivingAddressesAction->setStatusTip(tr("Show the list of used receiving addresses and labels"));
 
-    openAction = new QAction(platformStyle->TextColorIcon(":/icons/open"), tr("Open &URI..."), this);
+    openAction = new QAction(platformStyle->MultiStatesIcon(":/icons/open"), tr("Open &URI..."), this);
     openAction->setStatusTip(tr("Open a index: URI or payment request"));
 
-    showHelpMessageAction = new QAction(platformStyle->TextColorIcon(":/icons/info"), tr("&Command-line options"), this);
+    showHelpMessageAction = new QAction(platformStyle->MultiStatesIcon(":/icons/info"), tr("&Command-line options"), this);
     showHelpMessageAction->setMenuRole(QAction::NoRole);
     showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible Index command-line options").arg(tr(PACKAGE_NAME)));
 
