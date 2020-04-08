@@ -85,6 +85,8 @@ double GetPoSKernelPS()
 
     return result;
 }
+
+//Start Extra Blockinfo code
 CTransaction GetBlockRewardTransaction(const CBlock& block){
     int RewardTXIndex = block.IsProofOfStake() ? 1:0;
     return block.vtx[RewardTXIndex];
@@ -101,34 +103,24 @@ CTxOut GetStakeTXOut(const CTxIn& txin){
 
 std::string GetBlockRewardWinner(const CBlock& block){
     CTransaction RewardTX = GetBlockRewardTransaction(block);
-    if(block.IsProofOfStake()){
-        const CTxIn& txin = RewardTX.vin[0];
-        CTxOut const & txOut = GetStakeTXOut(txin);
-        CTxDestination dstAddr;
-        if(txOut != CTxOut() && ExtractDestination(txOut.scriptPubKey, dstAddr))
-            return CBitcoinAddress(dstAddr).ToString();
-    }
-    else{
-        const CTxOut& txout = RewardTX.vout[0];
-        CTxDestination dstAddr;
-        if(txout != CTxOut() && ExtractDestination(txout.scriptPubKey, dstAddr))
-            return CBitcoinAddress(dstAddr).ToString();
-    }
+    CTxDestination dstAddr;
+    const CTxOut& txout = block.IsProofOfStake() ? GetStakeTXOut(RewardTX.vin[0]) : RewardTX.vout[0];
+    if(txout != CTxOut() && ExtractDestination(txout.scriptPubKey, dstAddr))
+        return CBitcoinAddress(dstAddr).ToString();
     return "";
 }
 
 float GetBlockInput(const CBlock& block){
     float nValueIn = 0.0;
     CTransaction RewardTX = GetBlockRewardTransaction(block);
+    //Cycle through inputs as we may have many inputs staking
         for (unsigned int i = 0; i < RewardTX.vin.size(); i++) {
-            const CTxIn& txin = RewardTX.vin[i];
-            CTransaction prevTx;
-            uint256 hashBlock;
-            CTxOut const & txOut = GetStakeTXOut(txin);
+            CTxOut const & txOut = GetStakeTXOut(RewardTX.vin[i]);
             nValueIn+= ValueFromAmount(txOut.nValue).get_real();
         }
     return nValueIn;
 }
+//End extra block info code
 UniValue blockheaderToJSON(const CBlockIndex* blockindex)
 {
     UniValue result(UniValue::VOBJ);
