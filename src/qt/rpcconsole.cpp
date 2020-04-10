@@ -290,7 +290,7 @@ RPCConsole::RPCConsole(const PlatformStyle *platformStyle, QWidget *parent) :
     connect(ui->btn_zapwallettxes2, SIGNAL(clicked()), this, SLOT(walletZaptxes2()));
     connect(ui->btn_upgradewallet, SIGNAL(clicked()), this, SLOT(walletUpgrade()));
     connect(ui->btn_reindex, SIGNAL(clicked()), this, SLOT(walletReindex()));
-    connect(ui->btn_resync, SIGNAL(clicked()), this, SLOT(walletReindex()));
+    connect(ui->btn_resync, SIGNAL(clicked()), this, SLOT(walletResync()));
     // Set stylesheet
     SetObjectStyleSheet(ui->promptIcon, StyleSheetNames::ButtonTransparent);
     SetObjectStyleSheet(ui->clearButton, StyleSheetNames::ButtonTransparent);

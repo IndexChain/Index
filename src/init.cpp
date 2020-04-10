@@ -1687,19 +1687,15 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     if (mapArgs.count("-maxuploadtarget")) {
         CNode::SetMaxOutboundTarget(GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET) * 1024 * 1024);
     }
-
-    // ********************************************************* Step 7: load block chain
-    LogPrintf("Step 7: load block chain ************************************\n");
-    fReindex = GetBoolArg("-reindex", false);
-    bool fReindexChainState = GetBoolArg("-reindex-chainstate", false);
     if (GetBoolArg("-resync", false)) {
             //Clear banned on resync aswell
-            CNode::ClearBanned();
             uiInterface.InitMessage(_("Preparing for resync..."));
             // Delete the local blockchain folders to force a resync from scratch to get a consitent blockchain-state
             boost::filesystem::path blocksDir = GetDataDir() / "blocks";
             boost::filesystem::path chainstateDir = GetDataDir() / "chainstate";
             boost::filesystem::path sporksDir = GetDataDir() / "sporks";
+            boost::filesystem::path indexnodeCache = GetDataDir() / "incache.dat";
+            boost::filesystem::path indexnodePayments = GetDataDir() / "inpayments.dat";
 
             LogPrintf("Deleting blockchain folders blocks, chainstate, sporks and zerocoin\n");
             // We delete in 4 individual steps in case one of the folder is missing already
@@ -1718,10 +1714,22 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
                     boost::filesystem::remove_all(sporksDir);
                     LogPrintf("-resync: folder deleted: %s\n", sporksDir.string().c_str());
                 }
+                if (boost::filesystem::exists(indexnodeCache)){
+                    boost::filesystem::remove(indexnodeCache);
+                    LogPrintf("-resync: file deleted: %s\n", indexnodeCache.string().c_str());
+                }
+                if (boost::filesystem::exists(indexnodePayments)){
+                    boost::filesystem::remove(indexnodePayments);
+                    LogPrintf("-resync: file deleted: %s\n", indexnodePayments.string().c_str());
+                }
             } catch (const boost::filesystem::filesystem_error& error) {
                 LogPrintf("Failed to delete blockchain folders %s\n", error.what());
             }
         }
+    // ********************************************************* Step 7: load block chain
+    LogPrintf("Step 7: load block chain ************************************\n");
+    fReindex = GetBoolArg("-reindex", false);
+    bool fReindexChainState = GetBoolArg("-reindex-chainstate", false);
 #ifdef ENABLE_CLIENTAPI
     if(fApi)
         pzmqPublisherInterface->StartWorker();
