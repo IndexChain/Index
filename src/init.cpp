@@ -98,7 +98,6 @@ static CZMQReplierInterface* pzmqReplierInterface = NULL;
 
 
 bool fFeeEstimatesInitialized = false;
-bool fRestartRequested = false;  // true: restart false: shutdown
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
