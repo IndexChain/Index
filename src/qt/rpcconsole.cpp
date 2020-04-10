@@ -58,6 +58,7 @@ const QString ZAPTXES1("-zapwallettxes=1");
 const QString ZAPTXES2("-zapwallettxes=2");
 const QString UPGRADEWALLET("-upgradewallet");
 const QString REINDEX("-reindex");
+const QString RESYNC("-resync");
 
 const struct {
     const char *url;
@@ -289,6 +290,7 @@ RPCConsole::RPCConsole(const PlatformStyle *platformStyle, QWidget *parent) :
     connect(ui->btn_zapwallettxes2, SIGNAL(clicked()), this, SLOT(walletZaptxes2()));
     connect(ui->btn_upgradewallet, SIGNAL(clicked()), this, SLOT(walletUpgrade()));
     connect(ui->btn_reindex, SIGNAL(clicked()), this, SLOT(walletReindex()));
+    connect(ui->btn_resync, SIGNAL(clicked()), this, SLOT(walletReindex()));
     // Set stylesheet
     SetObjectStyleSheet(ui->promptIcon, StyleSheetNames::ButtonTransparent);
     SetObjectStyleSheet(ui->clearButton, StyleSheetNames::ButtonTransparent);
@@ -581,6 +583,11 @@ void RPCConsole::walletUpgrade()
 void RPCConsole::walletReindex()
 {
     buildParameterlist(REINDEX);
+}
+/** Restart wallet with "-resync" */
+void RPCConsole::walletResync()
+{
+    buildParameterlist(RESYNC);
 }
 
 /** Build command-line parameter list for restart */
