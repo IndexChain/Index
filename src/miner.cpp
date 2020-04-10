@@ -1874,7 +1874,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
                 nLastCoinStakeSearchInterval = 0;
                 MilliSleep(10000);
             }
-            while (vNodes.empty() || IsInitialBlockDownload())
+            while (vNodes.empty() || IsInitialBlockDownload() || !indexnodeSync.IsSynced())
             {
                 nLastCoinStakeSearchInterval = 0;
                 fTryToSync = true;
