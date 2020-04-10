@@ -28,7 +28,7 @@ jobs:
           name: CONFIGURE
           command: ./configure
       - run:
-          name: BUILD Index
+          name: BUILD IndexChain
           command: make -j2
   windows:
       docker:
@@ -61,7 +61,7 @@ jobs:
               ./autogen.sh;
               ./configure --prefix=`pwd`/depends/x86_64-w64-mingw32
         - run:
-            name: BUILD Index Windows
+            name: BUILD IndexChain Windows
             command: make -j2
 workflows:
   version: 2
