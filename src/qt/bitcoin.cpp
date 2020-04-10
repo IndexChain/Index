@@ -298,7 +298,7 @@ void BitcoinCore::restart(QStringList args)
 
             qDebug() << __func__ << ": Running Restart in thread";
             Interrupt(threadGroup);
-            threadGroup.join_all();
+            // threadGroup.join_all();
             StartRestart();
             PrepareShutdown();
             qDebug() << __func__ << ": Shutdown finished";
