@@ -13,6 +13,7 @@
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "intro.h"
+#include "net.h"
 #include "recover.h"
 #include "notifymnemonic.h"
 #include "networkstyle.h"
@@ -49,6 +50,7 @@
 #include <QLibraryInfo>
 #include <QLocale>
 #include <QMessageBox>
+#include <QProcess>
 #include <QSettings>
 #include <QThread>
 #include <QTimer>
@@ -180,6 +182,7 @@ public:
 public Q_SLOTS:
     void initialize();
     void shutdown();
+    void restart(QStringList args);
 
 Q_SIGNALS:
     void initializeResult(int retval);
@@ -219,7 +222,6 @@ public:
     void requestInitialize();
     /// Request core shutdown
     void requestShutdown();
-
     /// Get process return value
     int getReturnValue() { return returnValue; }
 
@@ -234,6 +236,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void requestedInitialize();
+    void requestedRestart(QStringList args);
     void requestedShutdown();
     void stopThread();
     void splashFinished(QWidget *window);
@@ -279,6 +282,34 @@ void BitcoinCore::initialize()
         handleRunawayException(&e);
     } catch (...) {
         handleRunawayException(NULL);
+    }
+}
+
+void BitcoinCore::restart(QStringList args)
+{
+    static bool executing_restart{false};
+    // Show a simple window indicating shutdown status
+    // Do this first as some of the steps may take some time below,
+    // for example the RPC console may still be executing a command.
+    if(!executing_restart) { // Only restart 1x, no matter how often a user clicks on a restart-button
+        executing_restart = true;
+        try
+        {
+
+            qDebug() << __func__ << ": Running Restart in thread";
+            Interrupt(threadGroup);
+            threadGroup.join_all();
+            StartRestart();
+            PrepareShutdown();
+            qDebug() << __func__ << ": Shutdown finished";
+            Q_EMIT shutdownResult(1);
+            CExplicitNetCleanup::callCleanup();
+            QProcess::startDetached(QApplication::applicationFilePath(), args);
+            qDebug() << __func__ << ": Restart initiated...";
+            QApplication::quit();
+        } catch (const std::exception& e) {
+            handleRunawayException(&e);
+        }
     }
 }
 
@@ -394,6 +425,7 @@ void BitcoinApplication::startThread()
     connect(executor, SIGNAL(runawayException(QString)), this, SLOT(handleRunawayException(QString)));
     connect(this, SIGNAL(requestedInitialize()), executor, SLOT(initialize()));
     connect(this, SIGNAL(requestedShutdown()), executor, SLOT(shutdown()));
+    connect(window, SIGNAL(requestedRestart(QStringList)), executor, SLOT(restart(QStringList)));
     /*  make sure executor object is deleted in its own thread */
     connect(this, SIGNAL(stopThread()), executor, SLOT(deleteLater()));
     connect(this, SIGNAL(stopThread()), coreThread, SLOT(quit()));
