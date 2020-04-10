@@ -28,8 +28,6 @@
 #include "wallet/wallet.h"
 #include "definition.h"
 #include "crypto/scrypt.h"
-#include "crypto/Lyra2Z/Lyra2Z.h"
-#include "crypto/Lyra2Z/Lyra2.h"
 #include "indexnode-payments.h"
 #include "indexnode-sync.h"
 #include "indexnodeman.h"

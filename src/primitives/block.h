@@ -117,10 +117,7 @@ public:
     }
 
     void SetPoWHash(uint256 hash) const
-    {
-//        isComputed = 1;
-//        powHash = hash;
-    }
+    {}
 
     uint256 GetPoWHash() const;
 
@@ -130,7 +127,6 @@ public:
     {
         return (int64_t)nTime;
     }
-    void InvalidateCachedPoWHash(int nHeight) const;
 };
 
 class CZerocoinTxInfo;
