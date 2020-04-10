@@ -30,9 +30,6 @@ jobs:
       - run:
           name: BUILD Index
           command: make -j2
-      - run:
-          name: RUN Unit test
-          command: make check
   windows:
       docker:
         - image: ubuntu:latest
