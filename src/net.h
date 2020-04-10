@@ -869,7 +869,11 @@ public:
 };
 
 
-
+class CExplicitNetCleanup
+{
+public:
+    static void callCleanup();
+};
 class CTransaction;
 void RelayTransaction(const CTransaction& tx);
 void RelayInv(CInv &inv, const int minProtoVersion = MIN_PEER_PROTO_VERSION);
