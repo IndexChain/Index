@@ -4573,7 +4573,7 @@ bool CheckBlock(const CBlock &block, CValidationState &state,
             nHeight = ZerocoinGetNHeight(block.GetBlockHeader());
         const CTransaction& txNew = (block.nNonce == 0) ? block.vtx[1] : block.vtx[0];
         //We dont really use checkzerocoinfoundersinputs after snapshot payee block,disable with the next update
-        if (CheckZerocoinFoundersInputs(txNew, state, Params().GetConsensus(), nHeight, false)) {
+        if (nHeight > 1 && !CheckZerocoinFoundersInputs(txNew, state, Params().GetConsensus(), nHeight, false)) {
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(), "Founders' reward check failed");
         }
 
