@@ -82,6 +82,7 @@ public:
         SpendToSelf,
         Mint,
         Stake,
+        INReward
     };
 
     /** Number of confirmation recommended for accepting a transaction */

@@ -1,0 +1,75 @@
+/*--------------------------------------------
+Table View light CSS
+--------------------------------------------*/
+QHeaderView{
+    color: #5a5a5d;
+    background-color: #1f1f1f;
+    border: none;
+}
+QHeaderView:section{
+    padding: 6px 20px 6px 6px;
+    border: none;
+    background-color: transparent;
+}
+QHeaderView::down-arrow {
+    image: url(":/styles/theme1/app-icons/down_arrow");
+    width: 6px;
+    height: 4px;
+    margin-right: 5px;
+    margin-bottom: 1px;
+}
+QHeaderView::up-arrow {
+    image: url(":/styles/theme1/app-icons/up_arrow");
+    width: 6px;
+    height: 4px;
+    margin-right: 5px;
+    margin-bottom: 1px;
+}
+QTableView{
+    background-color: #1f1f1f;
+    border: 1px solid #49587a;
+    border-radius: 6px;
+}
+
+/*--------------------------------------------
+Scroll Bar Vertical CSS
+--------------------------------------------*/
+QScrollBar:vertical {
+    border-radius: 0px;
+    border-left: 1px solid #6a6a6d;
+    background: #747474;
+    width: 19px;
+    padding: 10px 4px;
+}
+QScrollBar::handle:vertical {
+    border: 1px solid #646464;
+    background: #4c4c4c;
+    border-radius: 5px;
+    min-height: 30px;
+}
+QScrollBar::handle:vertical:disabled {
+    background: rgba(76, 76, 76, 40%);
+}
+/*--------------------------------------------
+Scroll Bar Horizontal CSS
+--------------------------------------------*/
+QScrollBar:horizontal {
+    border-radius: 0px;
+    border-left: 1px solid #6a6a6d;
+    background: #747474;
+    height: 19px;
+    padding: 4px 10px;
+}
+QScrollBar::handle:horizontal {
+    border: 1px solid #646464;
+    background: #4c4c4c;
+    border-radius: 5px;
+    min-height: 30px;
+}
+QScrollBar::handle:horizontal:disabled {
+    background: rgba(76, 76, 76, 40%);
+}
+QAbstractScrollArea::corner {
+    background: #747474;
+    border: 0px;
+}

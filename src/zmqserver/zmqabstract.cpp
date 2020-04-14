@@ -42,12 +42,12 @@ bool CZMQAbstract::NotifyAPIStatus()
     return true;
 }
 
-bool CZMQAbstract::NotifyZnodeList()
+bool CZMQAbstract::NotifyIndexnodeList()
 {
     return true;
 }
 
-bool CZMQAbstract::NotifyZnodeUpdate(CZnode &znode)
+bool CZMQAbstract::NotifyIndexnodeUpdate(CIndexnode &indexnode)
 {
     return true;
 }

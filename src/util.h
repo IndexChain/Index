@@ -49,7 +49,7 @@ public:
     /** Translate a message to the native language of the user. */
     boost::signals2::signal<std::string (const char* psz)> Translate;
 };
-extern bool fZNode;
+extern bool fIndexNode;
 extern bool fLiteMode;
 extern int nWalletBackups;
 
@@ -155,7 +155,7 @@ boost::filesystem::path CreatePaymentRequestFile(bool fNetSpecific=true);
 boost::filesystem::path CreateZerocoinFile(bool fNetSpecific=true);
 boost::filesystem::path CreateSettingsFile(bool fNetSpecific=true);
 boost::filesystem::path CreateTxTimestampFile(bool fNetSpecific=true);
-boost::filesystem::path GetZnodeConfigFile();
+boost::filesystem::path GetIndexnodeConfigFile();
 boost::filesystem::path GetPidFile();
 void CreatePidFile(const boost::filesystem::path &path, pid_t pid);
 

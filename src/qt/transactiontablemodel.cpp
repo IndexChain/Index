@@ -12,7 +12,7 @@
 #include "transactiondesc.h"
 #include "transactionrecord.h"
 #include "walletmodel.h"
-
+#include "hybridui/styleSheet.h"
 #include "core_io.h"
 #include "main.h"
 #include "sync.h"
@@ -243,6 +243,12 @@ TransactionTableModel::TransactionTableModel(const PlatformStyle *platformStyle,
         fProcessingQueuedTransactions(false),
         platformStyle(platformStyle)
 {
+    color_unconfirmed = GetColorStyleValue("guiconstants/color-unconfirmed", COLOR_UNCONFIRMED);
+    color_negative = GetColorStyleValue("guiconstants/color-negative", COLOR_NEGATIVE);
+    color_bareaddress = GetColorStyleValue("guiconstants/color-bareaddress", COLOR_BAREADDRESS);
+    color_tx_status_openuntildate = GetColorStyleValue("guiconstants/color-tx-status-openuntildate", COLOR_TX_STATUS_OPENUNTILDATE);
+    color_tx_status_danger = GetColorStyleValue("guiconstants/color-tx-status-danger", COLOR_TX_STATUS_DANGER);
+    color_black = GetColorStyleValue("guiconstants/color-black", COLOR_BLACK);
     columns << QString() << QString() << tr("Date") << tr("Type") << tr("Label") << BitcoinUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
     priv->refreshWallet();
 
@@ -388,6 +394,8 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
            return tr("Mint");
     case TransactionRecord::Stake:
            return tr("Stake");
+    case TransactionRecord::INReward:
+            return tr("Indexnode Reward");
     default:
         return QString();
     }
@@ -398,20 +406,21 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     switch(wtx->type)
     {
     case TransactionRecord::Generated:
-        return QIcon(":/icons/tx_mined");
+        return platformStyle->TableColorIcon(":/icons/tx_mined",PlatformStyle::Input);
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
     case TransactionRecord::SpendToSelf:
-        return QIcon(":/icons/tx_input");
+        return platformStyle->TableColorIcon(":/icons/tx_input", PlatformStyle::Input);
     case TransactionRecord::SendToAddress:
     case TransactionRecord::SendToOther:
     case TransactionRecord::SpendToAddress:
     case TransactionRecord::Mint:
-        return QIcon(":/icons/tx_output");
+        return platformStyle->TableColorIcon(":/icons/tx_output", PlatformStyle::Output);
     case TransactionRecord::Stake:
-        return QIcon(":/icons/tx_mined");
+    case TransactionRecord::INReward:
+        return platformStyle->TableColorIcon(":/icons/tx_mined",PlatformStyle::Input);
     default:
-        return QIcon(":/icons/tx_inout");
+        return platformStyle->TableColorIcon(":/icons/tx_inout", PlatformStyle::Inout);
     }
 }
 
@@ -432,6 +441,7 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx, b
     case TransactionRecord::SpendToAddress:
     case TransactionRecord::SpendToSelf:
     case TransactionRecord::Stake:
+    case TransactionRecord::INReward:
     case TransactionRecord::Generated:
         return lookupAddress(wtx->address, tooltip) + watchAddress;
     case TransactionRecord::SendToOther:
@@ -454,6 +464,7 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord *wtx) const
     case TransactionRecord::SpendToAddress:
     case TransactionRecord::Generated:
     case TransactionRecord::Stake:
+    case TransactionRecord::INReward:
         {
         QString label = walletModel->getAddressTableModel()->labelForAddress(QString::fromStdString(wtx->address));
         if(label.isEmpty())
@@ -488,36 +499,32 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord *wtx)
     {
     case TransactionStatus::OpenUntilBlock:
     case TransactionStatus::OpenUntilDate:
-        return COLOR_TX_STATUS_OPENUNTILDATE;
+        return color_tx_status_openuntildate;
     case TransactionStatus::Offline:
         return COLOR_TX_STATUS_OFFLINE;
     case TransactionStatus::Unconfirmed:
-        return QIcon(":/icons/transaction_0");
+        return platformStyle->TableColorIcon(":/icons/transaction_0", PlatformStyle::Normal);
     case TransactionStatus::Abandoned:
-        return QIcon(":/icons/transaction_abandoned");
-    case TransactionStatus::Confirming:
-        switch(wtx->status.depth)
-        {
-        case 1: return QIcon(":/icons/transaction_1");
-        case 2: return QIcon(":/icons/transaction_2");
-        case 3: return QIcon(":/icons/transaction_3");
-        case 4: return QIcon(":/icons/transaction_4");
-        default: return QIcon(":/icons/transaction_5");
+        return platformStyle->TableColorIcon(":/icons/transaction_abandoned", PlatformStyle::Error);
+    case TransactionStatus::Confirming: {
+        int iconNum = ((wtx->status.depth - 1) * CONFIRM_ICONS) / TransactionRecord::RecommendedNumConfirmations + 1;
+        if(iconNum > CONFIRM_ICONS) iconNum = CONFIRM_ICONS;
+        return platformStyle->TableColorIcon(QString(":/icons/transaction_%1").arg(iconNum), PlatformStyle::Normal);
         };
     case TransactionStatus::Confirmed:
-        return QIcon(":/icons/transaction_confirmed");
+        return platformStyle->TableColorIcon(":/icons/transaction_confirmed", PlatformStyle::Normal);
     case TransactionStatus::Conflicted:
-        return QIcon(":/icons/transaction_conflicted");
+        return platformStyle->TableColorIcon(":/icons/transaction_conflicted", PlatformStyle::Error);
     case TransactionStatus::Immature: {
         int total = wtx->status.depth + wtx->status.matures_in;
         int part = (wtx->status.depth * 4 / total) + 1;
-        return QIcon(QString(":/icons/transaction_%1").arg(part));
+        return platformStyle->TableColorIcon(QString(":/icons/transaction_%1").arg(part), PlatformStyle::Normal);
         }
     case TransactionStatus::MaturesWarning:
     case TransactionStatus::NotAccepted:
-        return QIcon(":/icons/transaction_0");
+        return platformStyle->TableColorIcon(":/icons/transaction_0", PlatformStyle::Error);
     default:
-        return COLOR_BLACK;
+        return color_black;
     }
 }
 

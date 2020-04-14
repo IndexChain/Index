@@ -104,8 +104,8 @@ namespace boost {
 
 } // namespace boost
 
-// znode fZnode
-bool fZNode = false;
+// indexnode fIndexnode
+bool fIndexNode = false;
 bool fLiteMode = false;
 int nWalletBackups = 10;
 
@@ -714,9 +714,9 @@ boost::filesystem::path CreateTxTimestampFile(bool fNetSpecific)
     return pathConfigFile;
 }
 
-boost::filesystem::path GetZnodeConfigFile()
+boost::filesystem::path GetIndexnodeConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-znconf", "znode.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-znconf", "indexnode.conf"));
     if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir() / pathConfigFile;
     LogPrintf("pathConfigFile=%s\n", pathConfigFile);
     return pathConfigFile;
@@ -998,14 +998,14 @@ boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate)
 {
     namespace fs = boost::filesystem;
 
-    char pszPath[MAX_PATH] = "";
+    WCHAR pszPath[MAX_PATH] = L"";
 
-    if(SHGetSpecialFolderPathA(NULL, pszPath, nFolder, fCreate))
+    if(SHGetSpecialFolderPathW(nullptr, pszPath, nFolder, fCreate))
     {
         return fs::path(pszPath);
     }
 
-    LogPrintf("SHGetSpecialFolderPathA() failed, could not obtain requested path.\n");
+    LogPrintf("SHGetSpecialFolderPathW() failed, could not obtain requested path.\n");
     return fs::path("");
 }
 #endif

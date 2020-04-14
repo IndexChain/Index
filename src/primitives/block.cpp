@@ -13,32 +13,23 @@
 #include "crypto/common.h"
 #include "chainparams.h"
 #include "crypto/scrypt.h"
-#include "crypto/Lyra2Z/Lyra2Z.h"
-#include "crypto/Lyra2Z/Lyra2.h"
-#include "crypto/MerkleTreeProof/mtp.h"
 #include "util.h"
 #include <iostream>
 #include <chrono>
 #include <fstream>
 #include <algorithm>
 #include <string>
-#include "precomputed_hash.h"
 #include "crypto/x16Rv2/hash_algos.h"
 
 uint256 CBlockHeader::GetHash() const {
 
-    return HashX16RV2(BEGIN(nVersion), END(fProofOfStake), hashPrevBlock);
+    return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
 
 }
 
 uint256 CBlockHeader::GetPoWHash() const {
         //Changed hash algo to X16Rv2
-    return HashX16RV2(BEGIN(nVersion), END(fProofOfStake), hashPrevBlock);
-}
-
-void CBlockHeader::InvalidateCachedPoWHash(int nHeight) const {
-    if (nHeight >= 20500 && mapPoWHash.count(nHeight) > 0)
-        mapPoWHash.erase(nHeight);
+    return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
 }
 
 std::string CBlock::ToString() const {

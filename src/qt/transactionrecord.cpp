@@ -161,19 +161,40 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 }
                 if (wtx.IsCoinBase())
                 {
-                    // Generated
-                    sub.type = TransactionRecord::Generated;
+                    if (isminetype mine = wallet->IsMine(wtx.vout[0])) {
+                        // Generated
+                        sub.type = TransactionRecord::Generated;
+                    }
+                    else{
+                        CTxDestination destMN;
+                        int nIndexMN = wtx.vout.size() - 1;
+                        if (ExtractDestination(wtx.vout[nIndexMN].scriptPubKey, destMN) && IsMine(*wallet, destMN)) {
+                            isminetype mine = wallet->IsMine(wtx.vout[nIndexMN]);
+                            sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
+                            sub.type = TransactionRecord::INReward;
+                            sub.address = CBitcoinAddress(destMN).ToString();
+                            sub.credit = wtx.vout[nIndexMN].nValue;
+                        }
+                    }
                 } else if (wtx.IsCoinStake()) {
-                    sub.type = TransactionRecord::Stake;
-                }
-                if (wtx.IsCoinStake())
-                {
                     if (isminetype mine = wallet->IsMine(wtx.vout[1])) {
                         // Stake reward
-                        sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
                         sub.type = TransactionRecord::Stake;
+                        sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
                         sub.address = CBitcoinAddress(address).ToString();
                         sub.credit = wtx.vout[1].nValue - nDebit;
+                    }
+                    else{
+                        //MN Reward
+                        CTxDestination destMN;
+                        int nIndexMN = wtx.vout.size() - 1;
+                        if (ExtractDestination(wtx.vout[nIndexMN].scriptPubKey, destMN) && IsMine(*wallet, destMN)) {
+                            isminetype mine = wallet->IsMine(wtx.vout[nIndexMN]);
+                            sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
+                            sub.type = TransactionRecord::INReward;
+                            sub.address = CBitcoinAddress(destMN).ToString();
+                            sub.credit = wtx.vout[nIndexMN].nValue;
+                        }
                     }
                 }
                 parts.append(sub);
@@ -315,33 +336,8 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
             status.open_for = wtx.nLockTime;
         }
     }
-    // For generated transactions, determine maturity
-    else if(type == TransactionRecord::Generated)
-    {
-        if (wtx.GetBlocksToMaturity() > 0)
-        {
-            status.status = TransactionStatus::Immature;
-
-            if (wtx.IsInMainChain())
-            {
-                status.matures_in = wtx.GetBlocksToMaturity();
-
-                // Check if the block was requested by anyone
-                if (GetAdjustedTime() - wtx.nTimeReceived > 2 * 60 && wtx.GetRequestCount() == 0)
-                    status.status = TransactionStatus::MaturesWarning;
-            }
-            else
-            {
-                status.status = TransactionStatus::NotAccepted;
-            }
-        }
-        else
-        {
-            status.status = TransactionStatus::Confirmed;
-        }
-    }
-    // For staked transactions, determine maturity
-    else if(type == TransactionRecord::Stake)
+    // For generated,staked,or indexnode reward transactions, determine maturity
+    else if(type == TransactionRecord::Generated || type == TransactionRecord::Stake ||type == TransactionRecord::INReward)
     {
         if (wtx.GetBlocksToMaturity() > 0)
         {

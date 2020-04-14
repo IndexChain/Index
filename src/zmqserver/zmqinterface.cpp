@@ -146,22 +146,22 @@ CZMQPublisherInterface* CZMQPublisherInterface::Create()
         "pubrawtx", 
         "pubblockinfo", 
         "pubbalance", 
-        "pubznodeupdate", 
+        "pubindexnodeupdate", 
         "pubmintstatus", 
         "pubsettings", 
         "pubstatus",
-        "pubznodelist",
+        "pubindexnodelist",
     };
 
     factories["pubblock"] = CZMQAbstract::Create<CZMQBlockDataTopic>;
     factories["pubrawtx"] = CZMQAbstract::Create<CZMQTransactionTopic>;
     factories["pubblockinfo"] = CZMQAbstract::Create<CZMQBlockInfoTopic>;
     factories["pubbalance"] = CZMQAbstract::Create<CZMQBalanceTopic>;
-    factories["pubznodeupdate"] = CZMQAbstract::Create<CZMQZnodeTopic>;
+    factories["pubindexnodeupdate"] = CZMQAbstract::Create<CZMQIndexnodeTopic>;
     factories["pubmintstatus"] = CZMQAbstract::Create<CZMQMintStatusTopic>;
     factories["pubsettings"] = CZMQAbstract::Create<CZMQSettingsTopic>;
     factories["pubstatus"] = CZMQAbstract::Create<CZMQAPIStatusTopic>;
-    factories["pubznodelist"] = CZMQAbstract::Create<CZMQZnodeListTopic>;
+    factories["pubindexnodelist"] = CZMQAbstract::Create<CZMQIndexnodeListTopic>;
     
     BOOST_FOREACH(string pubIndex, pubIndexes)
     {
@@ -224,12 +224,12 @@ void CZMQPublisherInterface::NotifyAPIStatus()
     }
 }
 
-void CZMQPublisherInterface::NotifyZnodeList()
+void CZMQPublisherInterface::NotifyIndexnodeList()
 {
     for (std::list<CZMQAbstract*>::iterator i = notifiers.begin(); i!=notifiers.end(); )
     {
         CZMQAbstract *notifier = *i;
-        if (notifier->NotifyZnodeList())
+        if (notifier->NotifyIndexnodeList())
         {
             i++;
         }
@@ -292,12 +292,12 @@ void CZMQPublisherInterface::WalletTransaction(const CTransaction& tx)
     }
 }
 
-void CZMQPublisherInterface::UpdatedZnode(CZnode &znode)
+void CZMQPublisherInterface::UpdatedIndexnode(CIndexnode &indexnode)
 {
     for (std::list<CZMQAbstract*>::iterator i = notifiers.begin(); i!=notifiers.end(); )
     {
         CZMQAbstract *notifier = *i;
-        if (notifier->NotifyZnodeUpdate(znode))
+        if (notifier->NotifyIndexnodeUpdate(indexnode))
         {
             i++;
         }

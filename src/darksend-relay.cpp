@@ -4,16 +4,16 @@
 
 CDarkSendRelay::CDarkSendRelay()
 {
-    vinZnode = CTxIn();
+    vinIndexnode = CTxIn();
     nBlockHeight = 0;
     nRelayType = 0;
     in = CTxIn();
     out = CTxOut();
 }
 
-CDarkSendRelay::CDarkSendRelay(CTxIn& vinZnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
+CDarkSendRelay::CDarkSendRelay(CTxIn& vinIndexnodeIn, vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
 {
-    vinZnode = vinZnodeIn;
+    vinIndexnode = vinIndexnodeIn;
     vchSig = vchSigIn;
     nBlockHeight = nBlockHeightIn;
     nRelayType = nRelayTypeIn;
@@ -25,7 +25,7 @@ std::string CDarkSendRelay::ToString()
 {
     std::ostringstream info;
 
-    info << "vin: " << vinZnode.ToString() <<
+    info << "vin: " << vinIndexnode.ToString() <<
         " nBlockHeight: " << (int)nBlockHeight <<
         " nRelayType: "  << (int)nRelayType <<
         " in " << in.ToString() <<
@@ -99,7 +99,7 @@ void CDarkSendRelay::Relay()
 
 void CDarkSendRelay::RelayThroughNode(int nRank)
 {
-    CZnode* pmn = mnodeman.GetZnodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
+    CIndexnode* pmn = mnodeman.GetIndexnodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
 
     if(pmn != NULL){
         //printf("RelayThroughNode %s\n", pmn->addr.ToString().c_str());

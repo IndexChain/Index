@@ -10,7 +10,7 @@
 #endif
 
 #include "amount.h"
-#include "znodelist.h"
+#include "indexnodelist.h"
 #include "sigmadialog.h"
 
 #ifdef ENABLE_EXODUS
@@ -113,7 +113,7 @@ private:
     Zc2SigmaPage *zc2SigmaPage;
     TransactionView *indexTransactionList;
     QWidget *indexTransactionsView;
-    ZnodeList *znodeListPage;
+    IndexnodeList *indexnodeListPage;
 
     QProgressDialog *progressDialog;
     const PlatformStyle *platformStyle;
@@ -137,8 +137,8 @@ public Q_SLOTS:
     void gotoBitcoinHistoryTab();
     /** Switch to bitcoin tx history tab and focus on specific transaction */
     void focusBitcoinHistoryTab(const QModelIndex &idx);
-    /** Switch to znode page */
-    void gotoZnodePage();
+    /** Switch to indexnode page */
+    void gotoIndexnodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
@@ -167,7 +167,7 @@ public Q_SLOTS:
     /** Change encrypted wallet passphrase */
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
-    void unlockWallet(bool iconClicked=false);
+    void unlockWallet(bool iconClicked=false,bool fStaking = false);
 	/** lock wallet */
     void lockWallet();
     /** Show used sending addresses */

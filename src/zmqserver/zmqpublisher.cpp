@@ -5,7 +5,7 @@
 #include "util.h"
 #include "core_io.h"
 #include "chain.h"
-#include "znode-sync.h"
+#include "indexnode-sync.h"
 
 #include "zmqabstract.h"
 #include "zmqpublisher.h"
@@ -196,7 +196,7 @@ bool CZMQAPIStatusEvent::NotifyAPIStatus()
     return true;
 }
 
-bool CZMQZnodeListEvent::NotifyZnodeList()
+bool CZMQIndexnodeListEvent::NotifyIndexnodeList()
 {
     request.push_back(Pair("type", "initial"));
     Execute();
@@ -256,7 +256,7 @@ bool CZMQBlockEvent::NotifyBlock(const CBlockIndex *pindex){
     }
 
     // If synced, always publish, if not, every 100 blocks (for better sync speed).
-    if(znodeSync.GetBlockchainSynced() || pindex->nHeight%100==0){
+    if(indexnodeSync.GetBlockchainSynced() || pindex->nHeight%100==0){
         request.replace("data", pindex->ToJSON());
         Execute();
     }
@@ -264,8 +264,8 @@ bool CZMQBlockEvent::NotifyBlock(const CBlockIndex *pindex){
     return true;
 }
 
-bool CZMQZnodeEvent::NotifyZnodeUpdate(CZnode &znode){
-    request.replace("data", znode.ToJSON());
+bool CZMQIndexnodeEvent::NotifyIndexnodeUpdate(CIndexnode &indexnode){
+    request.replace("data", indexnode.ToJSON());
     Execute();
 
     return true;

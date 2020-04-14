@@ -203,10 +203,10 @@ extern UniValue getaddressbalance(const UniValue& params, bool fHelp);
 extern UniValue getpoolinfo(const UniValue& params, bool fHelp);
 extern UniValue spork(const UniValue& params, bool fHelp);
 extern UniValue createsporkkeypair(const UniValue& params, bool fHelp);
-extern UniValue znode(const UniValue& params, bool fHelp);
-extern UniValue znodelist(const UniValue& params, bool fHelp);
-extern UniValue znodebroadcast(const UniValue& params, bool fHelp);
-extern UniValue znsync(const UniValue& params, bool fHelp);
+extern UniValue indexnode(const UniValue& params, bool fHelp);
+extern UniValue indexnodelist(const UniValue& params, bool fHelp);
+extern UniValue indexnodebroadcast(const UniValue& params, bool fHelp);
+extern UniValue insync(const UniValue& params, bool fHelp);
 
 extern void EnsureWalletIsUnlocked();
 

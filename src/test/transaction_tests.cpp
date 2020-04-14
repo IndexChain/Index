@@ -21,9 +21,9 @@
 #include "script/script_error.h"
 #include "script/standard.h"
 #include "utilstrencodings.h"
-#include "znodeman.h"
-#include "znode-sync.h"
-#include "znode-payments.h"
+#include "indexnodeman.h"
+#include "indexnode-sync.h"
+#include "indexnode-payments.h"
 
 #include <map>
 #include <string>

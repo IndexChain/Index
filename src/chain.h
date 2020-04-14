@@ -215,7 +215,6 @@ public:
     unsigned int nTime;
     unsigned int nBits;
     unsigned int nNonce;
-    bool fProofOfStake;
     std::vector<unsigned char> vchBlockSig;
 
 
@@ -266,7 +265,6 @@ public:
         nTime          = 0;
         nBits          = 0;
         nNonce         = 0;
-        fProofOfStake  = false;
         vchBlockSig.clear();
 
         mintedPubCoins.clear();
@@ -292,8 +290,7 @@ public:
         nTime          = block.nTime;
         nBits          = block.nBits;
         nNonce         = block.nNonce;
-        fProofOfStake = block.fProofOfStake;
-        if(fProofOfStake)
+        if(nNonce == 0)
             vchBlockSig    = block.vchBlockSig; // qtum
     }
 
@@ -325,8 +322,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        block.fProofOfStake = fProofOfStake;
-        if(fProofOfStake)
+        if(block.nNonce == 0)
             block.vchBlockSig    = vchBlockSig;
         return block;
     }
@@ -399,13 +395,12 @@ public:
 
     bool IsProofOfStake() const
     {
-        return fProofOfStake;
+        return nNonce == 0 || nStatus & BLOCK_PROOF_OF_STAKE;
     }
 
     void SetProofOfStake()
     {
         nStatus |= BLOCK_PROOF_OF_STAKE;
-        fProofOfStake = true;
     }
 
     std::string ToString() const
@@ -516,8 +511,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        READWRITE(fProofOfStake);
-        if(fProofOfStake)
+        if(nNonce == 0)
             READWRITE(vchBlockSig); // qtum
 
         if (!(nType & SER_GETHASH) && nVersion >= ZC_ADVANCED_INDEX_VERSION) {
@@ -532,10 +526,7 @@ public:
         }
 
 	    // PoS
-        if (IsProofOfStake()) {
-            LogPrintf("CDiskBlockIndex::SerializationOp(): proof-of-stake block found at height=%u\n", nHeight);
-            READWRITE(nStakeModifier);
-        }
+        READWRITE(nStakeModifier);
 
         nDiskBlockVersion = nVersion;
     }
@@ -549,7 +540,6 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        block.fProofOfStake  = fProofOfStake;
 
         return block.GetHash();
     }

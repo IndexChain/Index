@@ -15,6 +15,19 @@
 
 #include <QSettings>
 
+#define NUM_ITEMS 5
+#define TOKEN_SIZE 40
+#define MARGIN 5
+#define SYMBOL_WIDTH 80
+
+#define TX_SIZE 40
+#define DECORATION_SIZE 20
+#define DATE_WIDTH 110
+#define TYPE_WIDTH 140
+#define AMOUNT_WIDTH 205
+
+#define BUTTON_ICON_SIZE 24
+
 class ClientModel;
 class TransactionFilterProxy;
 class TxViewDelegate;

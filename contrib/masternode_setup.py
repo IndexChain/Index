@@ -6,16 +6,22 @@ import sys
 import time
 import math
 import os
+import requests,json
 from urllib.request import urlopen
 from subprocess import *
+from crontab import CronTab
 SERVER_IP = urlopen('http://ip.42.pl/raw').read()
 # BOOTSTRAP_URL = "http://index.org/dprice.zip"
+#Change this to match your coin releases
+GITHUB_REPO = 'IndexChain/Index'
+BINARY_PREFIX = 'index-'
+BINARY_SUFFIX='-x86_64-linux-gnu.tar.gz'
 
 DEFAULT_COLOR = "\x1b[0m"
 PRIVATE_KEYS = []
 
 def print_info(message):
-    BLUE = '\033[94m'
+    BLUE = '\033[36m'
     print(BLUE + "[*] " + str(message) + DEFAULT_COLOR)
     time.sleep(1)
 
@@ -54,7 +60,7 @@ def print_welcome():
     print("")
     print("")
     print("")
-    print_info("IndexChain masternode(s) installer v1.0")
+    print_info("IndexChain masternode installer v1.0")
     print("")
     print("")
     print("")
@@ -82,79 +88,75 @@ def secure_server():
     run_command("ufw default allow outgoing")
     run_command("ufw --force enable")
 
+def checkdaemon():
+    return os.path.isfile('/usr/local/bin/indexd')
+
+# Helper functions for automating updating and installing daemon
+def getlatestrelease():
+    r = requests.get(url='https://api.github.com/repos/IndexChain/Index/releases/latest')
+    data = json.loads(r.text)['assets']
+    for x in range(len(data)):
+        if 'x86_64-linux-gnu.tar.gz' in data[x]['browser_download_url']:
+            return data[x]['browser_download_url']
+
+def getbinaryname(downloadurl):
+    return downloadurl[downloadurl.find(BINARY_PREFIX):]
+
+def getextfoldername(binaryname):
+    return binaryname[:binaryname.find(BINARY_SUFFIX)]
+
 def compile_wallet():
-    # print_info("Allocating swap...")
-    # run_command("fallocate -l 3G /swapfile")
-    # run_command("chmod 600 /swapfile")
-    # run_command("mkswap /swapfile")
-    # run_command("swapon /swapfile")
-    # f = open('/etc/fstab','r+b')
-    # line = '/swapfile   none    swap    sw    0   0 \n'
-    # lines = f.readlines()
-    # if (lines[-1] != line):
-    #     f.write(b +line)
-    #     f.close()
-
-    print_info("Installing wallet build dependencies...")
-    run_command("apt-get --assume-yes install git unzip build-essential libssl-dev libdb++-dev libboost-all-dev libcrypto++-dev libqrencode-dev libminiupnpc-dev libgmp-dev libgmp3-dev autoconf autogen automake libtool")
-
     is_compile = False
     is_download_from_release = True
-    if os.path.isfile('/usr/local/bin/indexd'):
+    if checkdaemon():
         print_warning('Wallet already installed on the system')
         is_download_from_release = False
 
-
-    if is_compile:
-        print_info("Downloading wallet...")
-        run_command("rm -rf /opt/IndexChain")
-        run_command("git clone https://github.com/IndexChain/Index /opt/IndexChain")
-        
-        print_info("Compiling wallet...")
-        run_command("chmod +x /opt/IndexChain/src/leveldb/build_detect_platform")
-        run_command("chmod +x /opt/IndexChain/src/secp256k1/autogen.sh")
-        run_command("cd  /opt/IndexChain/src/ && make -f makefile.unix USE_UPNP=-")
-        run_command("strip /opt/IndexChain/src/indexd")
-        run_command("cp /opt/IndexChain/src/indexd /usr/local/bin")
-        run_command("cd /opt/IndexChain/src/ &&  make -f makefile.unix clean")
-        run_command("indexd")
     if is_download_from_release:
-        print_info("Downloading daemon files...")
-        run_command("wget https://github.com/IndexChain/Index/releases/download/v0.13.8.11/index-0.13.8-x86_64-linux-gnu.tar.gz")
-        #Assuming the command went well,extract the targz
-        run_command("tar xzf index-0.13.8-x86_64-linux-gnu.tar.gz")
-        run_command("cd index-0.13.8 && cp bin/* /usr/local/bin/ && cd ~")
-        print_info("Finished downloading and installing daemon/wallet")
+        installdaemon(False)
 
+def installdaemon(fupdate):
+    os.system('su - mn1 -c "{}" '.format('index-cli stop &> /dev/null'))
+    print_info("Downloading daemon files...")
+    binraryurl = getlatestrelease()
+    binaryname = getbinaryname(binraryurl)
+    foldername = getextfoldername(binaryname)
+    run_command("wget " + binraryurl )
+    run_command("tar xzf " +binaryname)
+    run_command("cd " + foldername +" && cp bin/* /usr/local/bin/ && cd ~")
+    if fupdate:
+        print_info("Finished updating,now starting mn back up")
+        os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
+    else:
+        print_info("Finished downloading and installing daemon")
 
 def get_total_memory():
     return (os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES'))/(1024*1024)
 
 def autostart_masternode(user):
-    job = b"@reboot /usr/local/bin/indexd\n"
-    
+    job = "/usr/local/bin/indexd"
     p = subprocess.Popen("crontab -l -u {} 2> /dev/null".format(user), stderr=STDOUT, stdout=PIPE, shell=True)
     p.wait()
     lines = p.stdout.readlines()
     if job not in lines:
         print_info("Cron job doesn't exist yet, adding it to crontab")
         lines.append(job)
-        p = subprocess.run("echo \"{}\" | crontab -u {} -".format(''.join(lines).decode("utf-8"), user).decode("utf-8"), shell=True)
-        p.wait()
+        tab = CronTab(user=user)
+        cron = tab.new(command=job)
+        cron.every_reboot()
+        tab.write()
 
 def setup_first_masternode():
     print_info("Setting up first masternode")
     run_command("useradd --create-home -G sudo mn1")
-    os.system('su - mn1 -c "{}" '.format("indexd -daemon &> /dev/null"))
-
     print_info("Open your desktop wallet config file (%appdata%/IndexChain/index.conf) and copy your rpc username and password! If it is not there create one! E.g.:\n\trpcuser=[SomeUserName]\n\trpcpassword=[DifficultAndLongPassword]")
     global rpc_username
     global rpc_password
     rpc_username = input("rpcuser: ")
     rpc_password = input("rpcpassword: ")
 
-    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: znode genkey")
-    masternode_priv_key = input("znodeprivkey: ")
+    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: indexnode genkey")
+    masternode_priv_key = input("indexnodeprivkey: ")
     PRIVATE_KEYS.append(masternode_priv_key)
     
     config = """rpcuser={}
@@ -164,25 +166,21 @@ server=1
 listen=1
 daemon=1
 logtimestamps=1
-znode=1
-znodeprivkey={}
+indexnode=1
+indexnodeprivkey={}
 """.format(rpc_username, rpc_password, masternode_priv_key)
 
     print_info("Saving config file...")
+    #make inital dirs and logs required
+    run_command('su - mn1 -c "mkdir /home/mn1/.IndexChain"')
+    run_command('su - mn1 -c "touch /home/mn1/.IndexChain/index.conf"')
+    run_command('su - mn1 -c "touch /home/mn1/.IndexChain/exodus.log"')
+    run_command('su - mn1 -c "touch /home/mn1/.IndexChain/debug.log"')
     f = open('/home/mn1/.IndexChain/index.conf', 'w')
     f.write(config)
     f.close()
 
-    # print_info("Downloading blockchain bootstrap file...")
-    # run_command('su - mn1 -c "{}" '.format("cd && wget --continue " + BOOTSTRAP_URL))
-    
-    # print_info("Unzipping the file...")
-    # filename = BOOTSTRAP_URL[BOOTSTRAP_URL.rfind('/')+1:]
-    # run_command('su - mn1 -c "{}" '.format("cd && unzip -d .IndexChain -o " + filename))
-
-    # run_command('rm /home/mn1/.IndexChain/peers.dat') 
     autostart_masternode('mn1')
-    run_command("runuser -l  mn1 -c 'killall indexd'")
     os.system('su - mn1 -c "{}" '.format('indexd -daemon &> /dev/null'))
     print_warning("Masternode started syncing in the background...")
 
@@ -197,8 +195,8 @@ def setup_xth_masternode(xth):
     run_command("rm /home/mn{}/.IndexChain/peers.dat &> /dev/null".format(xth))
     run_command("rm /home/mn{}/.IndexChain/wallet.dat &> /dev/null".format(xth))
 
-    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: znode genkey")
-    masternode_priv_key = input("znodeprivkey: ")
+    print_info("Open your wallet console (Help => Debug window => Console) and create a new masternode private key: indexnode genkey")
+    masternode_priv_key = input("indexnodeprivkey: ")
     PRIVATE_KEYS.append(masternode_priv_key)
 
     BASE_RPC_PORT = 8888
@@ -213,8 +211,8 @@ server=1
 listen=1
 daemon=1
 logtimestamps=1
-znode=1
-znodeprivkey={}
+indexnode=1
+indexnodeprivkey={}
 """.format(rpc_username, rpc_password, BASE_RPC_PORT + xth - 1, BASE_PORT + xth - 1, masternode_priv_key)
     
     print_info("Saving config file...")
@@ -229,20 +227,16 @@ znodeprivkey={}
 
 def setup_masternodes():
     memory = get_total_memory()
-    # masternodes = int(math.floor(memory / 300))
     setup_first_masternode()
-
-    # for i in range(masternodes-1):
-    #     setup_xth_masternode(i+2)
 
 def porologe():
 
     mn_base_data = """
-Alias: Masternode{}
+Alias: zn{}
 IP: {}
 Private key: {}
-Transaction ID: [5k deposit transaction id. 'znode outputs']
-Transaction index: [5k deposit transaction index. 'znode outputs']
+Transaction ID: [5k IDX deposit transaction id. 'indexnode outputs']
+Transaction index: [5k IDX deposit transaction index. 'indexnode outputs']
 mnconf line :
 {} {} {} txhash txindex
 --------------------------------------------------
@@ -257,10 +251,10 @@ mnconf line :
     imp = """"""
     print('')
     print_info(
-"""Masternodes setup finished!
-\tWait until all masternodes are fully synced. To check the progress login the 
-\tmasternode account (su mnX, where X is the number of the masternode) and run
-\tthe 'indexd getinfo' to get actual block number. Go to
+"""Masternode setup finished!
+\tWait until masternode is fully synced. To check the progress login the 
+\tmasternode account (su mn1, where 1 is the number of the masternode) and run
+\tthe 'index-cli getinfo' to get actual block number. Go to
 \t the explorer website to check the latest block number. After the
 \tsyncronization is done add your masternodes to your desktop wallet.
 Datas:""" + mn_data)
@@ -272,9 +266,12 @@ def main():
     chech_root()
     update_system()
     secure_server()
-    compile_wallet()
-    setup_masternodes()
-    porologe()
+    if checkdaemon():
+        installdaemon(True)
+    else:
+        compile_wallet()
+        setup_masternodes()
+        porologe()
 
 if __name__ == "__main__":
     main()

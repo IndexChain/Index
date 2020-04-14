@@ -8,7 +8,7 @@
 
 #include "askpassphrasedialog.h"
 #include "ui_askpassphrasedialog.h"
-
+#include "hybridui/styleSheet.h"
 #include "guiconstants.h"
 #include "walletmodel.h"
 
@@ -27,7 +27,8 @@ AskPassphraseDialog::AskPassphraseDialog(Mode mode, QWidget *parent, QLabel *isS
     fCapsLock(false)
 {
     ui->setupUi(this);
-
+    SetObjectStyleSheet(ui->buttonBox->button(QDialogButtonBox::Cancel), StyleSheetNames::ButtonLight);
+    SetObjectStyleSheet(ui->buttonBox->button(QDialogButtonBox::Ok), StyleSheetNames::ButtonGray);
     ui->passEdit1->setMinimumSize(ui->passEdit1->sizeHint());
     ui->passEdit2->setMinimumSize(ui->passEdit2->sizeHint());
     ui->passEdit3->setMinimumSize(ui->passEdit3->sizeHint());
@@ -68,6 +69,7 @@ AskPassphraseDialog::AskPassphraseDialog(Mode mode, QWidget *parent, QLabel *isS
             ui->passLabel3->hide();
             ui->passEdit3->hide();
             ui->unlockForStakingOnlyCheckBox->show();
+	        ui->unlockForStakingOnlyCheckBox->setChecked(true);
             ui->unlockForStakingOnlyLabel->show();
             setWindowTitle(tr("Unlock wallet"));
             break;
@@ -127,7 +129,7 @@ void AskPassphraseDialog::accept()
             break;
         }
         QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm wallet encryption"),
-                 tr("Warning: If you encrypt your wallet and lose your passphrase, you will <b>LOSE ALL OF YOUR ZCOINS</b>!") + "<br><br>" + tr("Are you sure you wish to encrypt your wallet?"),
+                 tr("Warning: If you encrypt your wallet and lose your passphrase, you will <b>LOSE ALL OF YOUR IDX Coins</b>!") + "<br><br>" + tr("Are you sure you wish to encrypt your wallet?"),
                  QMessageBox::Yes|QMessageBox::Cancel,
                  QMessageBox::Cancel);
         if(retval == QMessageBox::Yes)

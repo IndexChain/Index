@@ -76,6 +76,7 @@ class CCoins
 public:
     //! whether transaction is a coinbase
     bool fCoinBase;
+    bool fCoinStake;
 
     //! unspent transaction outputs; spent outputs are .IsNull(); spent outputs at the end of the array are dropped
     std::vector<CTxOut> vout;
@@ -87,8 +88,10 @@ public:
     //! as new tx version will probably only be introduced at certain heights
     int nVersion;
 
-    void FromTx(const CTransaction &tx, int nHeightIn) {
+    void FromTx(const CTransaction& tx, int nHeightIn)
+    {
         fCoinBase = tx.IsCoinBase();
+        fCoinStake = tx.IsCoinStake();
         vout = tx.vout;
         nHeight = nHeightIn;
         nVersion = tx.nVersion;
@@ -96,71 +99,88 @@ public:
     }
 
     //! construct a CCoins from a CTransaction, at a given height
-    CCoins(const CTransaction &tx, int nHeightIn) {
+    CCoins(const CTransaction& tx, int nHeightIn)
+    {
         FromTx(tx, nHeightIn);
     }
 
-    void Clear() {
+    void Clear()
+    {
         fCoinBase = false;
+        fCoinStake = false;
         std::vector<CTxOut>().swap(vout);
         nHeight = 0;
         nVersion = 0;
     }
 
     //! empty constructor
-    CCoins() : fCoinBase(false), vout(0), nHeight(0), nVersion(0) { }
+    CCoins() : fCoinBase(false), fCoinStake(false), vout(0), nHeight(0), nVersion(0) {}
 
     //!remove spent outputs at the end of vout
-    void Cleanup() {
+    void Cleanup()
+    {
         while (vout.size() > 0 && vout.back().IsNull())
             vout.pop_back();
         if (vout.empty())
             std::vector<CTxOut>().swap(vout);
     }
 
-    void ClearUnspendable() {
-        BOOST_FOREACH(CTxOut &txout, vout) {
+    void ClearUnspendable()
+    {
+        for (CTxOut& txout : vout) {
             if (txout.scriptPubKey.IsUnspendable())
                 txout.SetNull();
         }
         Cleanup();
     }
 
-    void swap(CCoins &to) {
+    void swap(CCoins& to)
+    {
         std::swap(to.fCoinBase, fCoinBase);
+        std::swap(to.fCoinStake, fCoinStake);
         to.vout.swap(vout);
         std::swap(to.nHeight, nHeight);
         std::swap(to.nVersion, nVersion);
     }
 
     //! equality test
-    friend bool operator==(const CCoins &a, const CCoins &b) {
-         // Empty CCoins objects are always equal.
-         if (a.IsPruned() && b.IsPruned())
-             return true;
-         return a.fCoinBase == b.fCoinBase &&
-                a.nHeight == b.nHeight &&
-                a.nVersion == b.nVersion &&
-                a.vout == b.vout;
+    friend bool operator==(const CCoins& a, const CCoins& b)
+    {
+        // Empty CCoins objects are always equal.
+        if (a.IsPruned() && b.IsPruned())
+            return true;
+        return a.fCoinBase == b.fCoinBase &&
+               a.fCoinStake == b.fCoinStake &&
+               a.nHeight == b.nHeight &&
+               a.nVersion == b.nVersion &&
+               a.vout == b.vout;
     }
-    friend bool operator!=(const CCoins &a, const CCoins &b) {
+    friend bool operator!=(const CCoins& a, const CCoins& b)
+    {
         return !(a == b);
     }
 
-    void CalcMaskSize(unsigned int &nBytes, unsigned int &nNonzeroBytes) const;
+    void CalcMaskSize(unsigned int& nBytes, unsigned int& nNonzeroBytes) const;
 
-    bool IsCoinBase() const {
+    bool IsCoinBase() const
+    {
         return fCoinBase;
     }
 
-    unsigned int GetSerializeSize(int nType, int nVersion) const {
+    bool IsCoinStake() const
+    {
+        return fCoinStake;
+    }
+
+    unsigned int GetSerializeSize(int nType, int nVersion) const
+    {
         unsigned int nSize = 0;
         unsigned int nMaskSize = 0, nMaskCode = 0;
         CalcMaskSize(nMaskSize, nMaskCode);
         bool fFirst = vout.size() > 0 && !vout[0].IsNull();
         bool fSecond = vout.size() > 1 && !vout[1].IsNull();
         assert(fFirst || fSecond || nMaskCode);
-        unsigned int nCode = 8*(nMaskCode - (fFirst || fSecond ? 0 : 1)) + (fCoinBase ? 1 : 0) + (fFirst ? 2 : 0) + (fSecond ? 4 : 0);
+        unsigned int nCode = 8 * (nMaskCode - (fFirst || fSecond ? 0 : 1)) + (fCoinBase ? 1 : 0) + (fCoinStake ? 2 : 0) + (fFirst ? 4 : 0) + (fSecond ? 8 : 0);
         // version
         nSize += ::GetSerializeSize(VARINT(this->nVersion), nType, nVersion);
         // size of header code
@@ -176,23 +196,24 @@ public:
         return nSize;
     }
 
-    template<typename Stream>
-    void Serialize(Stream &s, int nType, int nVersion) const {
+    template <typename Stream>
+    void Serialize(Stream& s, int nType, int nVersion) const
+    {
         unsigned int nMaskSize = 0, nMaskCode = 0;
         CalcMaskSize(nMaskSize, nMaskCode);
         bool fFirst = vout.size() > 0 && !vout[0].IsNull();
         bool fSecond = vout.size() > 1 && !vout[1].IsNull();
         assert(fFirst || fSecond || nMaskCode);
-        unsigned int nCode = 8*(nMaskCode - (fFirst || fSecond ? 0 : 1)) + (fCoinBase ? 1 : 0) + (fFirst ? 2 : 0) + (fSecond ? 4 : 0);
+        unsigned int nCode = 16 * (nMaskCode - (fFirst || fSecond ? 0 : 1)) + (fCoinBase ? 1 : 0) + (fCoinStake ? 2 : 0) + (fFirst ? 4 : 0) + (fSecond ? 8 : 0);
         // version
         ::Serialize(s, VARINT(this->nVersion), nType, nVersion);
         // header code
         ::Serialize(s, VARINT(nCode), nType, nVersion);
         // spentness bitmask
-        for (unsigned int b = 0; b<nMaskSize; b++) {
+        for (unsigned int b = 0; b < nMaskSize; b++) {
             unsigned char chAvail = 0;
-            for (unsigned int i = 0; i < 8 && 2+b*8+i < vout.size(); i++)
-                if (!vout[2+b*8+i].IsNull())
+            for (unsigned int i = 0; i < 8 && 2 + b * 8 + i < vout.size(); i++)
+                if (!vout[2 + b * 8 + i].IsNull())
                     chAvail |= (1 << i);
             ::Serialize(s, chAvail, nType, nVersion);
         }
@@ -205,18 +226,20 @@ public:
         ::Serialize(s, VARINT(nHeight), nType, nVersion);
     }
 
-    template<typename Stream>
-    void Unserialize(Stream &s, int nType, int nVersion) {
+    template <typename Stream>
+    void Unserialize(Stream& s, int nType, int nVersion)
+    {
         unsigned int nCode = 0;
         // version
         ::Unserialize(s, VARINT(this->nVersion), nType, nVersion);
         // header code
         ::Unserialize(s, VARINT(nCode), nType, nVersion);
-        fCoinBase = nCode & 1;
+        fCoinBase = nCode & 1;         //0001 - means coinbase
+        fCoinStake = (nCode & 2) != 0; //0010 coinstake
         std::vector<bool> vAvail(2, false);
-        vAvail[0] = (nCode & 2) != 0;
-        vAvail[1] = (nCode & 4) != 0;
-        unsigned int nMaskCode = (nCode / 8) + ((nCode & 6) != 0 ? 0 : 1);
+        vAvail[0] = (nCode & 4) != 0; // 0100
+        vAvail[1] = (nCode & 8) != 0; // 1000
+        unsigned int nMaskCode = (nCode / 16) + ((nCode & 12) != 0 ? 0 : 1);
         // spentness bitmask
         while (nMaskCode > 0) {
             unsigned char chAvail = 0;
@@ -249,8 +272,9 @@ public:
 
     //! check whether the entire CCoins is spent
     //! note that only !IsPruned() CCoins can be serialized
-    bool IsPruned() const {
-        BOOST_FOREACH(const CTxOut &out, vout)
+    bool IsPruned() const
+    {
+        for (const CTxOut& out : vout)
             if (!out.IsNull())
                 return false;
         return true;

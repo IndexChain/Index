@@ -9,7 +9,7 @@
 #include "guiutil.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
-
+#include "hybridui/styleSheet.h"
 #include "base58.h"
 #include "init.h"
 #include "main.h" // For strMessageMagic
@@ -40,6 +40,14 @@ SignVerifyMessageDialog::SignVerifyMessageDialog(const PlatformStyle *platformSt
 #if QT_VERSION >= 0x040700
     ui->signatureOut_SM->setPlaceholderText(tr("Click \"Sign Message\" to generate signature"));
 #endif
+    SetObjectStyleSheet(ui->clearButton_SM, StyleSheetNames::ButtonLight);
+    SetObjectStyleSheet(ui->clearButton_VM, StyleSheetNames::ButtonLight);
+    SetObjectStyleSheet(ui->signMessageButton_SM, StyleSheetNames::ButtonGray);
+    SetObjectStyleSheet(ui->verifyMessageButton_VM, StyleSheetNames::ButtonGray);
+    SetObjectStyleSheet(ui->addressBookButton_SM, StyleSheetNames::ButtonTransparent);
+    SetObjectStyleSheet(ui->pasteButton_SM, StyleSheetNames::ButtonTransparent);
+    SetObjectStyleSheet(ui->copySignatureButton_SM, StyleSheetNames::ButtonTransparent);
+    SetObjectStyleSheet(ui->addressBookButton_VM, StyleSheetNames::ButtonTransparent);
 
     GUIUtil::setupAddressWidget(ui->addressIn_SM, this);
     GUIUtil::setupAddressWidget(ui->addressIn_VM, this);

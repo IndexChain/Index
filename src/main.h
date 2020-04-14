@@ -165,9 +165,12 @@ static const int MAX_UNCONNECTING_HEADERS = 10;
 static std::map<int, CBlock> mapBlockData;
 
 static const bool DEFAULT_PEERBLOOMFILTERS = true;
-
-// Block Height Lyra2Z
-#define LYRA2Z_HEIGHT 20500
+/** Default for -blockspamfilter, use header spam filter */
+static const bool DEFAULT_BLOCK_SPAM_FILTER = true;
+/** Default for -blockspamfiltermaxsize, maximum size of the list of indexes in the block spam filter */
+static const unsigned int DEFAULT_BLOCK_SPAM_FILTER_MAX_SIZE = 100;
+/** Default for -blockspamfiltermaxavg, maximum average size of an index occurrence in the block spam filter */
+static const unsigned int DEFAULT_BLOCK_SPAM_FILTER_MAX_AVG = 10;
 
 // Block Height Limit Spend One TX Per Block
 #define OLD_LIMIT_SPEND_TXS 22000
@@ -551,7 +554,7 @@ int GetUTXOHeight(const COutPoint& outpoint);
 int GetInputAge(const CTxIn &txin);
 int GetInputAgeIX(const uint256 &nTXHash, const CTxIn &txin);
 int GetIXConfirmations(const uint256 &nTXHash);
-CAmount GetZnodePayment(const Consensus::Params &params, bool fMTP,int nHeight);
+CAmount GetIndexnodePayment(const Consensus::Params &params, bool fMTP,int nHeight);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */
 bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true);

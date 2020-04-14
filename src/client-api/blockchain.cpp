@@ -5,7 +5,7 @@
 #include "client-api/server.h"
 #include "client-api/protocol.h"
 #include "rpc/server.h"
-#include "znode-sync.h"
+#include "indexnode-sync.h"
 #include "core_io.h"
 #include "wallet/wallet.h"
 #include "client-api/wallet.h"
@@ -19,10 +19,7 @@ using namespace boost::chrono;
 uint32_t AvgBlockTime(){
     uint32_t avgBlockTime;
     Consensus::Params nParams = Params().GetConsensus();
-    if(chainActive.Tip()->nHeight >= nParams.nMTPFiveMinutesStartBlock)
-        avgBlockTime = nParams.nPowTargetSpacingMTP;
-    else
-        avgBlockTime = nParams.nPowTargetSpacing;
+    avgBlockTime = nParams.nPowTargetSpacing;
 
     return avgBlockTime;
 }
@@ -33,11 +30,11 @@ UniValue blockchain(Type type, const UniValue& data, const UniValue& auth, bool 
     UniValue status(UniValue::VOBJ);
     UniValue currentBlock(UniValue::VOBJ);
 
-    status.push_back(Pair("isBlockchainSynced", znodeSync.GetBlockchainSynced()));
-    status.push_back(Pair("isZnodeListSynced", znodeSync.IsZnodeListSynced()));
-    status.push_back(Pair("isWinnersListSynced", znodeSync.IsWinnersListSynced()));
-    status.push_back(Pair("isSynced", znodeSync.IsSynced()));
-    status.push_back(Pair("isFailed", znodeSync.IsFailed()));
+    status.push_back(Pair("isBlockchainSynced", indexnodeSync.GetBlockchainSynced()));
+    status.push_back(Pair("isIndexnodeListSynced", indexnodeSync.IsIndexnodeListSynced()));
+    status.push_back(Pair("isWinnersListSynced", indexnodeSync.IsWinnersListSynced()));
+    status.push_back(Pair("isSynced", indexnodeSync.IsSynced()));
+    status.push_back(Pair("isFailed", indexnodeSync.IsFailed()));
 
     // if coming from PUB, height and time are included in data. otherwise just return chain tip
     UniValue height = find_value(data, "nHeight");
@@ -58,7 +55,7 @@ UniValue blockchain(Type type, const UniValue& data, const UniValue& auth, bool 
     blockinfoObj.push_back(Pair("currentBlock", currentBlock));
     blockinfoObj.push_back(Pair("avgBlockTime", int64_t(AvgBlockTime())));
 
-    if(!znodeSync.GetBlockchainSynced()){
+    if(!indexnodeSync.GetBlockchainSynced()){
         unsigned long currentTimestamp = floor(
             system_clock::now().time_since_epoch() / 
             milliseconds(1)/1000);

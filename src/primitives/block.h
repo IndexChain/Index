@@ -13,7 +13,6 @@
 #include "serialize.h"
 #include "uint256.h"
 #include "definition.h"
-#include "crypto/MerkleTreeProof/mtp.h"
 #include "zerocoin_params.h"
 
 // Can't include sigma.h
@@ -36,57 +35,6 @@ inline int GetZerocoinChainID()
     return 0x0001; // We are the first :)
 }
 
-// Index - MTP
-class CMTPHashData {
-public:
-    uint8_t hashRootMTP[16]; // 16 is 128 bit of blake2b
-    uint64_t nBlockMTP[mtp::MTP_L*2][128]; // 128 is ARGON2_QWORDS_IN_BLOCK
-    std::deque<std::vector<uint8_t>> nProofMTP[mtp::MTP_L*3];
-
-    CMTPHashData() {
-        memset(nBlockMTP, 0, sizeof(nBlockMTP));
-    }
-
-    ADD_SERIALIZE_METHODS;
-
-    /**
-     * Custom serialization scheme is in place because of speed reasons
-     */
-
-    // Function for write/getting size
-    template <typename Stream, typename Operation, typename = typename std::enable_if<!std::is_base_of<CSerActionUnserialize, Operation>::value>::type>
-    inline void SerializationOp(Stream &s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(hashRootMTP);
-        READWRITE(nBlockMTP);
-        for (int i = 0; i < mtp::MTP_L*3; i++) {
-            assert(nProofMTP[i].size() < 256);
-            uint8_t numberOfProofBlocks = (uint8_t)nProofMTP[i].size();
-            READWRITE(numberOfProofBlocks);
-            for (const std::vector<uint8_t> &mtpData: nProofMTP[i]) {
-                // data size should be 16 for each block
-                assert(mtpData.size() == 16);
-                s.write((const char *)mtpData.data(), 16);
-            }
-        }
-    }
-
-    // Function for reading
-    template <typename Stream>
-    inline void SerializationOp(Stream &s, CSerActionUnserialize ser_action, int nType, int nVersion) {
-        READWRITE(hashRootMTP);
-        READWRITE(nBlockMTP);
-        for (int i = 0; i < mtp::MTP_L*3; i++) {
-            uint8_t numberOfProofBlocks;
-            READWRITE(numberOfProofBlocks);
-            for (uint8_t j=0; j<numberOfProofBlocks; j++) {
-                vector<uint8_t> mtpData(16, 0);
-                s.read((char *)mtpData.data(), 16);
-                nProofMTP[i].emplace_back(std::move(mtpData));
-            }
-        }
-    }
-};
-
 class CBlockHeader
 {
 public:
@@ -97,17 +45,7 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
-    bool fProofOfStake;
     std::vector<unsigned char> vchBlockSig;//Proof Of Stake Block signature
-    // Index - MTP
-    int32_t nVersionMTP = 0x1000;
-    uint256 mtpHashValue;
-
-    // Reserved fields
-    uint256 reserved[2];
-
-    // Store this only when absolutely needed for verification
-    std::shared_ptr<CMTPHashData> mtpHashData;
 
     static const int CURRENT_VERSION = 2;
 
@@ -134,8 +72,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        READWRITE(fProofOfStake);
-        if(fProofOfStake)
+        if(nNonce == 0)
             READWRITE(vchBlockSig);
     }
 
@@ -147,8 +84,7 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        READWRITE(fProofOfStake);
-        if(fProofOfStake)
+        if(nNonce == 0)
             READWRITE(vchBlockSig);
     }
 
@@ -160,16 +96,9 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
-        fProofOfStake = false;
         isComputed = -1;
         powHash.SetNull();
         vchBlockSig.clear();
-
-        // Index - MTP
-        mtpHashData.reset();
-        mtpHashValue.SetNull();
-        reserved[0].SetNull();
-        reserved[1].SetNull();
     }
 
     int GetChainID() const
@@ -188,10 +117,7 @@ public:
     }
 
     void SetPoWHash(uint256 hash) const
-    {
-//        isComputed = 1;
-//        powHash = hash;
-    }
+    {}
 
     uint256 GetPoWHash() const;
 
@@ -201,7 +127,6 @@ public:
     {
         return (int64_t)nTime;
     }
-    void InvalidateCachedPoWHash(int nHeight) const;
 };
 
 class CZerocoinTxInfo;
@@ -212,7 +137,7 @@ public:
     // network and disk
     std::vector<CTransaction> vtx;
     // memory only
-    mutable CTxOut txoutZnode; // znode payment
+    mutable CTxOut txoutIndexnode; // indexnode payment
     mutable std::vector<CTxOut> voutSuperblock; // superblock payment
     mutable bool fChecked;
 
@@ -257,7 +182,7 @@ public:
         ZerocoinClean();
         CBlockHeader::SetNull();
         vtx.clear();
-        txoutZnode = CTxOut();
+        txoutIndexnode = CTxOut();
         voutSuperblock.clear();
         fChecked = false;
     }
@@ -281,8 +206,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        block.fProofOfStake = fProofOfStake;
-        if(block.fProofOfStake)
+        if(block.nNonce == 0)
             block.vchBlockSig    = vchBlockSig;
         return block;
     }

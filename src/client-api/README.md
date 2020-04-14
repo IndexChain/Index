@@ -56,9 +56,9 @@ A function with one or more operations.
 | [txFee](#txfee)                   | Gets the transaction fee required for the size of the tx passed + fee per kb. | 🔐 | – | – |
 | [unlockWallet](#unlockwallet)     | Unlock core wallet, should it be encrypted. | 🔐 | – | – |
 | [updateLabels](#updatelabels)     | Update transaction labels stored in the persistent tx metadata file. | 🔐 | – | – |
-| [znodeControl](#znodecontrol)     | Start/stop Znode(s) by alias. | 🔐 | ✅ | – |
-| [znodeKey](#znodekey)             | Generate a new znode key. | 🔐 | - | – |
-| [znodeList](#znodelist)           | list information related to all Znodes. | 🔐 | – | – |
+| [indexnodeControl](#indexnodecontrol)     | Start/stop Indexnode(s) by alias. | 🔐 | ✅ | – |
+| [indexnodeKey](#indexnodekey)             | Generate a new indexnode key. | 🔐 | - | – |
+| [indexnodeList](#indexnodelist)           | list information related to all Indexnodes. | 🔐 | – | – |
 
 ## data
 to be passed with `type` to be performed on `collection`.
@@ -107,9 +107,9 @@ OPTIONAL: not a necessary parameter to pass.
         pid: INT,
         modules: {
             API: BOOL,
-            Znode: BOOL
+            Indexnode: BOOL
         },
-        Znode: {
+        Indexnode: {
             localCount: INT,
             totalCount: INT,
             enabledCount: INT
@@ -214,10 +214,10 @@ OPTIONAL: not a necessary parameter to pass.
                     {
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -227,10 +227,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -244,10 +244,10 @@ OPTIONAL: not a necessary parameter to pass.
                             },
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -257,10 +257,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING                                    
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -277,7 +277,7 @@ OPTIONAL: not a necessary parameter to pass.
                 total: 
                     {
                         sent: INT, (VAR : category=="send"|"mint"|"spend")
-                        balance: INT, (VAR: category=="mined"|"znode"|"receive"|)
+                        balance: INT, (VAR: category=="mined"|"indexnode"|"receive"|)
                     } 
             },
         [STRING | "MINT"]: (address)
@@ -286,10 +286,10 @@ OPTIONAL: not a necessary parameter to pass.
                     {
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -299,10 +299,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING 
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -316,10 +316,10 @@ OPTIONAL: not a necessary parameter to pass.
                             },
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -329,10 +329,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING 
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -349,7 +349,7 @@ OPTIONAL: not a necessary parameter to pass.
                 total: 
                     {
                         sent: INT, (VAR : category=="send"|"mint"|"spend")
-                        balance: INT, (VAR: category=="mined"|"znode"|"receive"|)
+                        balance: INT, (VAR: category=="mined"|"indexnode"|"receive"|)
                     }  
             },
         ...
@@ -374,7 +374,7 @@ OPTIONAL: not a necessary parameter to pass.
         type: STRING,
         status: {
             isBlockchainSynced: BOOL,
-            isZnodeListSynced: BOOL,
+            isIndexnodeListSynced: BOOL,
             isWinnersListSynced: BOOL,
             isSynced: BOOL,
             isFailed: BOOL
@@ -913,10 +913,10 @@ OPTIONAL: not a necessary parameter to pass.
                     {
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -926,10 +926,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -943,10 +943,10 @@ OPTIONAL: not a necessary parameter to pass.
                             },
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -956,10 +956,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING                                    
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -976,7 +976,7 @@ OPTIONAL: not a necessary parameter to pass.
                 total: 
                     {
                         sent: INT, (VAR : category=="send"|"mint"|"spend")
-                        balance: INT, (VAR: category=="mined"|"znode"|"receive"|)
+                        balance: INT, (VAR: category=="mined"|"indexnode"|"receive"|)
                     } 
             },
         [STRING | "MINT"]: (address)
@@ -985,10 +985,10 @@ OPTIONAL: not a necessary parameter to pass.
                     {
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -998,10 +998,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING 
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1015,10 +1015,10 @@ OPTIONAL: not a necessary parameter to pass.
                             },
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1028,10 +1028,10 @@ OPTIONAL: not a necessary parameter to pass.
                                     blockHeight: INT,
                                     txid: STRING 
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1048,7 +1048,7 @@ OPTIONAL: not a necessary parameter to pass.
                 total: 
                     {
                         sent: INT, (VAR : category=="send"|"mint"|"spend")
-                        balance: INT, (VAR: category=="mined"|"znode"|"receive"|)
+                        balance: INT, (VAR: category=="mined"|"indexnode"|"receive"|)
                     }  
             },
         ...
@@ -1140,7 +1140,7 @@ OPTIONAL: not a necessary parameter to pass.
 }
 ```
 
-### `znodeControl`
+### `indexnodeControl`
 `update`:
 ```
     data: {
@@ -1177,7 +1177,7 @@ OPTIONAL: not a necessary parameter to pass.
 }
 ```
 
-### `znodeKey`
+### `indexnodeKey`
 `create`:
 ```
     data: {
@@ -1195,7 +1195,7 @@ OPTIONAL: not a necessary parameter to pass.
 }
 ```
 
-### `znodeList`
+### `indexnodeList`
 `initial`:
 ```
     data: {
@@ -1205,7 +1205,7 @@ OPTIONAL: not a necessary parameter to pass.
 ```
 {
 
-    data: (VAR: Znodes not synced) {
+    data: (VAR: Indexnodes not synced) {
         nodes: {
             STRING: (txid) {
                 label: STRING,
@@ -1239,7 +1239,7 @@ OPTIONAL: not a necessary parameter to pass.
         total: INT
     },
 
-    data: (VAR: Znodes synced) {
+    data: (VAR: Indexnodes synced) {
         STRING: { (payeeAddress)
             rank: INT,
             outpoint: {
@@ -1322,9 +1322,9 @@ OPTIONAL: not a necessary parameter to pass.
 The publisher module is comprised of various _topics_ that are triggered under specific conditions, called _events_. Both topics and events have a 1 to N relationship with each other; ie. 1 event may trigger 1 to N topics, and 1 topic may be triggered by 1 to N events.
 
 
-|               | _Event_       | NotifyAPIStatus  | SyncTransaction | NumConnectionsChanged | UpdatedBlockTip | UpdatedMintStatus  | UpdatedSettings | UpdatedZnode | UpdateSyncStatus |
+|               | _Event_       | NotifyAPIStatus  | SyncTransaction | NumConnectionsChanged | UpdatedBlockTip | UpdatedMintStatus  | UpdatedSettings | UpdatedIndexnode | UpdateSyncStatus |
 | ------------- | ------------- | ---------------  | --------------- | --------------------- | --------------- | -----------------  | --------------- | ------------ | ---------------- |
-| **_Topic_**   | Description   | API status notification | new transactions | indexd peer list updated | blockchain head updated | mint transaction added/up dated | settings changed/updated | Znode update | Blockchain sync update
+| **_Topic_**   | Description   | API status notification | new transactions | indexd peer list updated | blockchain head updated | mint transaction added/up dated | settings changed/updated | Indexnode update | Blockchain sync update
 **address** (triggers [block](#block))                 | block tx data.                            | -  | -  | -  | ✅ | -  | -  | -  | -  |
 **apiStatus** (triggers [apiStatus](#apistatus))       | Status of API                             | ✅ | -  | -  | -  | -  | -  | -  | -  |
 **balance** (triggers [balance](#balance))             | Balance info                              | -  | -  | -  | ✅ | -  | -  | -  | -  |
@@ -1332,7 +1332,7 @@ The publisher module is comprised of various _topics_ that are triggered under s
 **mintStatus** (triggers [mintStatus](#mintstatus))    | status of new mint                        | -  | -  | -  | -  | ✅ | -  | -  | -  |
 **settings** (triggers [readSettings](#readsettings))  | settings changed                          | -  | -  | -  | -  | -  | ✅ | -  | -  |
 **transaction** (triggers [transaction](#transaction)) | new transaction data                      | -  | ✅ | -  | -  | -  | -  | -  | -  |
-**znode** (triggers [znodeUpdate](#znodeupdate))       | update to znode                           | -  | -  | -  | -  | -  | -  | ✅ | -  |
+**indexnode** (triggers [indexnodeUpdate](#indexnodeupdate))       | update to indexnode                           | -  | -  | -  | -  | -  | -  | ✅ | -  |
 
 ## Methods
 
@@ -1401,10 +1401,10 @@ Methods specific to the publisher.
                     {
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1414,10 +1414,10 @@ Methods specific to the publisher.
                                     blockHeight: INT,
                                     txid: STRING
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1431,10 +1431,10 @@ Methods specific to the publisher.
                             },
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1444,10 +1444,10 @@ Methods specific to the publisher.
                                     blockHeight: INT,
                                     txid: STRING                                    
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1464,7 +1464,7 @@ Methods specific to the publisher.
                 total: 
                     {
                         sent: INT, (VAR : category=="send"|"mint"|"spend")
-                        balance: INT, (VAR: category=="mined"|"znode"|"receive"|)
+                        balance: INT, (VAR: category=="mined"|"indexnode"|"receive"|)
                     } 
             },
         [STRING | "MINT"]: (address)
@@ -1473,10 +1473,10 @@ Methods specific to the publisher.
                     {
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1486,10 +1486,10 @@ Methods specific to the publisher.
                                     blockHeight: INT,
                                     txid: STRING 
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1503,10 +1503,10 @@ Methods specific to the publisher.
                             },
                         STRING: (txid)
                             { 
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1516,10 +1516,10 @@ Methods specific to the publisher.
                                     blockHeight: INT,
                                     txid: STRING 
                                 },
-                            ["mined"|"send"|"receive"|"znode"|"spend"|"mint"]: (category) 
+                            ["mined"|"send"|"receive"|"indexnode"|"spend"|"mint"]: (category) 
                                  {
                                     address: STRING,
-                                    category: STRING("mined"|"send"|"receive"|"znode"|"spend"|"mint"),
+                                    category: STRING("mined"|"send"|"receive"|"indexnode"|"spend"|"mint"),
                                     amount: INT,
                                     fee: INT(sats),
                                     label: STRING (VAR : address is part of indexd "account")
@@ -1536,7 +1536,7 @@ Methods specific to the publisher.
                 total: 
                     {
                         sent: INT, (VAR : category=="send"|"mint"|"spend")
-                        balance: INT, (VAR: category=="mined"|"znode"|"receive"|)
+                        balance: INT, (VAR: category=="mined"|"indexnode"|"receive"|)
                     }  
             },
         ...
@@ -1547,7 +1547,7 @@ Methods specific to the publisher.
 }
 ```
 
-### `znodeUpdate` 
+### `indexnodeUpdate` 
 *Returns:*
 ```
 {

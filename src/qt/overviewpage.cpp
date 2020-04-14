@@ -14,7 +14,7 @@
 #include "transactionfilterproxy.h"
 #include "transactiontablemodel.h"
 #include "main.h"
-
+#include "hybridui/styleSheet.h"
 #ifdef WIN32
 #include <string.h>
 #endif
@@ -25,94 +25,150 @@
 #include <QAbstractItemDelegate>
 #include <QPainter>
 
-#define DECORATION_SIZE 54
 #define NUM_ITEMS 5
 
 class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    TxViewDelegate(const PlatformStyle *platformStyle, QObject *parent=nullptr):
+    explicit TxViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
         QAbstractItemDelegate(parent), unit(BitcoinUnits::BTC),
-        platformStyle(platformStyle)
+        platformStyle(_platformStyle)
     {
-
+        background_color_selected = GetStringStyleValue("txviewdelegate/background-color-selected", "#009ee5");
+        background_color = GetStringStyleValue("txviewdelegate/background-color", "#393939");
+        alternate_background_color = GetStringStyleValue("txviewdelegate/alternate-background-color", "#2e2e2e");
+        foreground_color = GetStringStyleValue("txviewdelegate/foreground-color", "#dedede");
+        foreground_color_selected = GetStringStyleValue("txviewdelegate/foreground-color-selected", "#ffffff");
+        amount_color = GetStringStyleValue("txviewdelegate/amount-color", "#ffffff");
+        color_unconfirmed = GetColorStyleValue("guiconstants/color-unconfirmed", COLOR_UNCONFIRMED);
+        color_negative = GetColorStyleValue("guiconstants/color-negative", COLOR_NEGATIVE);
     }
 
     inline void paint(QPainter *painter, const QStyleOptionViewItem &option,
                       const QModelIndex &index ) const
     {
         painter->save();
-
-        QIcon icon = qvariant_cast<QIcon>(index.data(TransactionTableModel::RawDecorationRole));
-        QRect mainRect = option.rect;
-        QRect decorationRect(mainRect.topLeft(), QSize(DECORATION_SIZE, DECORATION_SIZE));
-        int xspace = DECORATION_SIZE + 8;
-        int ypad = 6;
-        int halfheight = (mainRect.height() - 2*ypad)/2;
-        QRect amountRect(mainRect.left() + xspace, mainRect.top()+ypad, mainRect.width() - xspace, halfheight);
-        QRect addressRect(mainRect.left() + xspace, mainRect.top()+ypad+halfheight, mainRect.width() - xspace, halfheight);
-        icon = platformStyle->SingleColorIcon(icon);
-        icon.paint(painter, decorationRect);
-
+        bool selected = option.state & QStyle::State_Selected;
         QDateTime date = index.data(TransactionTableModel::DateRole).toDateTime();
+        QIcon icon = qvariant_cast<QIcon>(index.data(TransactionTableModel::RawDecorationRole));
+        if(selected)
+        {
+            icon = PlatformStyle::SingleColorIcon(icon, foreground_color_selected);
+        }
         QString address = index.data(Qt::DisplayRole).toString();
         qint64 amount = index.data(TransactionTableModel::AmountRole).toLongLong();
         bool confirmed = index.data(TransactionTableModel::ConfirmedRole).toBool();
-        QVariant value = index.data(Qt::ForegroundRole);
-        QColor foreground = option.palette.color(QPalette::Text);
-        if(value.canConvert<QBrush>())
+
+        QModelIndex ind = index.model()->index(index.row(), TransactionTableModel::Type, index.parent());
+        QString typeString = ind.data(Qt::DisplayRole).toString();
+
+        QRect mainRect = option.rect;
+        QColor txColor = index.row() % 2 ? background_color : alternate_background_color;
+        painter->fillRect(mainRect, txColor);
+
+        if(selected)
         {
-            QBrush brush = qvariant_cast<QBrush>(value);
-            foreground = brush.color();
+            painter->fillRect(mainRect.x()+1, mainRect.y()+1, mainRect.width()-2, mainRect.height()-2, background_color_selected);
         }
 
+        QColor foreground = foreground_color;
+        if(selected)
+        {
+            foreground = foreground_color_selected;
+        }
         painter->setPen(foreground);
-        QRect boundingRect;
-        painter->drawText(addressRect, Qt::AlignLeft|Qt::AlignVCenter, address, &boundingRect);
 
-        if (index.data(TransactionTableModel::WatchonlyRole).toBool())
+        QRect dateRect(mainRect.left() + MARGIN, mainRect.top(), DATE_WIDTH, TX_SIZE);
+        painter->drawText(dateRect, Qt::AlignLeft|Qt::AlignVCenter, GUIUtil::dateTimeStr(date));
+
+        int topMargin = (TX_SIZE - DECORATION_SIZE) / 2;
+        QRect decorationRect(dateRect.topRight() + QPoint(MARGIN, topMargin), QSize(DECORATION_SIZE, DECORATION_SIZE));
+        icon.paint(painter, decorationRect);
+
+        QRect typeRect(decorationRect.right() + MARGIN, mainRect.top(), TYPE_WIDTH, TX_SIZE);
+        painter->drawText(typeRect, Qt::AlignLeft|Qt::AlignVCenter, typeString);
+
+        bool watchOnly = index.data(TransactionTableModel::WatchonlyRole).toBool();
+
+        if (watchOnly)
         {
             QIcon iconWatchonly = qvariant_cast<QIcon>(index.data(TransactionTableModel::WatchonlyDecorationRole));
-            QRect watchonlyRect(boundingRect.right() + 5, mainRect.top()+ypad+halfheight, 16, halfheight);
+            if(selected)
+            {
+                iconWatchonly = PlatformStyle::SingleColorIcon(iconWatchonly, foreground_color_selected);
+            }
+            QRect watchonlyRect(typeRect.right() + MARGIN, mainRect.top() + topMargin, DECORATION_SIZE, DECORATION_SIZE);
             iconWatchonly.paint(painter, watchonlyRect);
         }
 
+        int addressMargin = watchOnly ? MARGIN + 20 : MARGIN;
+        int addressWidth = mainRect.width() - DATE_WIDTH - DECORATION_SIZE - TYPE_WIDTH - AMOUNT_WIDTH - 5*MARGIN;
+        addressWidth = watchOnly ? addressWidth - 20 : addressWidth;
+
+        QFont addressFont = option.font;
+        addressFont.setPointSizeF(addressFont.pointSizeF() * 0.95);
+        painter->setFont(addressFont);
+
+        QFontMetrics fmName(painter->font());
+        QString clippedAddress = fmName.elidedText(address, Qt::ElideRight, addressWidth);
+
+        QRect addressRect(typeRect.right() + addressMargin, mainRect.top(), addressWidth, TX_SIZE);
+        painter->drawText(addressRect, Qt::AlignLeft|Qt::AlignVCenter, clippedAddress);
+
+        QFont amountFont = option.font;
+        painter->setFont(amountFont);
+
         if(amount < 0)
         {
-            foreground = COLOR_NEGATIVE;
+            foreground = color_negative;
         }
         else if(!confirmed)
         {
-            foreground = COLOR_UNCONFIRMED;
+            foreground = color_unconfirmed;
         }
         else
         {
-            foreground = option.palette.color(QPalette::Text);
+            foreground = amount_color;
+        }
+
+        if(selected)
+        {
+            foreground = foreground_color_selected;
         }
         painter->setPen(foreground);
+
         QString amountText = BitcoinUnits::formatWithUnit(unit, amount, true, BitcoinUnits::separatorAlways);
         if(!confirmed)
         {
             amountText = QString("[") + amountText + QString("]");
         }
-        painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, amountText);
 
-        painter->setPen(option.palette.color(QPalette::Text));
-        painter->drawText(amountRect, Qt::AlignLeft|Qt::AlignVCenter, GUIUtil::dateTimeStr(date));
+        QRect amountRect(addressRect.right() + MARGIN, addressRect.top(), AMOUNT_WIDTH, TX_SIZE);
+        painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, amountText);
 
         painter->restore();
     }
 
     inline QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        return QSize(DECORATION_SIZE, DECORATION_SIZE);
+        return QSize(TX_SIZE, TX_SIZE);
     }
 
     int unit;
     const PlatformStyle *platformStyle;
 
+private:
+    QColor background_color_selected;
+    QColor background_color;
+    QColor alternate_background_color;
+    QColor foreground_color;
+    QColor foreground_color_selected;
+    QColor amount_color;
+    QColor color_unconfirmed;
+    QColor color_negative;
 };
+
 #include "overviewpage.moc"
 
 OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) :
@@ -130,6 +186,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     txdelegate(new TxViewDelegate(platformStyle, this))
 {
     ui->setupUi(this);
+    // Set stylesheet
+    SetObjectStyleSheet(ui->labelWalletStatus, StyleSheetNames::ButtonTransparent);
+    SetObjectStyleSheet(ui->labelTransactionsStatus, StyleSheetNames::ButtonTransparent);
 
     // read config
     bool torEnabled;
@@ -199,11 +258,12 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     currentWatchOnlyBalance = watchOnlyBalance;
     currentWatchUnconfBalance = watchUnconfBalance;
     currentWatchImmatureBalance = watchImmatureBalance;
+    CAmount totalbal = balance + unconfirmedBalance + immatureBalance + currentSigmaBalance + currentSigmaUnconfirmedBalance + currentStake;
     ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, currentBalance, false, BitcoinUnits::separatorAlways));
     ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, unconfirmedBalance, false, BitcoinUnits::separatorAlways));
     ui->labelStakeBalance->setText(BitcoinUnits::formatWithUnit(unit, currentStake, false, BitcoinUnits::separatorAlways));
     ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, immatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance + currentSigmaBalance + currentSigmaUnconfirmedBalance + currentStake, false, BitcoinUnits::separatorAlways));
+    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, (totalbal > 7446) ? totalbal:0, false, BitcoinUnits::separatorAlways));
     ui->labelWatchAvailable->setText(BitcoinUnits::formatWithUnit(unit, watchOnlyBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(unit, watchUnconfBalance, false, BitcoinUnits::separatorAlways));
     ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(unit, watchImmatureBalance, false, BitcoinUnits::separatorAlways));

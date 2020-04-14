@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Index Core Developers
+// Copyright (c) 2020 The Index Core Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,7 +15,7 @@
 #include "crypto/hmac_sha512.h"
 #include "keystore.h"
 #include <boost/optional.hpp>
-#include "znode-sync.h"
+#include "indexnode-sync.h"
 
 /**
  * Constructor for CHDMintWallet object.
@@ -670,7 +670,7 @@ bool CHDMintWallet::GetHDMintFromMintPoolEntry(const sigma::CoinDenomination den
  */
 bool CHDMintWallet::GenerateMint(const sigma::CoinDenomination denom, sigma::PrivateCoin& coin, CHDMint& dMint, boost::optional<MintPoolEntry> mintPoolEntry, bool fAllowUnsynced)
 {
-    if(!znodeSync.IsBlockchainSynced() && !fAllowUnsynced && !(Params().NetworkIDString() == CBaseChainParams::REGTEST))
+    if(!indexnodeSync.IsBlockchainSynced() && !fAllowUnsynced && !(Params().NetworkIDString() == CBaseChainParams::REGTEST))
         throw ZerocoinException("Unable to generate mint: Blockchain not yet synced.");
 
     if(mintPoolEntry!=boost::none)

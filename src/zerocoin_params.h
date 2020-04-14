@@ -12,8 +12,8 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 // There were bugs before this block, don't do some checks on early blocks
 #define ZC_CHECK_BUG_FIXED_AT_BLOCK         1
 
-// Before this block we allowed not paying to the znodes.
-#define ZC_ZNODE_PAYMENT_BUG_FIXED_AT_BLOCK         1
+// Before this block we allowed not paying to the indexnodes.
+#define ZC_INDEXNODE_PAYMENT_BUG_FIXED_AT_BLOCK         1
 
 // Do strict check on duplicate minted public coin value after this block
 #define ZC_CHECK_DUPLICATE_MINT_AT_BLOCK    1
@@ -99,7 +99,7 @@ static const int64_t DUST_HARD_LIMIT = 1000;   // 0.00001 IDX mininput
 #define ZC_MINT_CONFIRMATIONS               6
 
 // Genesis block timestamp
-#define ZC_GENESIS_BLOCK_TIME               1579903825//Date and time (GMT): Friday, January 24, 2020 10:10:25 PM
+#define ZC_GENESIS_BLOCK_TIME               1585678490//Date and time (GMT): Friday, January 24, 2020 10:10:25 PM
 
 #define SWITCH_TO_MTP_BLOCK_HEADER INT_MAX // NEVER
 #define SWITCH_TO_MTP_5MIN_BLOCK            INT_MAX

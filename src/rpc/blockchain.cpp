@@ -19,7 +19,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 #include "hash.h"
-
+#include "base58.h"
 #include <stdint.h>
 
 #include <univalue.h>
@@ -86,6 +86,41 @@ double GetPoSKernelPS()
     return result;
 }
 
+//Start Extra Blockinfo code
+CTransaction GetBlockRewardTransaction(const CBlock& block){
+    int RewardTXIndex = block.IsProofOfStake() ? 1:0;
+    return block.vtx[RewardTXIndex];
+}
+
+CTxOut GetStakeTXOut(const CTxIn& txin){
+    CTransaction prevTx;
+    uint256 hashBlock;
+    if (GetTransaction(txin.prevout.hash, prevTx, Params().GetConsensus(), hashBlock, true)) {
+        return prevTx.vout.at(txin.prevout.n);
+    }
+    return CTxOut();
+}
+
+std::string GetBlockRewardWinner(const CBlock& block){
+    CTransaction RewardTX = GetBlockRewardTransaction(block);
+    CTxDestination dstAddr;
+    const CTxOut& txout = block.IsProofOfStake() ? GetStakeTXOut(RewardTX.vin[0]) : RewardTX.vout[0];
+    if(txout != CTxOut() && ExtractDestination(txout.scriptPubKey, dstAddr))
+        return CBitcoinAddress(dstAddr).ToString();
+    return "";
+}
+
+float GetBlockInput(const CBlock& block){
+    float nValueIn = 0.0;
+    CTransaction RewardTX = GetBlockRewardTransaction(block);
+    //Cycle through inputs as we may have many inputs staking
+        for (unsigned int i = 0; i < RewardTX.vin.size(); i++) {
+            CTxOut const & txOut = GetStakeTXOut(RewardTX.vin[i]);
+            nValueIn+= ValueFromAmount(txOut.nValue).get_real();
+        }
+    return nValueIn;
+}
+//End extra block info code
 UniValue blockheaderToJSON(const CBlockIndex* blockindex)
 {
     UniValue result(UniValue::VOBJ);
@@ -124,6 +159,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("hash", blockindex->GetBlockHash().GetHex()));
     int confirmations = -1;
+    float blockInput = 0.0;
     // Only report confirmations if the block is on the main chain
     if (chainActive.Contains(blockindex))
         confirmations = chainActive.Height() - blockindex->nHeight + 1;
@@ -159,8 +195,13 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     CBlockIndex *pnext = chainActive.Next(blockindex);
     if (pnext)
         result.push_back(Pair("nextblockhash", pnext->GetBlockHash().GetHex()));
-    	if (block.IsProofOfStake()){
-        result.push_back(Pair("flags", blockindex->IsProofOfStake()? "proof-of-stake" : "proof-of-work"));
+    result.push_back(Pair("type",block.IsProofOfStake() ? "PoS":"PoW"));
+    if(block.IsProofOfStake())
+        blockInput = GetBlockInput(block);
+    if(blockInput > 0)
+            result.push_back(Pair("inputamount",blockInput));
+    result.push_back(Pair("rewardadress",GetBlockRewardWinner(block)));
+    if (block.IsProofOfStake()){
         result.push_back(Pair("modifier", blockindex->nStakeModifier.GetHex()));
         result.push_back(Pair("signature", HexStr(blockindex->vchBlockSig.begin(), blockindex->vchBlockSig.end())));
     }
@@ -993,6 +1034,10 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
             "{\n"
             "  \"chain\": \"xxxx\",        (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"blocks\": xxxxxx,         (numeric) the current number of blocks processed in the server\n"
+            "  \"lastpowblock\": xxxxxx,   (numeric) The last PoW Block in Block index\n"
+            "  \"lastpowdiff\": xxxxxx,    (numeric) The last PoW Block difficulty in Block index\n"
+            "  \"lastposblock\": xxxxxx,   (numeric) The last PoS Block in Block index\n"
+            "  \"lastposdiff\": xxxxxx,    (numeric) The last PoS Block difficulty in Block index\n"
             "  \"headers\": xxxxxx,        (numeric) the current number of headers we have validated\n"
             "  \"bestblockhash\": \"...\", (string) the hash of the currently best block\n"
             "  \"difficulty\": xxxxxx,     (numeric) the current difficulty\n"
@@ -1033,6 +1078,10 @@ UniValue getblockchaininfo(const UniValue& params, bool fHelp)
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("chain",                 Params().NetworkIDString()));
     obj.push_back(Pair("blocks",                (int)chainActive.Height()));
+    obj.push_back(Pair("lastpowblock",          GetLastBlockIndex(chainActive.Tip(), false)->nHeight));
+    obj.push_back(Pair("lastpowdiff",           GetDifficulty(GetLastBlockIndex(chainActive.Tip(), false))));
+    obj.push_back(Pair("lastposblock",          GetLastBlockIndex(chainActive.Tip(), true)->nHeight));
+    obj.push_back(Pair("lastposdiff",           GetDifficulty(GetLastBlockIndex(chainActive.Tip(), true))));
     obj.push_back(Pair("headers",               pindexBestHeader ? pindexBestHeader->nHeight : -1));
     obj.push_back(Pair("bestblockhash",         chainActive.Tip()->GetBlockHash().GetHex()));
     obj.push_back(Pair("difficulty",            (double)GetDifficulty()));

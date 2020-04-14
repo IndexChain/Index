@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "znodeman.h"
+#include "indexnodeman.h"
 #include "main.h"
 #include "init.h"
 #include "util.h"
@@ -10,12 +10,12 @@
 #include "client-api/protocol.h"
 #include "rpc/server.h"
 #include "rpc/client.h"
-#include "znode-sync.h"
+#include "indexnode-sync.h"
 #include "wallet/wallet.h"
-#include "znode.h"
-#include "znodeconfig.h"
-#include "znodeman.h"
-#include "activeznode.h"
+#include "indexnode.h"
+#include "indexnodeconfig.h"
+#include "indexnodeman.h"
+#include "activeindexnode.h"
 #include <zmqserver/zmqabstract.h>
 #include "univalue.h"
 
@@ -146,7 +146,7 @@ UniValue apistatus(Type type, const UniValue& data, const UniValue& auth, bool f
     UniValue modules(UniValue::VOBJ);
     
     modules.push_back(Pair("API", !APIIsInWarmup()));
-    modules.push_back(Pair("Znode", znodeSync.IsSynced()));
+    modules.push_back(Pair("Indexnode", indexnodeSync.IsSynced()));
 
     obj.push_back(Pair("version", CLIENT_VERSION));
     obj.push_back(Pair("protocolVersion", PROTOCOL_VERSION));
@@ -158,19 +158,19 @@ UniValue apistatus(Type type, const UniValue& data, const UniValue& auth, bool f
         }
     }
 
-    UniValue znode(UniValue::VOBJ);
-    znode.push_back(Pair("localCount", znodeConfig.getCount()));
-    znode.push_back(Pair("totalCount", mnodeman.CountZnodes()));
-    znode.push_back(Pair("enabledCount", mnodeman.CountEnabled()));
-    obj.push_back(Pair("Znode", znode));
+    UniValue indexnode(UniValue::VOBJ);
+    indexnode.push_back(Pair("localCount", indexnodeConfig.getCount()));
+    indexnode.push_back(Pair("totalCount", mnodeman.CountIndexnodes()));
+    indexnode.push_back(Pair("enabledCount", mnodeman.CountEnabled()));
+    obj.push_back(Pair("Indexnode", indexnode));
 
     obj.push_back(Pair("dataDir",       GetDataDir(true).string()));
     obj.push_back(Pair("network",       ChainNameFromCommandLine()));
     obj.push_back(Pair("blocks",        (int)chainActive.Height()));
     obj.push_back(Pair("connections",   (int)vNodes.size()));
     obj.push_back(Pair("devAuth",       CZMQAbstract::DEV_AUTH));
-    obj.push_back(Pair("synced",        znodeSync.GetBlockchainSynced()));
-    obj.push_back(Pair("reindexing",    fReindex || !znodeSync.GetBlockchainSynced()));
+    obj.push_back(Pair("synced",        indexnodeSync.GetBlockchainSynced()));
+    obj.push_back(Pair("reindexing",    fReindex || !indexnodeSync.GetBlockchainSynced()));
     obj.push_back(Pair("safeMode",      GetWarnings("api") != ""));
 
 #ifdef WIN32
@@ -215,7 +215,7 @@ UniValue stop(Type type, const UniValue& data, const UniValue& auth, bool fHelp)
     if (fHelp)
         throw runtime_error(
             "stop\n"
-            "\nStop Zcoin server.");
+            "\nStop IndexChain server.");
     // Event loop will exit after current HTTP requests have been handled, so
     // this reply will get back to the client.
     StartShutdown();

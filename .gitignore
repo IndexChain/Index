@@ -13,7 +13,7 @@ src/index-tx
 src/test/test_index
 src/test/test_index_fuzzy
 src/qt/test/test_index-qt
-
+indexnap/*
 # autoreconf
 Makefile.in
 aclocal.m4
@@ -45,6 +45,7 @@ src/univalue/gen
 
 src/qt/*.moc
 src/qt/moc_*.cpp
+src/qt/hybridui/moc_*.cpp
 src/qt/forms/ui_*.h
 
 src/qt/test/moc*.cpp

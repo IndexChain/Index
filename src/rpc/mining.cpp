@@ -20,9 +20,10 @@
 #include "rpc/server.h"
 #include "txmempool.h"
 #include "util.h"
+#include "spork.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
-#include "znode-sync.h"
+#include "indexnode-sync.h"
 #endif
 #include "utilstrencodings.h"
 #include "validationinterface.h"
@@ -38,48 +39,17 @@
 using namespace std;
 
 extern CTxMemPool stempool;
-
 /**
  * Return average network hashes per second based on the last 'lookup' blocks,
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
-UniValue GetNetworkHashPS(int lookup, int height) {
-    CBlockIndex *pb = chainActive.Tip();
-
-    if (height >= 0 && height < chainActive.Height())
-        pb = chainActive[height];
-
-    if (pb == NULL || !pb->nHeight)
-        return 0;
-
-    // If lookup is -1, then use blocks since last difficulty change.
-    if (lookup <= 0)
-        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
-
-    // If lookup is larger than chain, then set it to chain length.
-    if (lookup > pb->nHeight)
-        lookup = pb->nHeight;
-
-    CBlockIndex *pb0 = pb;
-    int64_t minTime = pb0->GetBlockTime();
-    int64_t maxTime = minTime;
-    for (int i = 0; i < lookup; i++) {
-        pb0 = pb0->pprev;
-        int64_t time = pb0->GetBlockTime();
-        minTime = std::min(time, minTime);
-        maxTime = std::max(time, maxTime);
-    }
-
-    // In case there's a situation where minTime == maxTime, we don't want a divide by zero exception.
-    if (minTime == maxTime)
-        return 0;
-
-    arith_uint256 workDiff = pb->nChainWork - pb0->nChainWork;
-    int64_t timeDiff = maxTime - minTime;
-
-    return workDiff.getdouble() / timeDiff;
+static UniValue GetNetworkHashPS(int lookup, int height) {
+    double currentDiffPoW  = GetDifficulty();
+    double netHashPS = currentDiffPoW * std::pow(2,32)  / Params().GetConsensus().nPowTargetSpacing;
+    return netHashPS;
 }
+
 
 UniValue getnetworkhashps(const UniValue& params, bool fHelp)
 {
@@ -90,7 +60,7 @@ UniValue getnetworkhashps(const UniValue& params, bool fHelp)
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
             "Pass in [height] to estimate the network speed at the time when a certain block was found.\n"
             "\nArguments:\n"
-            "1. blocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "1. blocks     (numeric, optional, default=360) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height     (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
             "x             (numeric) Hashes per second estimated\n"
@@ -100,7 +70,7 @@ UniValue getnetworkhashps(const UniValue& params, bool fHelp)
        );
 
     LOCK(cs_main);
-    return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 120, params.size() > 1 ? params[1].get_int() : -1);
+    return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 360, params.size() > 1 ? params[1].get_int() : -1);
 }
 
 UniValue generateBlocks(boost::shared_ptr<CReserveScript> coinbaseScript, int nGenerate, uint64_t nMaxTries, bool keepScript)
@@ -527,13 +497,13 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             "  \"curtime\" : ttt,                  (numeric) current timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"bits\" : \"xxxxxxxx\",              (string) compressed target of next block\n"
             "  \"height\" : n                      (numeric) The height of the next block\n"
-            "  \"znode\" : {                  (json object) required znode payee that must be included in the next block\n"
+            "  \"indexnode\" : {                  (json object) required indexnode payee that must be included in the next block\n"
             "      \"payee\" : \"xxxx\",             (string) payee address\n"
             "      \"script\" : \"xxxx\",            (string) payee scriptPubKey\n"
             "      \"amount\": n                   (numeric) required amount to pay\n"
             "  },\n"
-            "  \"znode_payments_started\" :  true|false, (boolean) true, if znode payments started\n"
-//            "  \"znode_payments_enforced\" : true|false, (boolean) true, if znode payments are enforced\n"
+            "  \"indexnode_payments_started\" :  true|false, (boolean) true, if indexnode payments started\n"
+            "  \"indexnode_payments_enforced\" : true|false, (boolean) true, if indexnode payments are enforced\n"
             "}\n"
 
             "\nExamples:\n"
@@ -609,12 +579,12 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     if (strMode != "template")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
 
-    if (vNodes.empty())
+    if (vNodes.empty() && chainActive.Tip()->nHeight > 100)
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Index is not connected!");
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Index is downloading blocks...");
 
-    if (!znodeSync.IsSynced())
+    if (!indexnodeSync.IsSynced() && chainActive.Tip()->nHeight > 500)
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Index Core is syncing with network...");
 
     static unsigned int nTransactionsUpdatedLast;
@@ -757,9 +727,6 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     UniValue aRules(UniValue::VARR);
     UniValue vbavailable(UniValue::VOBJ);
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; ++i) {
-        // MTP deployment has different set of rules
-        if (i == Consensus::DEPLOYMENT_MTP)
-            continue;
 
         Consensus::DeploymentPos pos = Consensus::DeploymentPos(i);
         ThresholdState state = VersionBitsState(pindexPrev, consensusParams, pos, versionbitscache);
@@ -834,18 +801,18 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     result.push_back(Pair("bits", strprintf("%08x", pblock->nBits)));
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
 
-    UniValue znodeObj(UniValue::VOBJ);
-    if(pblock->txoutZnode != CTxOut()) {
+    UniValue indexnodeObj(UniValue::VOBJ);
+    if(pblock->txoutIndexnode != CTxOut()) {
         CTxDestination address1;
-        ExtractDestination(pblock->txoutZnode.scriptPubKey, address1);
+        ExtractDestination(pblock->txoutIndexnode.scriptPubKey, address1);
         CBitcoinAddress address2(address1);
-        znodeObj.push_back(Pair("payee", address2.ToString().c_str()));
-        znodeObj.push_back(Pair("script", HexStr(pblock->txoutZnode.scriptPubKey.begin(), pblock->txoutZnode.scriptPubKey.end())));
-        znodeObj.push_back(Pair("amount", pblock->txoutZnode.nValue));
+        indexnodeObj.push_back(Pair("payee", address2.ToString().c_str()));
+        indexnodeObj.push_back(Pair("script", HexStr(pblock->txoutIndexnode.scriptPubKey.begin(), pblock->txoutIndexnode.scriptPubKey.end())));
+        indexnodeObj.push_back(Pair("amount", pblock->txoutIndexnode.nValue));
     }
-    result.push_back(Pair("znode", znodeObj));
-    result.push_back(Pair("znode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nZnodePaymentsStartBlock));
-//    result.push_back(Pair("znode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
+    result.push_back(Pair("indexnode", indexnodeObj));
+    result.push_back(Pair("indexnode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nIndexnodePaymentsStartBlock));
+    result.push_back(Pair("indexnode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_INDEXNODE_PAYMENT_ENFORCEMENT)));
 
     const struct BIP9DeploymentInfo& segwit_info = VersionBitsDeploymentInfo[Consensus::DEPLOYMENT_SEGWIT];
     if (!pblocktemplate->vchCoinbaseCommitment.empty() && setClientRules.find(segwit_info.name) != setClientRules.end()) {

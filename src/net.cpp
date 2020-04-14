@@ -397,20 +397,20 @@ CNode *FindNode(const NodeId nodeid) {
     return NULL;
 }
 
-CNode *ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, bool fConnectToZnode) {
+CNode *ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, bool fConnectToIndexnode) {
     if (pszDest == NULL) {
-        // we clean znode connections in CZnodeMan::ProcessZnodeConnections()
-        // so should be safe to skip this and connect to local Hot MN on CActiveZnode::ManageState()
-        if (IsLocal(addrConnect) && !fConnectToZnode)
+        // we clean indexnode connections in CIndexnodeMan::ProcessIndexnodeConnections()
+        // so should be safe to skip this and connect to local Hot MN on CActiveIndexnode::ManageState()
+        if (IsLocal(addrConnect) && !fConnectToIndexnode)
             return NULL;
         LOCK(cs_vNodes);
         // Look for an existing connection
         CNode *pnode = FindNode((CService) addrConnect);
         if (pnode) {
-            // we have existing connection to this node but it was not a connection to znode,
+            // we have existing connection to this node but it was not a connection to indexnode,
             // change flag and add reference so that we can correctly clear it later
-            if (fConnectToZnode && !pnode->fZnode) {
-                pnode->fZnode = true;
+            if (fConnectToIndexnode && !pnode->fIndexnode) {
+                pnode->fIndexnode = true;
             }
             pnode->AddRef();
             return pnode;
@@ -441,8 +441,8 @@ CNode *ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure
             // name catch this early.
             CNode *pnode = FindNode((CService) addrConnect);
             if (pnode) {
-                if (fConnectToZnode && !pnode->fZnode) {
-                    pnode->fZnode = true;
+                if (fConnectToIndexnode && !pnode->fIndexnode) {
+                    pnode->fIndexnode = true;
                 }
                 pnode->AddRef();
                 {
@@ -460,8 +460,8 @@ CNode *ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure
 
         // Add node
         CNode *pnode = new CNode(hSocket, addrConnect, pszDest ? pszDest : "", false);
-        if (fConnectToZnode) {
-            pnode->fZnode = true;
+        if (fConnectToIndexnode) {
+            pnode->fIndexnode = true;
         }
         pnode->AddRef();
 
@@ -1309,7 +1309,6 @@ void ThreadSocketHandler() {
         if (vNodes.size() != nPrevNodeCount) {
             nPrevNodeCount = vNodes.size();
             uiInterface.NotifyNumConnectionsChanged(nPrevNodeCount);
-            GetMainSignals().NumConnectionsChanged();
         }
 
         //
@@ -2417,7 +2416,13 @@ public:
 }
         instance_of_cnetcleanup;
 
-
+void CExplicitNetCleanup::callCleanup()
+{
+    // Explicit call to destructor of CNetCleanup because it's not implicitly called
+    // when the wallet is restarted from within the wallet itself.
+    CNetCleanup *tmp = new CNetCleanup();
+    delete tmp; // Stroustrup's gonna kill me for that
+}
 void RelayTransaction(const CTransaction &tx) {
     CInv inv(MSG_TX, tx.GetHash());
     LOCK(cs_vNodes);
@@ -2835,8 +2840,8 @@ CNode::CNode(SOCKET hSocketIn, const CAddress &addrIn, const std::string &addrNa
     minFeeFilter = 0;
     lastSentFeeFilter = 0;
     nextSendTimeFeeFilter = 0;
-    // znode
-    fZnode = false;
+    // indexnode
+    fIndexnode = false;
 
     BOOST_FOREACH(
     const std::string &msg, getAllNetMessageTypes())

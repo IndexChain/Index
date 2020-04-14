@@ -72,13 +72,14 @@ namespace {
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
 {
     uint256 txid = tx.GetHash();
+    entry.push_back(Pair("iscoinstake",tx.IsCoinStake()));
     entry.push_back(Pair("txid", txid.GetHex()));
     entry.push_back(Pair("hash", tx.GetWitnessHash().GetHex()));
     entry.push_back(Pair("size", (int)::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION)));
     entry.push_back(Pair("vsize", (int)::GetVirtualTransactionSize(tx)));
     entry.push_back(Pair("version", tx.nVersion));
     entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
-
+    float nTotalIn = 0;
     UniValue vin(UniValue::VARR);
     for (unsigned int i = 0; i < tx.vin.size(); i++) {
         const CTxIn& txin = tx.vin[i];
@@ -97,7 +98,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
             }
             in.push_back(Pair("anonymityGroup", int64_t(pubcoinId)));
             fillStdFields(in, txin);
-
+            nTotalIn += ValueFromAmount(spend->getIntDenomination()).get_real();
             in.push_back(Pair("value", ValueFromAmount(spend->getIntDenomination())));
             in.push_back(Pair("valueSat", spend->getIntDenomination()));
         } else if (txin.IsZerocoinRemint()){
@@ -112,6 +113,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
             fillStdFields(in, txin);
 
             CAmount const valueSat = remint->getDenomination() * COIN;
+            nTotalIn += ValueFromAmount(valueSat).get_real();
 
             in.push_back(Pair("value", ValueFromAmount(valueSat)));
             in.push_back(Pair("valueSat", valueSat));
@@ -124,7 +126,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
             uint256 hashBlock;
             if (GetTransaction(txin.prevout.hash, prevTx, Params().GetConsensus(), hashBlock, true)) {
                 CTxOut const & txOut = prevTx.vout.at(txin.prevout.n);
-
+                nTotalIn += ValueFromAmount(txOut.nValue).get_real();
                 in.push_back(Pair("value", ValueFromAmount(txOut.nValue)));
                 in.push_back(Pair("valueSat", txOut.nValue));
 
@@ -144,6 +146,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
             }
 
         }
+        in.push_back(Pair("totalin",nTotalIn));
         in.push_back(Pair("sequence", (int64_t)txin.nSequence));
         vin.push_back(in);
     }

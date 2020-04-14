@@ -125,7 +125,7 @@ void MetaDExDialog::setWalletModel(WalletModel *model)
     // use wallet model to get visibility into IDX balance changes for fees
     this->walletModel = model;
     if (model != NULL) {
-       connect(model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(UpdateBalances()));
+       connect(model, SIGNAL(balanceChanged(CAmount,CAmount,CAmount,CAmount,CAmount,CAmount,CAmount)), this, SLOT(UpdateBalances()));
     }
 }
 

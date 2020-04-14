@@ -29,7 +29,8 @@ class UnitDisplayStatusBarControl;
 class WalletFrame;
 class WalletModel;
 class HelpMessageDialog;
-
+class NavigationBar;
+class QDockWidget;
 class CWallet;
 
 QT_BEGIN_NAMESPACE
@@ -92,6 +93,7 @@ private:
     QProgressDialog *progressDialog;
 
     QMenuBar *appMenuBar;
+    NavigationBar *appNavigationBar = nullptr;
     QAction *overviewAction;
 #ifdef ENABLE_EXODUS
     QAction *exoAssetsAction;
@@ -116,12 +118,13 @@ private:
     QAction *backupWalletAction;
     QAction *changePassphraseAction;
     QAction *aboutQtAction;
+    QAction *openRepairAction;
     QAction *openRPCConsoleAction;
     QAction *openAction;
     QAction *showHelpMessageAction;
     QAction *sigmaAction;
     QAction *zc2SigmaAction;
-    QAction *znodeAction;
+    QAction *indexnodeAction;
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
@@ -145,6 +148,7 @@ private:
     void createTrayIcon(const NetworkStyle *networkStyle);
     /** Create system tray menu (or setup the dock menu) */
     void createTrayIconMenu();
+    void addDockWindows(Qt::DockWidgetArea area, QWidget* widget);
 
     /** Enable or disable all wallet-related actions */
     void setWalletActionsEnabled(bool enabled);
@@ -160,12 +164,15 @@ private:
 Q_SIGNALS:
     /** Signal raised when a URI was entered or dragged to the GUI */
     void receivedURI(const QString &uri);
-
+    /** Restart handling */
+    void requestedRestart(QStringList args);
 public Q_SLOTS:
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
     /** Set number of blocks and last block date shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
+    /** Get restart command-line parameters and request restart */
+    void handleRestart(QStringList args);
     /** Set additional data sync status shown in the UI */
     void setAdditionalDataSyncProgress(int count, double nSyncProgress);
 
@@ -211,8 +218,8 @@ private Q_SLOTS:
     void gotoHistoryPage();
     /** Switch directly to Index history tab */
     void gotoBitcoinHistoryTab();
-    /** Switch to znode page */
-    void gotoZnodePage();
+    /** Switch to indexnode page */
+    void gotoIndexnodePage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */

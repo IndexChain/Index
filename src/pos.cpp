@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Noir Developers
+// Copyright (c) 2020 The Noir Developers
 // Copyright (c) 2014-2018 The BlackCoin Developers
 // Copyright (c) 2011-2013 The PPCoin developers
 // Distributed under the MIT software license, see the accompanying
@@ -20,6 +20,7 @@
 #include "primitives/transaction.h"
 #include <stdio.h>
 #include "util.h"
+#include "indexnode-sync.h"
 
 // Stake Modifier (hash modifier of proof-of-stake):
 // The purpose of stake modifier is to prevent a txout (coin) owner from
@@ -70,7 +71,8 @@ bool CheckStakeBlockTimestamp(int64_t nTimeBlock)
 bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, unsigned int nBits, unsigned int nBlockTime, const CCoins* txPrev, const COutPoint& prevout, unsigned int nTimeTx, bool fPrintProofOfStake)
 {
       if ((nTimeTx < nBlockTime) && !(txPrev->nHeight <= Params().GetConsensus().nFirstPOSBlock))  // Transaction timestamp violation
-        return error("CheckStakeKernelHash() : nTime violation");
+        return false;
+        // return error("CheckStakeKernelHash() : nTime violation");
 
     // Base target
     arith_uint256 bnTarget;
@@ -116,7 +118,7 @@ bool CheckStakeKernelHash(const CBlockIndex* pindexPrev, unsigned int nBits, uns
 }
 
 // Check kernel hash target and coinstake signature
-bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBlockTime, unsigned int nBits, CValidationState &state)
+bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBlockTime, unsigned int nBits, CValidationState &state,CBlockIndex* mapBlockIndexFallback)
 {
     if (!tx.IsCoinStake())
         return error("CheckProofOfStake() : called on non-coinstake %s", tx.GetHash().ToString());
@@ -149,8 +151,7 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
     unsigned int nTime = pindexPrev->GetBlockTime();
 
     if (!CheckStakeKernelHash(pindexPrev, nBits, nTime, new CCoins(txPrev, pindexPrev->nHeight), txin.prevout, nBlockTime, fDebug))
-       return state.DoS(1, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString())); // may occur during initial download or if behind on block chain sync
-
+       return state.Invalid(false, REJECT_INVALID,"CheckProofOfStake() : INFO: check kernel failed on coinstake %s", tx.GetHash().ToString()); // may occur during initial download or if behind on block chain sync
     return true;
 }
 
@@ -182,6 +183,7 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, co
     auto it=cache.find(prevout);
 
     *pBlockTime = pindexPrev->GetBlockTime();
+    if(nTime < *pBlockTime) return false;
 
     if(it == cache.end()) {
         CTransaction txPrev;
@@ -209,8 +211,7 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, uint32_t nTime, co
             // Cache could potentially cause false positive stakes in the event of deep reorgs, so check without cache also
             return CheckKernel(pindexPrev, nBits, nTime, prevout);
         }
-        
-        LogPrintf("CheckKernel()::CheckStakeKernelHash(): pBlockTime=%u, nTime=%u\n", *pBlockTime, nTime);
+        // LogPrintf("CheckKernel()::CheckStakeKernelHash(): pBlockTime=%u, nTime=%u\n", *pBlockTime, nTime);
         return CheckStakeKernelHash(pindexPrev, nBits, *pBlockTime, new CCoins(stake.txPrev, pindexPrev->nHeight), prevout, nTime);
     }
 }

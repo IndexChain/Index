@@ -24,8 +24,8 @@
 #include "main.h"
 #include "consensus/validation.h"
 #include "core_io.h"
-#include "znode-sync.h"
-#include "znodeconfig.h"
+#include "indexnode-sync.h"
+#include "indexnodeconfig.h"
 
 using namespace std;
 CScript script;
@@ -454,7 +454,7 @@ BOOST_AUTO_TEST_CASE(statewallet_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(znodelist_test)
+BOOST_AUTO_TEST_CASE(indexnodelist_test)
 {
     // Verify "Create" initially.
     UniValue valRequest(UniValue::VOBJ);
@@ -463,18 +463,18 @@ BOOST_AUTO_TEST_CASE(znodelist_test)
     UniValue result(UniValue::VOBJ);
 
     valRequest.push_back(Pair("type", "initial"));
-    valRequest.push_back(Pair("collection", "znodeList"));
+    valRequest.push_back(Pair("collection", "indexnodeList"));
     //valRequest.push_back(Pair("auth", auth));
 
     BOOST_CHECK_THROW(CallAPI(valRequest, true), runtime_error);
 
-    // artificially finish znode sync to test list call
-    while(!znodeSync.IsSynced()){
-        znodeSync.SwitchToNextAsset();
+    // artificially finish indexnode sync to test list call
+    while(!indexnodeSync.IsSynced()){
+        indexnodeSync.SwitchToNextAsset();
     }
 
     result = CallAPI(valRequest, true);
-    BOOST_CHECK(!result.isNull()); // empty znode list
+    BOOST_CHECK(!result.isNull()); // empty indexnode list
 }
 
 BOOST_AUTO_TEST_CASE(balance_test)

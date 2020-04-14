@@ -85,12 +85,12 @@ static CZMQReplierInterface* pzmqReplierInterface = NULL;
 #include <event2/util.h>
 #include <event2/event.h>
 #include <event2/thread.h>
-#include "activeznode.h"
+#include "activeindexnode.h"
 #include "darksend.h"
-#include "znode-payments.h"
-#include "znode-sync.h"
-#include "znodeman.h"
-#include "znodeconfig.h"
+#include "indexnode-payments.h"
+#include "indexnode-sync.h"
+#include "indexnodeman.h"
+#include "indexnodeconfig.h"
 #include "netfulfilledman.h"
 #include "flat-database.h"
 #include "instantx.h"
@@ -165,7 +165,12 @@ static char *convert_str(const std::string &s) {
 //
 
 std::atomic<bool> fRequestShutdown(false);
+std::atomic<bool> fRequestRestart(false);
 
+void StartRestart()
+{
+    fRequestShutdown = fRequestRestart = true;
+}
 void StartShutdown() {
     fRequestShutdown = true;
 }
@@ -215,8 +220,9 @@ void Interrupt(boost::thread_group &threadGroup) {
     InterruptTorControl();
     threadGroup.interrupt_all();
 }
+/** Preparing steps before shutting down or restarting the wallet */
+void PrepareShutdown(){
 
-void Shutdown() {
     LogPrintf("%s: In progress...\n", __func__);
     static CCriticalSection cs_Shutdown;
     TRY_LOCK(cs_Shutdown, lockShutdown);
@@ -249,9 +255,9 @@ void Shutdown() {
     GenerateBitcoins(false, 0, Params());
     StopNode();
 
-    CFlatDB<CZnodeMan> flatdb1("zncache.dat", "magicZnodeCache");
+    CFlatDB<CIndexnodeMan> flatdb1("incache.dat", "magicIndexnodeCache");
     flatdb1.Dump(mnodeman);
-    CFlatDB<CZnodePayments> flatdb2("znpayments.dat", "magicZnodePaymentsCache");
+    CFlatDB<CIndexnodePayments> flatdb2("inpayments.dat", "magicIndexnodePaymentsCache");
     flatdb2.Dump(mnpayments);
     CFlatDB<CNetFulfilledRequestManager> flatdb4("netfulfilled.dat", "magicFulfilledCache");
     flatdb4.Dump(netfulfilledman);
@@ -315,6 +321,24 @@ void Shutdown() {
         LogPrintf("%s: Unable to remove pidfile: %s\n", __func__, e.what());
     }
     UnregisterAllValidationInterfaces();
+}
+/**
+* Shutdown is split into 2 parts:
+* Part 1: shut down everything but the main wallet instance (done in PrepareShutdown() )
+* Part 2: delete wallet instance
+*
+* In case of a restart PrepareShutdown() was already called before, but this method here gets
+* called implicitly when the parent object is deleted. In this case we have to skip the
+* PrepareShutdown() part because it was already executed and just delete the wallet instance.
+*/
+void Shutdown()
+{
+    // Shutdown part 1: prepare shutdown
+    if(!fRequestRestart){
+        PrepareShutdown();
+    }
+
+   // Shutdown part 2: delete wallet instance
 #ifdef ENABLE_WALLET
     delete pwalletMain;
     pwalletMain = NULL;
@@ -416,6 +440,7 @@ std::string HelpMessage(HelpMessageMode mode) {
             MIN_DISK_SPACE_FOR_BLOCK_FILES / 1024 / 1024));
     strUsage += HelpMessageOpt("-reindex-chainstate", _("Rebuild chain state from the currently indexed blocks"));
     strUsage += HelpMessageOpt("-reindex", _("Rebuild chain state and block index from the blk*.dat files on disk"));
+    strUsage += HelpMessageOpt("-resync", _("Delete blockchain folders and resync from scratch") + " " + _("on startup"));
 #ifndef WIN32
     strUsage += HelpMessageOpt("-sysperms",
                                _("Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)"));
@@ -668,6 +693,10 @@ std::string HelpMessage(HelpMessageMode mode) {
     strUsage += HelpMessageOpt("-rpcthreads=<n>",
                                strprintf(_("Set the number of threads to service RPC calls (default: %d)"),
                                          DEFAULT_HTTP_THREADS));
+    strUsage += HelpMessageOpt("-blockspamfilter=<n>", strprintf(_("Use block spam filter (default: %u)"), DEFAULT_BLOCK_SPAM_FILTER));
+    strUsage += HelpMessageOpt("-blockspamfiltermaxsize=<n>", strprintf(_("Maximum size of the list of indexes in the block spam filter (default: %u)"), DEFAULT_BLOCK_SPAM_FILTER_MAX_SIZE));
+    strUsage += HelpMessageOpt("-blockspamfiltermaxavg=<n>", strprintf(_("Maximum average size of an index occurrence in the block spam filter (default: %u)"), DEFAULT_BLOCK_SPAM_FILTER_MAX_AVG));
+
     if (showDebug) {
         strUsage += HelpMessageOpt("-rpcworkqueue=<n>",
                                    strprintf("Set the depth of the work queue to service RPC calls (default: %d)",
@@ -1618,7 +1647,7 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
         } else {
             struct in_addr inaddr_any;
             inaddr_any.s_addr = INADDR_ANY;
-            fBound |= Bind(CService(in6addr_any, GetListenPort()), BF_NONE);
+            fBound |= Bind(CService((in6_addr)IN6ADDR_ANY_INIT, GetListenPort()), BF_NONE);
             fBound |= Bind(CService(inaddr_any, GetListenPort()), !fBound ? BF_REPORT_ERROR : BF_NONE);
         }
         if (!fBound)
@@ -1658,12 +1687,49 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     if (mapArgs.count("-maxuploadtarget")) {
         CNode::SetMaxOutboundTarget(GetArg("-maxuploadtarget", DEFAULT_MAX_UPLOAD_TARGET) * 1024 * 1024);
     }
+    if (GetBoolArg("-resync", false)) {
+            //Clear banned on resync aswell
+            uiInterface.InitMessage(_("Preparing for resync..."));
+            // Delete the local blockchain folders to force a resync from scratch to get a consitent blockchain-state
+            boost::filesystem::path blocksDir = GetDataDir() / "blocks";
+            boost::filesystem::path chainstateDir = GetDataDir() / "chainstate";
+            boost::filesystem::path sporksDir = GetDataDir() / "sporks";
+            boost::filesystem::path indexnodeCache = GetDataDir() / "incache.dat";
+            boost::filesystem::path indexnodePayments = GetDataDir() / "inpayments.dat";
 
+            LogPrintf("Deleting blockchain folders blocks, chainstate, sporks and zerocoin\n");
+            // We delete in 4 individual steps in case one of the folder is missing already
+            try {
+                if (boost::filesystem::exists(blocksDir)){
+                    boost::filesystem::remove_all(blocksDir);
+                    LogPrintf("-resync: folder deleted: %s\n", blocksDir.string().c_str());
+                }
+
+                if (boost::filesystem::exists(chainstateDir)){
+                    boost::filesystem::remove_all(chainstateDir);
+                    LogPrintf("-resync: folder deleted: %s\n", chainstateDir.string().c_str());
+                }
+
+                if (boost::filesystem::exists(sporksDir)){
+                    boost::filesystem::remove_all(sporksDir);
+                    LogPrintf("-resync: folder deleted: %s\n", sporksDir.string().c_str());
+                }
+                if (boost::filesystem::exists(indexnodeCache)){
+                    boost::filesystem::remove(indexnodeCache);
+                    LogPrintf("-resync: file deleted: %s\n", indexnodeCache.string().c_str());
+                }
+                if (boost::filesystem::exists(indexnodePayments)){
+                    boost::filesystem::remove(indexnodePayments);
+                    LogPrintf("-resync: file deleted: %s\n", indexnodePayments.string().c_str());
+                }
+            } catch (const boost::filesystem::filesystem_error& error) {
+                LogPrintf("Failed to delete blockchain folders %s\n", error.what());
+            }
+        }
     // ********************************************************* Step 7: load block chain
     LogPrintf("Step 7: load block chain ************************************\n");
     fReindex = GetBoolArg("-reindex", false);
     bool fReindexChainState = GetBoolArg("-reindex-chainstate", false);
-
 #ifdef ENABLE_CLIENTAPI
     if(fApi)
         pzmqPublisherInterface->StartWorker();
@@ -1751,6 +1817,8 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
                 LogPrintf("fReindex = %s\n", fReindex);
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
+                    //Clear banned if we are reindexing
+                    CNode::ClearBanned();
                     //If we're reindexing in prune mode, wipe away unusable block files and all undo data files
                     if (fPruneMode)
                         CleanupBlockRevFiles();
@@ -2034,45 +2102,45 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
         threadGroup.create_thread(boost::bind(&ThreadStakeMiner, pwalletMain, chainparams));
 
     // ********************************************************* Step 11a: setup PrivateSend
-    fZNode = GetBoolArg("-znode", false);
+    fIndexNode = GetBoolArg("-indexnode", false);
 
-    LogPrintf("fZNode = %s\n", fZNode);
-    LogPrintf("znodeConfig.getCount(): %s\n", znodeConfig.getCount());
+    LogPrintf("fIndexNode = %s\n", fIndexNode);
+    LogPrintf("indexnodeConfig.getCount(): %s\n", indexnodeConfig.getCount());
 
-    if ((fZNode || znodeConfig.getCount() > 0) && !fTxIndex) {
-        return InitError("Enabling Znode support requires turning on transaction indexing."
+    if ((fIndexNode || indexnodeConfig.getCount() > 0) && !fTxIndex) {
+        return InitError("Enabling Indexnode support requires turning on transaction indexing."
                                  "Please add txindex=1 to your configuration and start with -reindex");
     }
 
-    if (fZNode) {
-        LogPrintf("ZNODE:\n");
+    if (fIndexNode) {
+        LogPrintf("INDEXNODE:\n");
 
-        if (!GetArg("-znodeaddr", "").empty()) {
-            // Hot Znode (either local or remote) should get its address in
-            // CActiveZnode::ManageState() automatically and no longer relies on Znodeaddr.
-            return InitError(_("znodeaddr option is deprecated. Please use znode.conf to manage your remote znodes."));
+        if (!GetArg("-indexnodeaddr", "").empty()) {
+            // Hot Indexnode (either local or remote) should get its address in
+            // CActiveIndexnode::ManageState() automatically and no longer relies on Indexnodeaddr.
+            return InitError(_("indexnodeaddr option is deprecated. Please use indexnode.conf to manage your remote indexnodes."));
         }
 
-        std::string strZnodePrivKey = GetArg("-znodeprivkey", "");
-        if (!strZnodePrivKey.empty()) {
-            if (!darkSendSigner.GetKeysFromSecret(strZnodePrivKey, activeZnode.keyZnode,
-                                                  activeZnode.pubKeyZnode))
-                return InitError(_("Invalid znodeprivkey. Please see documentation."));
+        std::string strIndexnodePrivKey = GetArg("-indexnodeprivkey", "");
+        if (!strIndexnodePrivKey.empty()) {
+            if (!darkSendSigner.GetKeysFromSecret(strIndexnodePrivKey, activeIndexnode.keyIndexnode,
+                                                  activeIndexnode.pubKeyIndexnode))
+                return InitError(_("Invalid indexnodeprivkey. Please see documentation."));
 
-            LogPrintf("  pubKeyZnode: %s\n", CBitcoinAddress(activeZnode.pubKeyZnode.GetID()).ToString());
+            LogPrintf("  pubKeyIndexnode: %s\n", CBitcoinAddress(activeIndexnode.pubKeyIndexnode.GetID()).ToString());
         } else {
             return InitError(
-                    _("You must specify a znodeprivkey in the configuration. Please see documentation for help."));
+                    _("You must specify a indexnodeprivkey in the configuration. Please see documentation for help."));
         }
     }
 
-    LogPrintf("Using Znode config file %s\n", GetZnodeConfigFile().string());
+    LogPrintf("Using Indexnode config file %s\n", GetIndexnodeConfigFile().string());
 
-    // Lock Existing Znodes
-    if (GetBoolArg("-znconflock", true) && (znodeConfig.getCount() > 0)) {
-        LogPrintf(" Locking Existing Znodes..\n");
+    // Lock Existing Indexnodes
+    if (GetBoolArg("-inconflock", true) && (indexnodeConfig.getCount() > 0)) {
+        LogPrintf(" Locking Existing Indexnodes..\n");
         LOCK2(cs_main, pwalletMain->cs_wallet);
-        BOOST_FOREACH(CZnodeConfig::CZnodeEntry mne, znodeConfig.getEntries()) {
+        BOOST_FOREACH(CIndexnodeConfig::CIndexnodeEntry mne, indexnodeConfig.getEntries()) {
             uint256 mnTxHash(uint256S(mne.getTxHash()));
             int outputIndex = boost::lexical_cast<unsigned int>(mne.getOutputIndex());
 
@@ -2080,9 +2148,9 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
 
             if(pwalletMain->IsMine(CTxIn(outpoint)) == ISMINE_SPENDABLE &&
               !pwalletMain->IsSpent(mnTxHash, outputIndex)){
-                pwalletMain->LockCoin(outpoint); //Lock if this transaction is an available znode colleteral payment
+                pwalletMain->LockCoin(outpoint); //Lock if this transaction is an available indexnode colleteral payment
             }else {
-                pwalletMain->UnlockCoin(outpoint); // Unlock any spent/unavailable Znode collateral
+                pwalletMain->UnlockCoin(outpoint); // Unlock any spent/unavailable Indexnode collateral
             }
         }
         if(fApi)
@@ -2106,10 +2174,10 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
 //    nInstantSendDepth = GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
 //    nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);
 
-    // lite mode disables all Znode and Darksend related functionality
+    // lite mode disables all Indexnode and Darksend related functionality
     fLiteMode = GetBoolArg("-litemode", false);
-    if (fZNode && fLiteMode) {
-        return InitError("You can not start a znode in litemode");
+    if (fIndexNode && fLiteMode) {
+        return InitError("You can not start a indexnode in litemode");
     }
 
     LogPrintf("fLiteMode %d\n", fLiteMode);
@@ -2122,21 +2190,21 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     // ********************************************************* Step 11b: Load cache data
 
     // LOAD SERIALIZED DAT FILES INTO DATA CACHES FOR INTERNAL USE
-    if (GetBoolArg("-persistentznodestate", true)) {
-        uiInterface.InitMessage(_("Loading znode cache..."));
-        CFlatDB<CZnodeMan> flatdb1("zncache.dat", "magicZnodeCache");
+    if (GetBoolArg("-persistentindexnodestate", true)) {
+        uiInterface.InitMessage(_("Loading indexnode cache..."));
+        CFlatDB<CIndexnodeMan> flatdb1("incache.dat", "magicIndexnodeCache");
         if (!flatdb1.Load(mnodeman)) {
-            return InitError("Failed to load znode cache from zncache.dat");
+            return InitError("Failed to load indexnode cache from incache.dat");
         }
 
         if (mnodeman.size()) {
-            uiInterface.InitMessage(_("Loading Znode payment cache..."));
-            CFlatDB<CZnodePayments> flatdb2("znpayments.dat", "magicZnodePaymentsCache");
+            uiInterface.InitMessage(_("Loading Indexnode payment cache..."));
+            CFlatDB<CIndexnodePayments> flatdb2("inpayments.dat", "magicIndexnodePaymentsCache");
             if (!flatdb2.Load(mnpayments)) {
-                return InitError("Failed to load znode payments cache from znpayments.dat");
+                return InitError("Failed to load indexnode payments cache from inpayments.dat");
             }
         } else {
-            uiInterface.InitMessage(_("Znode cache is empty, skipping payments cache..."));
+            uiInterface.InitMessage(_("Indexnode cache is empty, skipping payments cache..."));
         }
 
         uiInterface.InitMessage(_("Loading fulfilled requests cache..."));
@@ -2156,7 +2224,7 @@ bool AppInit2(boost::thread_group &threadGroup, CScheduler &scheduler) {
     mnodeman.UpdatedBlockTip(chainActive.Tip());
     darkSendPool.UpdatedBlockTip(chainActive.Tip());
     mnpayments.UpdatedBlockTip(chainActive.Tip());
-    znodeSync.UpdatedBlockTip(chainActive.Tip());
+    indexnodeSync.UpdatedBlockTip(chainActive.Tip());
     // governance.UpdatedBlockTip(chainActive.Tip());
 
     // ********************************************************* Step 11d: start dash-privatesend thread
