@@ -249,6 +249,7 @@ BITCOIN_CORE_H = \
   sigma.h \
   coin_containers.h \
   zerocoin_params.h \
+  fs.h \
   addresstype.h
 
 obj/build.h: FORCE
@@ -490,6 +491,7 @@ libbitcoin_util_a_SOURCES = \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
+  fs.cpp \
   mbstring.cpp \
   random.cpp \
   rpc/protocol.cpp \

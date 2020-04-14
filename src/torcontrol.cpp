@@ -314,7 +314,7 @@ static std::map<std::string,std::string> ParseTorReplyMapping(const std::string 
  */
 static std::pair<bool,std::string> ReadBinaryFile(const std::string &filename, size_t maxsize=std::numeric_limits<size_t>::max())
 {
-    FILE *f = fopen(filename.c_str(), "rb");
+    FILE *f = fsbridge::fopen(filename.c_str(), "rb");
     if (f == NULL)
         return std::make_pair(false,"");
     std::string retval;
@@ -334,7 +334,7 @@ static std::pair<bool,std::string> ReadBinaryFile(const std::string &filename, s
  */
 static bool WriteBinaryFile(const std::string &filename, const std::string &data)
 {
-    FILE *f = fopen(filename.c_str(), "wb");
+    FILE *f = fsbridge::fopen(filename.c_str(), "wb");
     if (f == NULL)
         return false;
     if (fwrite(data.data(), 1, data.size(), f) != data.size()) {

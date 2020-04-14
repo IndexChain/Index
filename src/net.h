@@ -9,6 +9,7 @@
 #include "amount.h"
 #include "bloom.h"
 #include "compat.h"
+#include "fs.h"
 #include "limitedmap.h"
 #include "netbase.h"
 #include "protocol.h"
@@ -27,7 +28,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 #include <boost/signals2/signal.hpp>
 
@@ -882,7 +882,7 @@ void RelayInv(CInv &inv, const int minProtoVersion = MIN_PEER_PROTO_VERSION);
 class CAddrDB
 {
 private:
-    boost::filesystem::path pathAddr;
+    fs::path pathAddr;
 public:
     CAddrDB();
     bool Write(const CAddrMan& addr);
@@ -894,7 +894,7 @@ public:
 class CBanDB
 {
 private:
-    boost::filesystem::path pathBanlist;
+    fs::path pathBanlist;
 public:
     CBanDB();
     bool Write(const banmap_t& banSet);

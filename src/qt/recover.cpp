@@ -3,12 +3,11 @@
 
 #include "guiutil.h"
 
+#include "fs.h"
 #include "util.h"
 
 #include "../wallet/bip39.h"
 #include "support/allocators/secure.h"
-
-#include <boost/filesystem.hpp>
 
 #include <QFileDialog>
 #include <QSettings>
