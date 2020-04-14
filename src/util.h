@@ -16,6 +16,7 @@
 #endif
 
 #include "compat.h"
+#include "fs.h"
 #include "tinyformat.h"
 #include "utiltime.h"
 
@@ -24,8 +25,9 @@
 #include <map>
 #include <stdint.h>
 #include <string>
+#include <utility>
 #include <vector>
-#include <boost/filesystem/path.hpp>
+
 #include <boost/signals2/signal.hpp>
 #include <boost/thread/exceptions.hpp>
 #include <boost/optional.hpp>
@@ -140,24 +142,24 @@ void FileCommit(FILE *fileout);
 bool TruncateFile(FILE *file, unsigned int length);
 int RaiseFileDescriptorLimit(int nMinFD);
 void AllocateFileRange(FILE *file, unsigned int offset, unsigned int length);
-bool RenameOver(boost::filesystem::path src, boost::filesystem::path dest);
-bool TryCreateDirectory(const boost::filesystem::path& p);
-boost::filesystem::path GetDefaultDataDir();
-const boost::filesystem::path &GetDataDir(bool fNetSpecific = true);
-const boost::filesystem::path &GetBackupsDir();
+bool RenameOver(fs::path src, fs::path dest);
+bool TryCreateDirectory(const fs::path& p);
+fs::path GetDefaultDataDir();
+const fs::path &GetDataDir(bool fNetSpecific = true);
+const fs::path &GetBackupsDir();
 void ClearDatadirCache();
-boost::filesystem::path GetPersistentDataDir(bool fNetSpecific = true);
-boost::filesystem::path GetJsonDataDir(bool fNetSpecific, const char* filename);
-boost::filesystem::path GetConfigFile();
+fs::path GetPersistentDataDir(bool fNetSpecific = true);
+fs::path GetJsonDataDir(bool fNetSpecific, const char* filename);
+fs::path GetConfigFile();
 void CreatePersistentFiles(bool fNetSpecific=true);
-boost::filesystem::path CreateTxMetadataFile(bool fNetSpecific=true);
-boost::filesystem::path CreatePaymentRequestFile(bool fNetSpecific=true);
-boost::filesystem::path CreateZerocoinFile(bool fNetSpecific=true);
-boost::filesystem::path CreateSettingsFile(bool fNetSpecific=true);
-boost::filesystem::path CreateTxTimestampFile(bool fNetSpecific=true);
-boost::filesystem::path GetIndexnodeConfigFile();
-boost::filesystem::path GetPidFile();
-void CreatePidFile(const boost::filesystem::path &path, pid_t pid);
+fs::path CreateTxMetadataFile(bool fNetSpecific=true);
+fs::path CreatePaymentRequestFile(bool fNetSpecific=true);
+fs::path CreateZerocoinFile(bool fNetSpecific=true);
+fs::path CreateSettingsFile(bool fNetSpecific=true);
+fs::path CreateTxTimestampFile(bool fNetSpecific=true);
+fs::path GetIndexnodeConfigFile();
+fs::path GetPidFile();
+void CreatePidFile(const fs::path &path, pid_t pid);
 
 #ifdef ENABLE_CLIENTAPI
 bool CreateZipFile(std::string rootPath, std::vector<std::string> folderPaths, std::vector<std::string> filePaths, std::string destinationPath);
@@ -165,7 +167,7 @@ bool CreateZipFile(std::string rootPath, std::vector<std::string> folderPaths, s
 
 void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet, std::map<std::string, std::vector<std::string> >& mapMultiSettingsRet);
 #ifdef WIN32
-boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
+fs::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
 #endif
 void OpenDebugLog();
 void ShrinkDebugFile();
@@ -287,6 +289,24 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
         throw;
     }
 }
+
+namespace util {
+#ifdef WIN32
+class WinCmdLineArgs
+{
+public:
+    WinCmdLineArgs();
+    ~WinCmdLineArgs();
+    std::pair<int, char**> get();
+
+private:
+    int argc;
+    char** argv;
+    std::vector<std::string> args;
+};
+#endif
+} // namespace util
+
 
 std::string CopyrightHolders(const std::string& strPrefix);
 

@@ -16,8 +16,8 @@ void CIndexnodeConfig::add(std::string alias, std::string ip, std::string privKe
 
 bool CIndexnodeConfig::read(std::string& strErr) {
     int linenumber = 1;
-    boost::filesystem::path pathIndexnodeConfigFile = GetIndexnodeConfigFile();
-    boost::filesystem::ifstream streamConfig(pathIndexnodeConfigFile);
+    fs::path pathIndexnodeConfigFile = GetIndexnodeConfigFile();
+    fsbridge::ifstream streamConfig(pathIndexnodeConfigFile);
     LogPrintf("pathIndexnodeConfigFile=%s\n", pathIndexnodeConfigFile);
 
     if (!streamConfig.good()) {

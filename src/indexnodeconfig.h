@@ -6,6 +6,8 @@
 #ifndef SRC_INDEXNODECONFIG_H_
 #define SRC_INDEXNODECONFIG_H_
 
+#include "fs.h"
+
 #include <univalue.h>
 
 class CIndexnodeConfig;
