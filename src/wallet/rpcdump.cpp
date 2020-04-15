@@ -449,8 +449,8 @@ UniValue importwallet(const UniValue& params, bool fHelp)
     }
 
 
-    ifstream file;
-    file.open(params[0].get_str().c_str(), std::ios::in | std::ios::ate);
+    fsbridge::ifstream file;
+    file.open(params[0].get_str(), std::ios::in | std::ios::ate);
     if (!file.is_open())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open wallet dump file");
 
@@ -694,8 +694,11 @@ UniValue dumpwallet(const UniValue& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    ofstream file;
-    file.open(params[0].get_str().c_str());
+    fs::path filepath = params[0].get_str().c_str();
+    filepath = fs::absolute(filepath);
+
+    fsbridge::ofstream file;
+    file.open(filepath);
     if (!file.is_open())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open wallet dump file");
 

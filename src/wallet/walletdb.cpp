@@ -6,6 +6,8 @@
 
 
 #include "base58.h"
+#include "fs.h"
+#include "init.h"
 #include "consensus/validation.h"
 #include "main.h" // For CheckTransaction
 #include "protocol.h"
@@ -16,7 +18,6 @@
 #include "wallet/wallet.h"
 
 #include <boost/version.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
