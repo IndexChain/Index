@@ -118,40 +118,40 @@ jobs:
       with:
         name: windows-binaries
         path: ${{ env.ARTIFACT_DIR }}
-  build-mac:
-    name: Build for macOS
-    needs: create-source-distribution
-    runs-on: macos-10.15
-    env:
-      ARTIFACT_DIR: mac-binaries
-    steps:
-    - name: Getting Source
-      uses: actions/download-artifact@v1
-      with:
-        name: ${{ env.SOURCE_ARTIFACT }}
-    - name: Extract Archives
-      run: |
-        tar -xzf depends.tar.gz
-        tar -xzf index-*.tar.gz --strip-components=1
-      working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Use Xcode instead of Command Line Tools
-      run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-    - name: Install Required Packages
-      run: brew install automake coreutils pkg-config
-    - name: Build Dependencies
-      run: make -C depends -j$(sysctl -n hw.activecpu)
-      working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Build Index
-      run: |
-        ./configure --disable-jni --enable-elysium --prefix=$(grealpath depends/x86_64-apple-darwin*)
-        make -j$(sysctl -n hw.activecpu)
-      working-directory: ${{ env.SOURCE_ARTIFACT }}
-    - name: Prepare Files for Artifact
-      run: |
-        mkdir -p $ARTIFACT_DIR
-        mv $SOURCE_ARTIFACT/src/{index-cli,index-tx,indexd,qt/index-qt} $ARTIFACT_DIR
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v1
-      with:
-        name: mac-binaries
-        path: ${{ env.ARTIFACT_DIR }}
+  # build-mac:
+  #   name: Build for macOS
+  #   needs: create-source-distribution
+  #   runs-on: macos-10.15
+  #   env:
+  #     ARTIFACT_DIR: mac-binaries
+  #   steps:
+  #   - name: Getting Source
+  #     uses: actions/download-artifact@v1
+  #     with:
+  #       name: ${{ env.SOURCE_ARTIFACT }}
+  #   - name: Extract Archives
+  #     run: |
+  #       tar -xzf depends.tar.gz
+  #       tar -xzf index-*.tar.gz --strip-components=1
+  #     working-directory: ${{ env.SOURCE_ARTIFACT }}
+  #   - name: Use Xcode instead of Command Line Tools
+  #     run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+  #   - name: Install Required Packages
+  #     run: brew install automake coreutils pkg-config
+  #   - name: Build Dependencies
+  #     run: make -C depends -j$(sysctl -n hw.activecpu)
+  #     working-directory: ${{ env.SOURCE_ARTIFACT }}
+  #   - name: Build Index
+  #     run: |
+  #       ./configure --disable-jni --enable-elysium --prefix=$(grealpath depends/x86_64-apple-darwin*)
+  #       make -j$(sysctl -n hw.activecpu)
+  #     working-directory: ${{ env.SOURCE_ARTIFACT }}
+  #   - name: Prepare Files for Artifact
+  #     run: |
+  #       mkdir -p $ARTIFACT_DIR
+  #       mv $SOURCE_ARTIFACT/src/{index-cli,index-tx,indexd,qt/index-qt} $ARTIFACT_DIR
+  #   - name: Upload Artifact
+  #     uses: actions/upload-artifact@v1
+  #     with:
+  #       name: mac-binaries
+  #       path: ${{ env.ARTIFACT_DIR }}
