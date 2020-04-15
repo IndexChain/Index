@@ -86,8 +86,8 @@ private:
     QLabel *labelEncryptionIcon;
     QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
-    QLabel *labelExodusPendingIcon;
-    QLabel *labelExodusPendingText;
+    QLabel *labelElysiumPendingIcon;
+    QLabel *labelElysiumPendingText;
     QLabel *progressBarLabel;
     QProgressBar *progressBar;
     QProgressDialog *progressDialog;
@@ -95,8 +95,8 @@ private:
     QMenuBar *appMenuBar;
     NavigationBar *appNavigationBar = nullptr;
     QAction *overviewAction;
-#ifdef ENABLE_EXODUS
-    QAction *exoAssetsAction;
+#ifdef ENABLE_ELYSIUM
+    QAction *elyAssetsAction;
     QAction *toolboxAction;
 #endif
     QAction *historyAction;
@@ -193,8 +193,8 @@ public Q_SLOTS:
     void setEncryptionStatus(int status);
     void toggleLockState();
 
-    /** Set the Exodus pending transactions label **/
-    void setExodusPendingStatus(bool pending);
+    /** Set the Elysium pending transactions label **/
+    void setElysiumPendingStatus(bool pending);
 
     bool handlePaymentRequest(const SendCoinsRecipient& recipient);
 
@@ -206,13 +206,13 @@ private Q_SLOTS:
 #ifdef ENABLE_WALLET
     /** Switch to overview (home) page */
     void gotoOverviewPage();
-#ifdef ENABLE_EXODUS
-    /** Switch to ExoAssets page */
-    void gotoExoAssetsPage();
+#ifdef ENABLE_ELYSIUM
+    /** Switch to ElyAssets page */
+    void gotoElyAssetsPage();
     /** Switch to utility page */
     void gotoToolboxPage();
-    /** Switch directly to Exodus history tab */
-    void gotoExodusHistoryTab();
+    /** Switch directly to Elysium history tab */
+    void gotoElysiumHistoryTab();
 #endif
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
