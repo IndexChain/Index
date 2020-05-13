@@ -1849,7 +1849,8 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
     for (int i = 0; i < nThreads; i++)
         minerThreads->create_thread(boost::bind(&ZcoinMiner, boost::cref(chainparams)));
 }
-	void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
+
+void ThreadStakeMiner(CWallet *pwallet, const CChainParams& chainparams)
 {
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
     LogPrintf("Staking started\n");
@@ -1918,6 +1919,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
         MilliSleep(10000);
     }
 }
+
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
 {
     // Update nExtraNonce

@@ -92,38 +92,6 @@ unsigned int DarkGravityWave(const CBlockIndex* pindexLast, const Consensus::Par
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, bool fProofOfStake)
-{
-    if (pindexLast == nullptr)
-        return UintToArith256(params.powLimit).GetCompact(); // genesis block
-
-    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
-
-    if (pindexPrev->pprev == nullptr || pindexLast->nHeight == Params().GetConsensus().nFirstPOSBlock)
-        return UintToArith256(params.posLimit).GetCompact(); // first block
-    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
-    if (pindexPrevPrev->pprev == nullptr || pindexLast->nHeight  + 1 == Params().GetConsensus().nFirstPOSBlock + 1)
-        return UintToArith256(params.posLimit).GetCompact(); // second block
-
-    int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-    // peercoin: target change every block
-    // peercoin: retarget with exponential moving toward target spacing
-    CBigNum bnNew;
-    bnNew.SetCompact(pindexPrev->nBits);
-    if (Params().NetworkIDString() != CBaseChainParams::REGTEST) {
-        int64_t nTargetSpacing = fProofOfStake? params.nPowTargetSpacing : std::min(params.nPowTargetSpacing, params.nPowTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
-        int64_t nInterval = params.nPowTargetTimespan / nTargetSpacing;
-        bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-        bnNew /= ((nInterval + 1) * nTargetSpacing);
-        
-    }
-
-    if (bnNew > CBigNum(params.powLimit))
-        bnNew = CBigNum(params.powLimit);
-
-    return bnNew.GetCompact();
-}
-
 // Index GetNextWorkRequired
 unsigned int GetNextWorkRequired(const CBlockIndex *pindexLast, const CBlockHeader *pblock, const Consensus::Params &params,bool fProofOfStake) {
     assert(pindexLast != nullptr);

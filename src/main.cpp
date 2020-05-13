@@ -2367,6 +2367,7 @@ namespace Consensus {
         // for an attacker to attempt to split the network.
         if (!inputs.HaveInputs(tx))
             return state.Invalid(false, 0, "", "Inputs unavailable");
+    const Consensus::Params& consensus = Params();
 
         CAmount nValueIn = 0;
         CAmount nFees = 0;
@@ -2391,21 +2392,25 @@ namespace Consensus {
 
         }
 
-		if (!tx.IsCoinStake())
-        {
-            if (nValueIn < tx.GetValueOut())
+            if (!tx.IsCoinStake() && nValueIn < tx.GetValueOut())
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-in-belowout", false,
                                  strprintf("value in (%s) < value out (%s)", FormatMoney(nValueIn),
                                            FormatMoney(tx.GetValueOut())));
-
             // Tally transaction fees
-            CAmount nTxFee = nValueIn - tx.GetValueOut();
+            CAmount nTxFee = tx.IsCoinStake() ? tx.GetValueOut() - nValueIn :nValueIn - tx.GetValueOut();
+            bool fCoinstakematchesReward = tx.IsCoinStake() && (nTxFee == GetBlockSubsidy(nSpendHeight,consensus,GetAdjustedTime()) || nTxFee == GetBlockSubsidy(nSpendHeight,consensus,GetAdjustedTime()) - GetIndexnodePayment(consensus,false,nSpendHeight));
+            if(!fCoinstakematchesReward && tx.IsCoinStake()){
+                LogPrintf("Stakeout is %d\n",nTxFee);
+                return state.DoS(100, false, REJECT_INVALID, "bad-coinstake-toohigh");
+
+            }
+            if(nTxFee < 0)
+                LogPrintf("Fee is %d\n",nTxFee);
             if (nTxFee < 0)
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-negative");
             nFees += nTxFee;
             if (!MoneyRange(nFees))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-outofrange");
-        }
         return true;
     }
 }// namespace Consensus
@@ -4423,6 +4428,7 @@ bool GetBlockPublicKey(const CBlock& block, std::vector<unsigned char>& vchPubKe
 
             return error("Fallthroughx\n");
 }
+
 static bool CheckBlockSignature(const CBlock& block)
 {
     if (block.IsProofOfWork())
@@ -4440,6 +4446,7 @@ static bool CheckBlockSignature(const CBlock& block)
         key_id = CPubKey(vchPubKey);
     return posPubKey == key_id;
 }
+
 //btzc: code from vertcoin, add
 bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state, const Consensus::Params &consensusParams, bool fCheckPOW) {
     int nHeight = ZerocoinGetNHeight(block);

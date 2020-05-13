@@ -1005,6 +1005,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     tx = CTransaction(txNew);
     return true;
 }
+
 bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
     if (IsCrypted())
         return false;
@@ -8278,6 +8279,7 @@ void CWallet::DisableTransaction(const CTransaction &tx)
         NotifyTransactionChanged(this, hash, CT_DELETED);
     }
 }
+
 bool CReserveKey::GetReservedKey(CPubKey &pubkey) {
     if (nIndex == -1) {
         CKeyPool keypool;
@@ -8422,6 +8424,7 @@ uint64_t CWallet::GetStakeWeight() const
 
     return nWeight;
 }
+
 class CAffectedKeysVisitor : public boost::static_visitor<void> {
 private:
     const CKeyStore &keystore;
