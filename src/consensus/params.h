@@ -80,7 +80,7 @@ struct Params {
     int nInstantSendKeepLock; // in blocks
     int nIndexnodeMinimumConfirmations;
     int nIndexnodePaymentsStartBlock;
-
+    int nDisableZCoinClientCheckTime;
 	/** Zerocoin-related block numbers when features are changed */
     int nCheckBugFixedAtBlock;
     int nIndexnodePaymentsBugFixedAtBlock;

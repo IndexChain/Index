@@ -6646,7 +6646,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             pfrom->fDisconnect = true;
             return false;
         }
-
+        bool fCheckClientVersion = GetAdjustedTime() < chainparams.GetConsensus().nDisableZCoinClientCheckTime;
         if (pfrom->nVersion == 10300)
             pfrom->nVersion = 300;
         if (!vRecv.empty())
@@ -6654,16 +6654,18 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
         if (!vRecv.empty()) {
             vRecv >> LIMITED_STRING(pfrom->strSubVer, MAX_SUBVERSION_LENGTH);
             pfrom->cleanSubVer = SanitizeString(pfrom->strSubVer);
-            int parsedVersion[4];
-            if (sscanf(pfrom->cleanSubVer.c_str(), "/Satoshi:%2d.%2d.%2d.%2d/",
+            if(fCheckClientVersion){
+                int parsedVersion[4];
+                if (sscanf(pfrom->cleanSubVer.c_str(), "/Satoshi:%2d.%2d.%2d.%2d/",
                     &parsedVersion[0], &parsedVersion[1], &parsedVersion[2], &parsedVersion[3]) == 4) {
-                int peerClientVersion = parsedVersion[0]*1000000 + parsedVersion[1]*10000 + parsedVersion[2]*100 + parsedVersion[3];
-                if (peerClientVersion < MIN_ZCOIN_CLIENT_VERSION) {
-                    pfrom->PushMessage(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, "This version is banned from the network");
-                    pfrom->fDisconnect = 1;
-                    LOCK(cs_main);
-                    Misbehaving(pfrom->GetId(), 100);
-                    return false;
+                    int peerClientVersion = parsedVersion[0]*1000000 + parsedVersion[1]*10000 + parsedVersion[2]*100 + parsedVersion[3];
+                    if (peerClientVersion < MIN_ZCOIN_CLIENT_VERSION) {
+                        pfrom->PushMessage(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE, "This version is banned from the network");
+                        pfrom->fDisconnect = 1;
+                        LOCK(cs_main);
+                        Misbehaving(pfrom->GetId(), 100);
+                        return false;
+                    }
                 }
             }
         }

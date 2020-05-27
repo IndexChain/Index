@@ -143,6 +143,7 @@ public:
         consensus.nStakeTimestampMask = 0xf; // 15
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
+        consensus.nDisableZCoinClientCheckTime = 1590679266; //Date and time (GMT): Thursday, May 28, 2020 3:21:06 PM
         /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
@@ -155,61 +156,14 @@ public:
         pchMessageStart[3] = 0x4d;
         nDefaultPort = 7082;
         nPruneAfterHeight = 100000;
-        /**
-         * btzc: index init genesis block
-         * nBits = 0x1e0ffff0
-         * nTime = 1414776286
-         * nNonce = 142392
-         * genesisReward = 0 * COIN
-         * nVersion = 2
-         * extraNonce
-         */
+
         std::vector<unsigned char> extraNonce(4);
 	    extraNonce[0] = 0x81;
         extraNonce[1] = 0x3a;
         extraNonce[2] = 0x00;
         extraNonce[3] = 0x00;
         genesis = CreateGenesisBlock(ZC_GENESIS_BLOCK_TIME, 48351, 0x1e00ffff, 2, 0 * COIN, extraNonce);
-        // std::cout << "index new hashMerkleRoot hash: " << genesis.hashMerkleRoot.ToString() << std::endl;
-        // std::cout << "index new genesis hash: " << genesis.GetHash().ToString() << std::endl;
         consensus.hashGenesisBlock = genesis.GetHash();    
-        // uint32_t nGenesisTime = ZC_GENESIS_BLOCK_TIME;
-        // arith_uint256 test;
-        // bool fNegative;
-        // bool fOverflow;
-        // test.SetCompact(0x1e00ffff, &fNegative, &fOverflow);
-        // std::cout << "Test threshold: " << test.GetHex() << "\n\n";
-        // int genesisNonce = 0;
-        // uint256 TempHashHolding = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
-        // uint256 BestBlockHash = uint256S("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        // for (int i=0;i<40000000;i++) {
-        //     genesis = CreateGenesisBlock(nGenesisTime, i, 0x1e00ffff, 2, 0 * COIN,extraNonce);
-        //     //genesis.hashPrevBlock = TempHashHolding;
-        //     consensus.hashGenesisBlock = genesis.GetHash();
-        //     arith_uint256 BestBlockHashArith = UintToArith256(BestBlockHash);
-        //     if (UintToArith256(consensus.hashGenesisBlock) < BestBlockHashArith) {
-        //         BestBlockHash = consensus.hashGenesisBlock;
-        //         std::cout << BestBlockHash.GetHex() << " Nonce: " << i << "\n";
-        //         std::cout << "   PrevBlockxHash: " << genesis.hashPrevBlock.GetHex() << "\n";
-        // 	std::cout << "hashGenesisBlocxk to 0x" << BestBlockHash.GetHex() << std::endl;
-        // 	std::cout << "Genesis xNonce to " << genesisNonce << std::endl;
-        // 	std::cout << "Genesisx Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
-        //     }
-        //     TempHashHolding = consensus.hashGenesisBlock;
-        //     if (BestBlockHashArith < test) {
-        //         genesisNonce = i - 1;
-        //         break;
-        //     }
-        //     //std::cout << consensus.hashGenesisBlock.GetHex() << "\n";
-        // }
-        // std::cout << "\n";
-        // std::cout << "\n";
-        // std::cout << "FINAL\n";
-        // std::cout << "hashGenesisBlock to 0x" << BestBlockHash.GetHex() << std::endl;
-        // std::cout << "Genesis Nonce to " << genesisNonce << std::endl;
-        // std::cout << "Genesis Merkle " << genesis.hashMerkleRoot.GetHex() << std::endl;
-        // std::cout << "\n";
-        // std::exit(0);
         assert(consensus.hashGenesisBlock == uint256S("0x000000263aa7c2332ccdaa9f5ae5b9008c685c6c263020d2529432ed5bd77b32"));
         assert(genesis.hashMerkleRoot     == uint256S("b6f05125e30ba39aac82cd89a07afe985ecf1fbbceeb2abde4e6e78da22a9b22"));
         //Initial seeders for use
