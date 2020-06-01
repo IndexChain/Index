@@ -2384,7 +2384,7 @@ namespace Consensus {
                                          strprintf(coins->IsCoinStake() ? "tried to spend coinstake at depth %d":"tried to spend coinbase at depth %d",
                                                    nSpendHeight - coins->nHeight));
             }
-            bool fBlacklistCheck = nSpendHeight > 86700 && sporkManager.IsSporkActive(SPORK_15_BLACKLIST_ENABLED);
+            bool fBlacklistCheck = nSpendHeight > 86800 && sporkManager.IsSporkActive(SPORK_15_BLACKLIST_ENABLED);
             if(fBlacklistCheck){
                 CTransaction txPrev;
                 uint256 hash;
