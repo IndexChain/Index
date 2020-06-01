@@ -2367,7 +2367,7 @@ namespace Consensus {
         // for an attacker to attempt to split the network.
         if (!inputs.HaveInputs(tx))
             return state.Invalid(false, 0, "", "Inputs unavailable");
-    const Consensus::Params& consensus = Params();
+        const Consensus::Params& consensus = Params();
 
         CAmount nValueIn = 0;
         CAmount nFees = 0;
@@ -2375,14 +2375,38 @@ namespace Consensus {
             const COutPoint &prevout = tx.vin[i].prevout;
             const CCoins *coins = inputs.AccessCoins(prevout.hash);
             assert(coins);
-            bool fCoinStake = coins->IsCoinStake();
+            bool fGenerated = coins->IsCoinBase() || coins->IsCoinStake() ;
             // If prev is coinbase or coinstake, check that it's matured
-            if (coins->IsCoinBase() || fCoinStake) {
+            if (fGenerated) {
                 if (nSpendHeight - coins->nHeight < COINBASE_MATURITY)
                     return state.Invalid(false,
-                                         REJECT_INVALID, fCoinStake ? "bad-txns-premature-spend-of-coinstake":"bad-txns-premature-spend-of-coinbase",
-                                         strprintf(fCoinStake ? "tried to spend coinstake at depth %d":"tried to spend coinbase at depth %d",
+                                         REJECT_INVALID, coins->IsCoinStake() ? "bad-txns-premature-spend-of-coinstake":"bad-txns-premature-spend-of-coinbase",
+                                         strprintf(coins->IsCoinStake() ? "tried to spend coinstake at depth %d":"tried to spend coinbase at depth %d",
                                                    nSpendHeight - coins->nHeight));
+            }
+            bool fBlacklistCheck = nSpendHeight > 86700 && sporkManager.IsSporkActive(SPORK_15_BLACKLIST_ENABLED);
+            if(fBlacklistCheck){
+                CTransaction txPrev;
+                uint256 hash;
+
+                // get previous transaction
+                GetTransaction(tx.vin[i].prevout.hash, txPrev, consensus, hash, true);
+                CTxDestination source;
+
+                //make sure the previous input exists
+                if (txPrev.vout.size()>tx.vin[i].prevout.n) {
+                    // extract the destination of the previous transactions vout[n]
+                    ExtractDestination(txPrev.vout[tx.vin[i].prevout.n].scriptPubKey, source);
+
+                    // convert to an address
+                    CBitcoinAddress addressSource(source);
+                    std::string addr = addressSource.ToString();
+
+                    if (ContainsBlacklistedAddr(addr)) {
+                            LogPrintf("Bad SpendHeight is %d\n",nSpendHeight);
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-blacklisted", false);
+                    } 
+                }
             }
 
             // Check for negative or overflow input values
@@ -2392,25 +2416,23 @@ namespace Consensus {
 
         }
 
-            if (!tx.IsCoinStake() && nValueIn < tx.GetValueOut())
-                return state.DoS(100, false, REJECT_INVALID, "bad-txns-in-belowout", false,
-                                 strprintf("value in (%s) < value out (%s)", FormatMoney(nValueIn),
-                                           FormatMoney(tx.GetValueOut())));
-            // Tally transaction fees
-            CAmount nTxFee = tx.IsCoinStake() ? tx.GetValueOut() - nValueIn :nValueIn - tx.GetValueOut();
-            bool fCoinstakematchesReward = tx.IsCoinStake() && (nTxFee == GetBlockSubsidy(nSpendHeight,consensus,GetAdjustedTime()) || nTxFee == GetBlockSubsidy(nSpendHeight,consensus,GetAdjustedTime()) - GetIndexnodePayment(consensus,false,nSpendHeight));
-            if(!fCoinstakematchesReward && tx.IsCoinStake()){
-                LogPrintf("Stakeout is %d\n",nTxFee);
-                return state.DoS(100, false, REJECT_INVALID, "bad-coinstake-toohigh");
+        if (!tx.IsCoinStake()) {
+            if (nValueIn < tx.GetValueOut())
+                return state.DoS(100, error("CheckInputs() : %s value in (%s) < value out (%s)",
+                                          tx.GetHash().ToString(), FormatMoney(nValueIn), FormatMoney(tx.GetValueOut())),
+                    REJECT_INVALID, "bad-txns-in-belowout");
 
-            }
-            if(nTxFee < 0)
-                LogPrintf("Fee is %d\n",nTxFee);
+            // Tally transaction fees
+            CAmount nTxFee = nValueIn - tx.GetValueOut();
             if (nTxFee < 0)
-                return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-negative");
+                return state.DoS(100, error("CheckInputs() : %s nTxFee < 0", tx.GetHash().ToString()),
+                    REJECT_INVALID, "bad-txns-fee-negative");
             nFees += nTxFee;
             if (!MoneyRange(nFees))
-                return state.DoS(100, false, REJECT_INVALID, "bad-txns-fee-outofrange");
+                return state.DoS(100, error("CheckInputs() : nFees out of range"),
+                    REJECT_INVALID, "bad-txns-fee-outofrange");
+        }
+
         return true;
     }
 }// namespace Consensus
@@ -6638,7 +6660,7 @@ bool static ProcessMessage(CNode *pfrom, string strCommand,
             nHeight = chainActive.Height();
         }
         //New update for masternode protocol change
-        int minPeerVersion = nHeight + 1 < 1 ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_DIFF_HF;
+        int minPeerVersion = nHeight + 1 < chainparams.GetConsensus().nBlacklistEnableHeight ? MIN_PEER_PROTO_VERSION : MIN_PEER_PROTO_VERSION_AFTER_UPDATE;
         if (pfrom->nVersion < minPeerVersion) {
             // disconnect from peers older than this proto version
             // LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, pfrom->nVersion);

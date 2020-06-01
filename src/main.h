@@ -11,6 +11,7 @@
 #endif
 
 #include "amount.h"
+#include "blacklist/blacklist.h"
 #include "chain.h"
 #include "coins.h"
 #include "miner.h"

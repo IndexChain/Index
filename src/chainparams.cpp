@@ -143,7 +143,8 @@ public:
         consensus.nStakeTimestampMask = 0xf; // 15
         consensus.posLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-        consensus.nDisableZCoinClientCheckTime = 1590848104; //Date and time (GMT): Saturday, May 30, 2020 2:15:04 PM
+        consensus.nDisableZCoinClientCheckTime = 1591139261; //Date and time (GMT): Tuesday, June 2, 2020 11:07:41 PM
+        consensus.nBlacklistEnableHeight = 86700;
         /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce

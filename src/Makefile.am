@@ -145,6 +145,7 @@ BITCOIN_CORE_H = \
   spentindex.h \
   addrman.h \
   base58.h \
+  blacklist/blacklist.h \
   bloom.h \
   blockencodings.h \
   chain.h \
@@ -265,6 +266,7 @@ libbitcoin_server_a_SOURCES = \
   addrman.cpp \
   bloom.cpp \
   blockencodings.cpp \
+  blacklist/blacklist.cpp \
   chain.cpp \
   checkpoints.cpp \
   httprpc.cpp \
