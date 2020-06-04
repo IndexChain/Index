@@ -194,9 +194,17 @@ public:
         nMaxPoWBlocks = 1000;
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
-                    (0, genesis.GetHash()),
-                ZC_GENESIS_BLOCK_TIME, // * UNIX timestamp of last checkpoint block
-                2,    // * total number of transactions between genesis and last checkpoint
+                    (0, genesis.GetHash())
+                    (86810,uint256S("0x2eac965dcd0e10574dc05f44ee14756e5224bf521358e5455f33da1ad8a9536c"))
+                    (86818,uint256S("0x00000000068be20010a30c14f4002161b02d4694c109cd4c38958ccb3bb2a8cd"))
+                    (86980,uint256S("0x047f44feee06d93a16e5184fc8f8b85e9bdac2bc1676fff6c1d54d615b512b20"))
+                    (88000,uint256S("0x6575eee6bd423a6a0aa74fec962d2a16a4fd49c46c3bbd2d42310e1a5098a457"))
+                    (89000,uint256S("0x000000000d3e6b5cc7ce270f44fb6559784f36d6263cfeabe5ee312b1f16c315"))
+                    (90000,uint256S("0x0000000005f9711eb7bc1a8c7729426efeae8c92873a56093c3f4a681ea757e6"))
+                    (90041,uint256S("0x0000000000c4d71827f765ce757239b86bff22422ff64dd5aac8cd88e5419a80")),
+
+                1591286991, // * UNIX timestamp of last checkpoint block
+                148510,    // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)
                 1440     // * estimated number of transactions per day after checkpoint
         };
