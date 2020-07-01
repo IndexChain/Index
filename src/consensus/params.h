@@ -82,6 +82,7 @@ struct Params {
     int nIndexnodePaymentsStartBlock;
     int nDisableZCoinClientCheckTime;
     int nBlacklistEnableHeight;
+    int nBlockLimitUpgradeHeight;
 	/** Zerocoin-related block numbers when features are changed */
     int nCheckBugFixedAtBlock;
     int nIndexnodePaymentsBugFixedAtBlock;

@@ -145,6 +145,7 @@ public:
 
         consensus.nDisableZCoinClientCheckTime = 1591139261; //Date and time (GMT): Tuesday, June 2, 2020 11:07:41 PM
         consensus.nBlacklistEnableHeight = 86810;
+        consensus.nBlockLimitUpgradeHeight = 128735;
         /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
